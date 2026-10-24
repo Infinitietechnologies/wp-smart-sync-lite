@@ -12,7 +12,7 @@ class SmartSyncSyncStorage extends SMARL_CloudConfig {
     public bool $truncate = false;
     public mixed $duringTransfer = null;
     public function __construct(string $provider = 'aws') {
-        $this->serviceProvider = $provider; $this->bucket = 'sync-fixture'; $this->region = 'us-east-1';
+        $this->serviceProvider = $provider; $this->bucket = 'sync-fixture'; $this->region = $provider === 'bunny' ? 'DE' : 'us-east-1';
         $this->iamKey = 'fixture-key'; $this->iamSecret = 'fixture-secret'; $this->url = 'cdn.example.test';
     }
     public function isConfigured(): bool { return true; }

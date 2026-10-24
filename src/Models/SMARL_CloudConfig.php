@@ -9,7 +9,13 @@ use Aws\Sts\StsClient;
 use InvalidArgumentException;
 use RuntimeException;
 use Google\Cloud\Storage\StorageClient;
+use GuzzleHttp\Client;
+use GuzzleHttp\ClientInterface;
+use GuzzleHttp\Handler\CurlHandler;
+use GuzzleHttp\HandlerStack;
 use SmartSyncS3\Services\SMARLI_GoogleService;
+use SmartSyncS3\Helpers\SMARL_Helper;
+use SmartSyncS3\Exceptions\SMARL_ProviderException;
 
 /** Persisted configuration and common storage operations for media and sync jobs. */
 class SMARL_CloudConfig
@@ -34,6 +40,7 @@ class SMARL_CloudConfig
     public string $googleServicePath = '';
     public string $cloudflareUrl = '';
     public string $bunnyStoragePassword = '';
+    public string $bunnyStorageEndpoint = '';
     public ?SMARL_CustomUrl $customUrl = null;
 
     private const FIELDS = [
@@ -43,6 +50,7 @@ class SMARL_CloudConfig
         'serviceProvider' => 'service_provider', 'googleServicePath' => 'googleServicePath',
         'cloudflareEndpoint' => 'cloudflareEndpoint', 'cloudflareUrl' => 'cloudflareUrl',
         'bunnyStoragePassword' => 'bunnyStoragePassword',
+        'bunnyStorageEndpoint' => 'bunnyStorageEndpoint',
     ];
     private const BOOLEAN_FIELDS = [
         'useCloudFront' => 'use_cloudfront', 'useCdnForAssets' => 'use_cdn_for_assets',
@@ -74,7 +82,14 @@ class SMARL_CloudConfig
         return $data;
     }
 
-    public function save(): void { update_option('smarl_settings', $this->toArray(), false); }
+    public function save(): void
+    {
+        global $wpdb;
+        $data = $this->toArray();
+        update_option('smarl_settings', $data, false);
+        $saved = maybe_unserialize($wpdb->get_var($wpdb->prepare("SELECT option_value FROM {$wpdb->options} WHERE option_name = %s", 'smarl_settings')));
+        if ($saved !== $data) throw new SMARL_ProviderException(__('Cloud settings could not be saved. Check the WordPress database and try again.', 'smartsync-lite-media-offloader-and-assets-cdn'));
+    }
     public static function load(): ?SMARL_CloudConfig
     {
         // A long-running request can outlive a configuration change in another worker.
@@ -83,17 +98,37 @@ class SMARL_CloudConfig
         $data = get_option('smarl_settings', []);
         $config = self::fromArray(is_array($data) ? $data : []);
         $config->customUrl = SMARL_CustomUrl::load();
-        if ($config->serviceProvider === 'google' && $config->googleServicePath !== '') {
+        try { $needsMigration = $config->serviceProvider === 'google' && $config->googleServicePath !== '' && SMARLI_GoogleService::credentialsNeedMigration($config->googleServicePath); }
+        catch (\Throwable $error) { $needsMigration = false; }
+        if ($needsMigration) {
+            $lock = SMARL_Helper::acquireSyncLock();
+            if ($lock === null) return $config;
             try {
-                $path = SMARLI_GoogleService::migrateCredentials($config->googleServicePath);
+                global $wpdb;
+                $current = maybe_unserialize($wpdb->get_var($wpdb->prepare("SELECT option_value FROM {$wpdb->options} WHERE option_name = %s", 'smarl_settings')));
+                $fresh = self::fromArray(is_array($current) ? $current : []);
+                $fresh->customUrl = $config->customUrl;
+                $config = $fresh;
+                if ($config->serviceProvider !== 'google' || !SMARLI_GoogleService::credentialsNeedMigration($config->googleServicePath)) return $config;
+                $oldPath = $config->googleServicePath;
+                $path = SMARLI_GoogleService::migrateCredentials($oldPath, false);
                 if ($path !== $config->googleServicePath) {
                     $config->googleServicePath = $path;
-                    $config->save();
-                    delete_option('service_json_path_temp');
+                    try { $config->save(); }
+                    catch (\Throwable $error) { /* Verify durable state even when an option hook fails after writing. */ }
+                    $saved = maybe_unserialize($wpdb->get_var($wpdb->prepare("SELECT option_value FROM {$wpdb->options} WHERE option_name = %s", 'smarl_settings')));
+                    if (is_array($saved) && ($saved['service_provider'] ?? '') === 'google' && ($saved['googleServicePath'] ?? '') === $path) {
+                        SMARLI_GoogleService::deleteLegacyCredentialFile($oldPath);
+                        if (get_option('service_json_path_temp') === $oldPath) delete_option('service_json_path_temp');
+                    } else {
+                        $config->googleServicePath = $oldPath;
+                        SMARLI_GoogleService::deleteCredentialFile($path);
+                    }
                 }
             } catch (\Throwable $e) {
                 // Configuration remains inspectable so an administrator can replace invalid credentials.
-            }
+                if (isset($oldPath)) $config->googleServicePath = $oldPath;
+            } finally { SMARL_Helper::releaseSyncLock($lock); }
         }
         return $config;
     }
@@ -149,7 +184,11 @@ class SMARL_CloudConfig
             $options['region'] = 'auto';
             $options['endpoint'] = self::validateCloudflareEndpoint($this->cloudflareEndpoint);
             $options['use_path_style_endpoint'] = true;
-        } elseif ($this->serviceProvider === 'digitalocean') $options['endpoint'] = "https://$region.digitaloceanspaces.com";
+        } elseif ($this->serviceProvider === 'digitalocean') {
+            // The endpoint chooses the Spaces datacenter. AWS regions avoid an invalid CreateBucket payload.
+            $options['region'] = 'us-east-1';
+            $options['endpoint'] = "https://$region.digitaloceanspaces.com";
+        }
         elseif ($this->serviceProvider === 'wasabi') $options['endpoint'] = $region === 'us-east-1' ? 'https://s3.wasabisys.com' : "https://s3.$region.wasabisys.com";
         return new S3Client($options);
     }
@@ -186,9 +225,17 @@ class SMARL_CloudConfig
             try { $this->googleBucket()->upload($stream, ['name' => $key]); }
             finally { if (is_resource($stream)) fclose($stream); }
         } elseif ($this->serviceProvider === 'bunny') {
-            $body = file_get_contents($path);
-            if ($body === false) throw new RuntimeException('The local upload file cannot be read.');
-            $this->bunnyRequest('PUT', $key, ['body' => $body, 'headers' => ['Content-Type' => 'application/octet-stream']]);
+            $size = filesize($path);
+            if ($size === false) throw new RuntimeException('The local upload file cannot be read.');
+            $options = ['headers' => ['Content-Type' => 'application/octet-stream']];
+            if ($size > 1048576) {
+                $options['smartsync_source_file'] = $path;
+            } else {
+                $body = file_get_contents($path);
+                if ($body === false) throw new RuntimeException('The local upload file cannot be read.');
+                $options['body'] = $body;
+            }
+            $this->bunnyRequest('PUT', $key, $options);
         } else {
             $args = ['Bucket' => $this->bucket, 'Key' => $key, 'SourceFile' => $path];
             // R2 has no object ACLs; AWS uses its bucket policy or OAC.
@@ -249,11 +296,13 @@ class SMARL_CloudConfig
         } else {
             $client = $this->getS3Client();
             $args = ['Bucket' => $this->bucket];
+            $seenTokens = [];
             do {
                 $result = $client->listObjectsV2($args);
                 foreach ($result['Contents'] ?? [] as $object) $files[] = ['key' => (string) $object['Key'], 'size' => (int) $object['Size']];
                 $token = $result['NextContinuationToken'] ?? '';
-                if (!empty($result['IsTruncated']) && ($token === '' || $token === ($args['ContinuationToken'] ?? null))) throw new RuntimeException('Invalid storage pagination response.');
+                if (!empty($result['IsTruncated']) && (!is_string($token) || $token === '' || isset($seenTokens[$token]))) throw new RuntimeException('Invalid storage pagination response.');
+                if (is_string($token)) $seenTokens[$token] = true;
                 $args['ContinuationToken'] = $token;
             } while (!empty($result['IsTruncated']));
         }
@@ -263,12 +312,73 @@ class SMARL_CloudConfig
     protected function getGoogleStorageClient(): StorageClient { return (new SMARLI_GoogleService($this->googleServicePath))->storage; }
     private function googleBucket() { return $this->getGoogleStorageClient()->bucket($this->bucket); }
 
+    public function createGoogleBucket(): void
+    {
+        $this->getGoogleStorageClient()->createBucket($this->bucket, ['location' => $this->region,
+            'iamConfiguration' => ['uniformBucketLevelAccess' => ['enabled' => true]]]);
+    }
+
+    public function configureGooglePublicAccess(): void
+    {
+        $bucket = $this->googleBucket();
+        if (!$bucket->exists()) throw new InvalidArgumentException('The selected Google bucket does not exist.');
+        $iam = $bucket->iam();
+        $policy = $iam->policy(['requestedPolicyVersion' => 3]);
+        foreach ($policy['bindings'] ?? [] as $index => $binding) {
+            if (($binding['role'] ?? '') !== 'roles/storage.objectViewer' || isset($binding['condition'])) continue;
+            if (in_array('allUsers', $binding['members'] ?? [], true)) return;
+            $policy['bindings'][$index]['members'][] = 'allUsers';
+            $iam->setPolicy($policy);
+            return;
+        }
+        $policy['bindings'][] = ['role' => 'roles/storage.objectViewer', 'members' => ['allUsers']];
+        $iam->setPolicy($policy);
+    }
+
+    /** A credentials-only repair must prove read access without changing existing IAM policy. */
+    public function verifyGoogleConnection(): void
+    {
+        if ($this->serviceProvider !== 'google' || !$this->isConfigured()) throw new InvalidArgumentException(__('Google storage is not configured.', 'smartsync-lite-media-offloader-and-assets-cdn'));
+        if (!$this->googleBucket()->exists()) throw new InvalidArgumentException('The selected Google bucket does not exist.');
+    }
+
     public function getBunnyStorageEndpoint(): string
     {
+        if ($this->bunnyStorageEndpoint !== '') return self::validateBunnyStorageEndpoint($this->bunnyStorageEndpoint);
         $endpoints = ['DE' => 'storage.bunnycdn.com', 'UK' => 'uk.storage.bunnycdn.com', 'US' => 'ny.storage.bunnycdn.com', 'NY' => 'ny.storage.bunnycdn.com', 'LA' => 'la.storage.bunnycdn.com', 'SG' => 'sg.storage.bunnycdn.com', 'SE' => 'se.storage.bunnycdn.com', 'BR' => 'br.storage.bunnycdn.com', 'SA' => 'jh.storage.bunnycdn.com', 'JH' => 'jh.storage.bunnycdn.com', 'SYD' => 'syd.storage.bunnycdn.com'];
         $region = strtoupper($this->region ?: 'DE');
         if (!isset($endpoints[$region])) throw new InvalidArgumentException('Unsupported Bunny storage region.');
         return 'https://' . $endpoints[$region];
+    }
+
+    /** Never send a storage password to a hostname outside Bunny's storage API. */
+    public static function validateBunnyStorageEndpoint(string $endpoint): string
+    {
+        if (!str_contains($endpoint, '://')) $endpoint = 'https://' . $endpoint;
+        $parts = parse_url($endpoint);
+        if (!$parts || ($parts['scheme'] ?? '') !== 'https' || isset($parts['user']) || isset($parts['pass'])
+            || isset($parts['port']) || isset($parts['query']) || isset($parts['fragment'])
+            || !empty(trim($parts['path'] ?? '', '/'))
+            || !preg_match('/^(?:[a-z0-9-]+\.)?storage\.bunnycdn\.com$/i', $parts['host'] ?? '')) {
+            throw new InvalidArgumentException(__('Bunny returned an invalid storage hostname. Refresh the storage zones and try again.', 'smartsync-lite-media-offloader-and-assets-cdn'));
+        }
+        return 'https://' . strtolower($parts['host']);
+    }
+
+    /** Check the selected storage password/region before claiming that setup succeeded. */
+    public function verifyBunnyConnection(): void
+    {
+        if ($this->serviceProvider !== 'bunny' || !$this->isConfigured()) throw new InvalidArgumentException(__('Bunny storage is not configured.', 'smartsync-lite-media-offloader-and-assets-cdn'));
+        $response = $this->bunnyRequest('GET', '');
+        $items = json_decode(wp_remote_retrieve_body($response), true);
+        if (!is_array($items) || !array_is_list($items)) throw new SMARL_ProviderException(__('Bunny storage returned an invalid directory response. Check the selected zone and region.', 'smartsync-lite-media-offloader-and-assets-cdn'));
+    }
+
+    /** cURL streams the source file instead of duplicating large videos in PHP memory. */
+    protected function getBunnyStreamClient(): ClientInterface
+    {
+        if (!extension_loaded('curl')) throw new SMARL_ProviderException(__('Enable the PHP cURL extension to upload Bunny files larger than 1 MB.', 'smartsync-lite-media-offloader-and-assets-cdn'));
+        return new Client(['handler' => HandlerStack::create(new CurlHandler())]);
     }
 
     private function bunnyRequest(string $method, string $key, array $options = [], bool $allowMissing = false): array
@@ -281,10 +391,28 @@ class SMARL_CloudConfig
         $options['timeout'] = 120;
         $options['redirection'] = 0;
         $options['headers'] = array_merge($options['headers'] ?? [], ['AccessKey' => $this->bunnyStoragePassword]);
-        $response = wp_safe_remote_request($url, $options);
-        if (is_wp_error($response)) throw new RuntimeException('Unable to contact Bunny storage.');
+        if (isset($options['smartsync_source_file'])) {
+            $stream = @fopen($options['smartsync_source_file'], 'rb');
+            if ($stream === false) throw new RuntimeException('The local upload file cannot be read.');
+            try {
+                $http = $this->getBunnyStreamClient()->request($method, $url, ['headers' => $options['headers'], 'body' => $stream,
+                    'connect_timeout' => 10, 'timeout' => 120, 'allow_redirects' => false, 'http_errors' => false]);
+                $response = ['response' => ['code' => $http->getStatusCode()], 'body' => (string) $http->getBody()];
+            } catch (SMARL_ProviderException $error) { throw $error; }
+            catch (\Throwable $error) { throw new SMARL_ProviderException(__('Unable to contact Bunny storage. Check outbound HTTPS, DNS, and the selected storage region.', 'smartsync-lite-media-offloader-and-assets-cdn')); }
+            finally { if (is_resource($stream)) fclose($stream); }
+        } else {
+            $response = wp_safe_remote_request($url, $options);
+        }
+        if (is_wp_error($response)) throw new SMARL_ProviderException(__('Unable to contact Bunny storage. Check outbound HTTPS, DNS, and the selected storage region.', 'smartsync-lite-media-offloader-and-assets-cdn'));
         $status = (int) wp_remote_retrieve_response_code($response);
-        if (($status < 200 || $status >= 300) && !($allowMissing && $status === 404)) throw new RuntimeException('Bunny storage request failed (HTTP ' . $status . ').');
+        if (($status < 200 || $status >= 300) && !($allowMissing && $status === 404)) {
+            $message = in_array($status, [401, 403], true)
+                ? __('Bunny storage rejected access. Refresh the storage zones and check the zone password, region, and permissions.', 'smartsync-lite-media-offloader-and-assets-cdn')
+                /* translators: %d: HTTP response status code. */
+                : sprintf(__('Bunny storage request failed (HTTP %d). Try again or check the storage zone status.', 'smartsync-lite-media-offloader-and-assets-cdn'), $status);
+            throw new SMARL_ProviderException($message);
+        }
         if ($method === 'PUT') {
             $result = json_decode(wp_remote_retrieve_body($response), true);
             if (is_array($result) && (($result['Success'] ?? null) === false || ($result['success'] ?? null) === false)) throw new RuntimeException('Bunny storage did not accept the uploaded file.');

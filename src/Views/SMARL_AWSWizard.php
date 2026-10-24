@@ -137,8 +137,9 @@ class SMARL_AWSWizard
                         <input type="text" id="cloudflare-url" class="regular-text" name="cloudflare-url" value="<?php echo esc_attr($cloudConfig->cloudflareUrl ?: ($cloudConfig->serviceProvider === 'cloudflare' ? $cloudConfig->url : '')); ?>" autocomplete="off" spellcheck="false">
                     </div>
                     <div class="config-inputs bunny-inputs d-none">
-                        <label for="bunny-api-key"><?php esc_html_e('Bunny API Key', 'smartsync-lite-media-offloader-and-assets-cdn'); ?></label>
+                        <label for="bunny-api-key"><?php esc_html_e('Bunny Account API Key', 'smartsync-lite-media-offloader-and-assets-cdn'); ?></label>
                         <input type="password" id="bunny-api-key" class="regular-text" value="<?php echo esc_attr($cloudConfig->serviceProvider === 'bunny' ? explode('|', $cloudConfig->iamSecret)[0] : ''); ?>" name="bunny-api-key" autocomplete="off">
+                        <p class="smartsync-input-description"><?php esc_html_e('Use the account API key from Bunny account settings, not the storage zone password or a Stream API key. Storage credentials are retrieved securely after choosing a zone.', 'smartsync-lite-media-offloader-and-assets-cdn'); ?></p>
                     </div>
                     <br><br>
                     <button id="step-1-next" class="primary-btn">
@@ -171,11 +172,25 @@ class SMARL_AWSWizard
                         </select>
                     </div>
 
+                    <div id="manual-bucket-selector" class="d-none">
+                        <label for="manual-bucket-entry"><input type="checkbox" id="manual-bucket-entry"> <?php esc_html_e('Enter an existing bucket manually', 'smartsync-lite-media-offloader-and-assets-cdn'); ?></label>
+                        <p class="smartsync-input-description"><?php esc_html_e('Use this when your credentials can access a bucket but cannot list every bucket in the account.', 'smartsync-lite-media-offloader-and-assets-cdn'); ?></p>
+                    </div>
+                    <div id="manual-bucket-fields" class="d-none">
+                        <label for="manual_bucket_name"><?php esc_html_e('Existing Bucket Name', 'smartsync-lite-media-offloader-and-assets-cdn'); ?></label>
+                        <input type="text" id="manual_bucket_name" value="<?php echo esc_attr($cloudConfig->bucket); ?>" autocomplete="off" spellcheck="false">
+                        <div id="manual-bucket-region-field">
+                            <label for="manual_bucket_region"><?php esc_html_e('Existing Bucket Region', 'smartsync-lite-media-offloader-and-assets-cdn'); ?></label>
+                            <input type="text" id="manual_bucket_region" data-saved-provider="<?php echo esc_attr($cloudConfig->serviceProvider); ?>" data-saved-region="<?php echo esc_attr($cloudConfig->region); ?>" autocomplete="off" spellcheck="false">
+                        </div>
+                    </div>
+
                     <div id="pull-zones-container" class="d-none">
                         <label for="pull-zones"><?php esc_html_e('Select Pull Zone:', 'smartsync-lite-media-offloader-and-assets-cdn'); ?></label>
                         <select id="pull-zones">
                             <option value=""><?php esc_html_e('Loading zones...', 'smartsync-lite-media-offloader-and-assets-cdn'); ?></option>
                         </select>
+                        <p id="bunny-pull-zone-help" class="smartsync-input-description" hidden></p>
                     </div>
 
                     <div id="new-bucket-options" class="d-none">

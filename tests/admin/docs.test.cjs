@@ -2,6 +2,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
+const { pathToFileURL } = require('node:url');
 const { JSDOM } = require('jsdom');
 const docs = path.resolve(__dirname, '../../Documentation');
 const html = fs.readFileSync(path.join(docs, 'index.html'), 'utf8');
@@ -44,7 +45,8 @@ test('documentation navigation handles its root link and mobile/desktop visibili
         const scrolled = [];
         window.HTMLElement.prototype.scrollIntoView = function () { scrolled.push(this.id); };
         window.matchMedia = () => ({ matches: true });
-        window.eval(fs.readFileSync(path.join(docs, 'assets/js/docs.js'), 'utf8'));
+        const source = path.join(docs, 'assets/js/docs.js');
+        window.eval(fs.readFileSync(source, 'utf8') + '\n//# sourceURL=' + pathToFileURL(source).href);
         const toggler = window.document.getElementById('docs-sidebar-toggler');
         const sidebar = window.document.getElementById('docs-sidebar');
         assert.equal(toggler.getAttribute('aria-expanded'), 'false');

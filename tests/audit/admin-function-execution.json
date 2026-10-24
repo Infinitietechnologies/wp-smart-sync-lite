@@ -1,0 +1,1220 @@
+{
+  "auditDate": "2026-10-24",
+  "scope": "Maintained admin/documentation scripts and PHP Views; function entry execution does not imply full branch/platform coverage.",
+  "javascript": [
+    {
+      "file": "assets/js/enhanced-logs.js",
+      "name": "<script>",
+      "line": 1,
+      "column": 1,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 8
+    },
+    {
+      "file": "assets/js/enhanced-logs.js",
+      "name": "<callback>",
+      "line": 1,
+      "column": 8,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 8
+    },
+    {
+      "file": "assets/js/enhanced-logs.js",
+      "name": "<callback>",
+      "line": 7,
+      "column": 37,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 164
+    },
+    {
+      "file": "assets/js/enhanced-logs.js",
+      "name": "<callback>",
+      "line": 12,
+      "column": 23,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 1
+    },
+    {
+      "file": "assets/js/settings.js",
+      "name": "<script>",
+      "line": 1,
+      "column": 1,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 8
+    },
+    {
+      "file": "assets/js/settings.js",
+      "name": "<callback>",
+      "line": 1,
+      "column": 8,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 8
+    },
+    {
+      "file": "assets/js/settings.js",
+      "name": "text",
+      "line": 9,
+      "column": 18,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 184
+    },
+    {
+      "file": "assets/js/settings.js",
+      "name": "<callback>",
+      "line": 22,
+      "column": 18,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 24
+    },
+    {
+      "file": "assets/js/settings.js",
+      "name": "request",
+      "line": 26,
+      "column": 5,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 21
+    },
+    {
+      "file": "assets/js/settings.js",
+      "name": "errorMessage",
+      "line": 34,
+      "column": 5,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 7
+    },
+    {
+      "file": "assets/js/settings.js",
+      "name": "appendLog",
+      "line": 39,
+      "column": 5,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 164
+    },
+    {
+      "file": "assets/js/settings.js",
+      "name": "setRunningState",
+      "line": 49,
+      "column": 5,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 16
+    },
+    {
+      "file": "assets/js/settings.js",
+      "name": "<callback>",
+      "line": 54,
+      "column": 22,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 48
+    },
+    {
+      "file": "assets/js/settings.js",
+      "name": "cancelPolling",
+      "line": 63,
+      "column": 5,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 3
+    },
+    {
+      "file": "assets/js/settings.js",
+      "name": "checkSyncStatus",
+      "line": 68,
+      "column": 5,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 12
+    },
+    {
+      "file": "assets/js/settings.js",
+      "name": "retryStatus",
+      "line": 72,
+      "column": 9,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 1
+    },
+    {
+      "file": "assets/js/settings.js",
+      "name": "<callback>",
+      "line": 81,
+      "column": 43,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 10
+    },
+    {
+      "file": "assets/js/settings.js",
+      "name": "<callback>",
+      "line": 102,
+      "column": 79,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 151
+    },
+    {
+      "file": "assets/js/settings.js",
+      "name": "<callback>",
+      "line": 105,
+      "column": 73,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 1
+    },
+    {
+      "file": "assets/js/settings.js",
+      "name": "<callback>",
+      "line": 110,
+      "column": 17,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 1
+    },
+    {
+      "file": "assets/js/settings.js",
+      "name": "recoverStartFailure",
+      "line": 116,
+      "column": 5,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 1
+    },
+    {
+      "file": "assets/js/settings.js",
+      "name": "<callback>",
+      "line": 125,
+      "column": 25,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 3
+    },
+    {
+      "file": "assets/js/settings.js",
+      "name": "<callback>",
+      "line": 144,
+      "column": 106,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 1
+    },
+    {
+      "file": "assets/js/settings.js",
+      "name": "<callback>",
+      "line": 153,
+      "column": 17,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 1
+    },
+    {
+      "file": "assets/js/settings.js",
+      "name": "<callback>",
+      "line": 159,
+      "column": 42,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 2
+    },
+    {
+      "file": "assets/js/settings.js",
+      "name": "<callback>",
+      "line": 166,
+      "column": 44,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 1
+    },
+    {
+      "file": "assets/js/settings.js",
+      "name": "<callback>",
+      "line": 180,
+      "column": 17,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 1
+    },
+    {
+      "file": "assets/js/settings.js",
+      "name": "<callback>",
+      "line": 182,
+      "column": 19,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 2
+    },
+    {
+      "file": "assets/js/settings.js",
+      "name": "toggleSetting",
+      "line": 190,
+      "column": 5,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 2
+    },
+    {
+      "file": "assets/js/settings.js",
+      "name": "<callback>",
+      "line": 193,
+      "column": 36,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 1
+    },
+    {
+      "file": "assets/js/settings.js",
+      "name": "<callback>",
+      "line": 200,
+      "column": 17,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 1
+    },
+    {
+      "file": "assets/js/settings.js",
+      "name": "<callback>",
+      "line": 203,
+      "column": 19,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 2
+    },
+    {
+      "file": "assets/js/settings.js",
+      "name": "<callback>",
+      "line": 206,
+      "column": 46,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 1
+    },
+    {
+      "file": "assets/js/settings.js",
+      "name": "<callback>",
+      "line": 210,
+      "column": 42,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 1
+    },
+    {
+      "file": "assets/js/settings.js",
+      "name": "<callback>",
+      "line": 215,
+      "column": 53,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 3
+    },
+    {
+      "file": "assets/js/settings.js",
+      "name": "<callback>",
+      "line": 218,
+      "column": 48,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 1
+    },
+    {
+      "file": "assets/js/settings.js",
+      "name": "<callback>",
+      "line": 220,
+      "column": 17,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 1
+    },
+    {
+      "file": "assets/js/settings.js",
+      "name": "<callback>",
+      "line": 222,
+      "column": 19,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 2
+    },
+    {
+      "file": "assets/js/settings.js",
+      "name": "<callback>",
+      "line": 225,
+      "column": 46,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 3
+    },
+    {
+      "file": "assets/js/settings.js",
+      "name": "<callback>",
+      "line": 228,
+      "column": 45,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 2
+    },
+    {
+      "file": "assets/js/settings.js",
+      "name": "<callback>",
+      "line": 238,
+      "column": 17,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 1
+    },
+    {
+      "file": "assets/js/settings.js",
+      "name": "<callback>",
+      "line": 241,
+      "column": 19,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 3
+    },
+    {
+      "file": "assets/js/settings.js",
+      "name": "<callback>",
+      "line": 244,
+      "column": 30,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 1
+    },
+    {
+      "file": "assets/js/settings.js",
+      "name": "<callback>",
+      "line": 248,
+      "column": 30,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 1
+    },
+    {
+      "file": "assets/js/ui-improvements.js",
+      "name": "<script>",
+      "line": 1,
+      "column": 1,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 14
+    },
+    {
+      "file": "assets/js/ui-improvements.js",
+      "name": "<callback>",
+      "line": 1,
+      "column": 8,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 14
+    },
+    {
+      "file": "assets/js/ui-improvements.js",
+      "name": "text",
+      "line": 8,
+      "column": 18,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 71
+    },
+    {
+      "file": "assets/js/ui-improvements.js",
+      "name": "selectTab",
+      "line": 25,
+      "column": 5,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 3
+    },
+    {
+      "file": "assets/js/ui-improvements.js",
+      "name": "<callback>",
+      "line": 32,
+      "column": 22,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 1
+    },
+    {
+      "file": "assets/js/ui-improvements.js",
+      "name": "<callback>",
+      "line": 33,
+      "column": 24,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 2
+    },
+    {
+      "file": "assets/js/ui-improvements.js",
+      "name": "<callback>",
+      "line": 65,
+      "column": 19,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 24
+    },
+    {
+      "file": "assets/js/ui-improvements.js",
+      "name": "<callback>",
+      "line": 80,
+      "column": 50,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 2
+    },
+    {
+      "file": "assets/js/ui-improvements.js",
+      "name": "<callback>",
+      "line": 84,
+      "column": 45,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 16
+    },
+    {
+      "file": "assets/js/ui-improvements.js",
+      "name": "<callback>",
+      "line": 87,
+      "column": 44,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 10
+    },
+    {
+      "file": "assets/js/ui-improvements.js",
+      "name": "<callback>",
+      "line": 112,
+      "column": 47,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 19
+    },
+    {
+      "file": "assets/js/wizard.js",
+      "name": "<script>",
+      "line": 1,
+      "column": 1,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 9
+    },
+    {
+      "file": "assets/js/wizard.js",
+      "name": "<callback>",
+      "line": 1,
+      "column": 8,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 9
+    },
+    {
+      "file": "assets/js/wizard.js",
+      "name": "text",
+      "line": 7,
+      "column": 18,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 61
+    },
+    {
+      "file": "assets/js/wizard.js",
+      "name": "errorMessage",
+      "line": 10,
+      "column": 5,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 4
+    },
+    {
+      "file": "assets/js/wizard.js",
+      "name": "request",
+      "line": 15,
+      "column": 5,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 13
+    },
+    {
+      "file": "assets/js/wizard.js",
+      "name": "showMessage",
+      "line": 23,
+      "column": 5,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 58
+    },
+    {
+      "file": "assets/js/wizard.js",
+      "name": "initializeProviderWizard",
+      "line": 27,
+      "column": 5,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 9
+    },
+    {
+      "file": "assets/js/wizard.js",
+      "name": "provider",
+      "line": 44,
+      "column": 9,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 134
+    },
+    {
+      "file": "assets/js/wizard.js",
+      "name": "supportsManualBucket",
+      "line": 45,
+      "column": 9,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 33
+    },
+    {
+      "file": "assets/js/wizard.js",
+      "name": "selectedBucket",
+      "line": 47,
+      "column": 9,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 25
+    },
+    {
+      "file": "assets/js/wizard.js",
+      "name": "fillPullZones",
+      "line": 52,
+      "column": 9,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 9
+    },
+    {
+      "file": "assets/js/wizard.js",
+      "name": "<callback>",
+      "line": 56,
+      "column": 27,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 2
+    },
+    {
+      "file": "assets/js/wizard.js",
+      "name": "chooseBucketType",
+      "line": 64,
+      "column": 9,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 14
+    },
+    {
+      "file": "assets/js/wizard.js",
+      "name": "showStep",
+      "line": 75,
+      "column": 9,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 11
+    },
+    {
+      "file": "assets/js/wizard.js",
+      "name": "invalidateDiscovery",
+      "line": 83,
+      "column": 9,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 4
+    },
+    {
+      "file": "assets/js/wizard.js",
+      "name": "restoreControls",
+      "line": 95,
+      "column": 9,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 1
+    },
+    {
+      "file": "assets/js/wizard.js",
+      "name": "<callback>",
+      "line": 96,
+      "column": 35,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 23
+    },
+    {
+      "file": "assets/js/wizard.js",
+      "name": "updateProvider",
+      "line": 101,
+      "column": 9,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 10
+    },
+    {
+      "file": "assets/js/wizard.js",
+      "name": "<callback>",
+      "line": 124,
+      "column": 29,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 253
+    },
+    {
+      "file": "assets/js/wizard.js",
+      "name": "credentialsValid",
+      "line": 132,
+      "column": 9,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 29
+    },
+    {
+      "file": "assets/js/wizard.js",
+      "name": "loadBuckets",
+      "line": 151,
+      "column": 9,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 11
+    },
+    {
+      "file": "assets/js/wizard.js",
+      "name": "listingFailed",
+      "line": 159,
+      "column": 13,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 2
+    },
+    {
+      "file": "assets/js/wizard.js",
+      "name": "<callback>",
+      "line": 182,
+      "column": 119,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 9
+    },
+    {
+      "file": "assets/js/wizard.js",
+      "name": "<callback>",
+      "line": 188,
+      "column": 66,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 6
+    },
+    {
+      "file": "assets/js/wizard.js",
+      "name": "<callback>",
+      "line": 199,
+      "column": 33,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 6
+    },
+    {
+      "file": "assets/js/wizard.js",
+      "name": "<callback>",
+      "line": 207,
+      "column": 21,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 2
+    },
+    {
+      "file": "assets/js/wizard.js",
+      "name": "<callback>",
+      "line": 210,
+      "column": 23,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 11
+    },
+    {
+      "file": "assets/js/wizard.js",
+      "name": "configurationData",
+      "line": 218,
+      "column": 9,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 16
+    },
+    {
+      "file": "assets/js/wizard.js",
+      "name": "saveConfiguration",
+      "line": 256,
+      "column": 9,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 7
+    },
+    {
+      "file": "assets/js/wizard.js",
+      "name": "<callback>",
+      "line": 262,
+      "column": 67,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 161
+    },
+    {
+      "file": "assets/js/wizard.js",
+      "name": "<callback>",
+      "line": 267,
+      "column": 49,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 1
+    },
+    {
+      "file": "assets/js/wizard.js",
+      "name": "<callback>",
+      "line": 275,
+      "column": 21,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 1
+    },
+    {
+      "file": "assets/js/wizard.js",
+      "name": "<callback>",
+      "line": 278,
+      "column": 23,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 1
+    },
+    {
+      "file": "assets/js/wizard.js",
+      "name": "<callback>",
+      "line": 290,
+      "column": 39,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 13
+    },
+    {
+      "file": "assets/js/wizard.js",
+      "name": "<callback>",
+      "line": 294,
+      "column": 39,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 9
+    },
+    {
+      "file": "assets/js/wizard.js",
+      "name": "<callback>",
+      "line": 304,
+      "column": 39,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 1
+    },
+    {
+      "file": "assets/js/wizard.js",
+      "name": "<callback>",
+      "line": 305,
+      "column": 39,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 1
+    },
+    {
+      "file": "assets/js/wizard.js",
+      "name": "<callback>",
+      "line": 306,
+      "column": 46,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 2
+    },
+    {
+      "file": "assets/js/wizard.js",
+      "name": "<callback>",
+      "line": 307,
+      "column": 45,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 1
+    },
+    {
+      "file": "assets/js/wizard.js",
+      "name": "<callback>",
+      "line": 308,
+      "column": 34,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 1
+    },
+    {
+      "file": "assets/js/wizard.js",
+      "name": "<callback>",
+      "line": 309,
+      "column": 34,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 1
+    },
+    {
+      "file": "assets/js/wizard.js",
+      "name": "initializeCustomDomain",
+      "line": 319,
+      "column": 5,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 9
+    },
+    {
+      "file": "assets/js/wizard.js",
+      "name": "domainStatus",
+      "line": 326,
+      "column": 9,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 26
+    },
+    {
+      "file": "assets/js/wizard.js",
+      "name": "cancelPolling",
+      "line": 332,
+      "column": 9,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 8
+    },
+    {
+      "file": "assets/js/wizard.js",
+      "name": "renderRecords",
+      "line": 337,
+      "column": 9,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 8
+    },
+    {
+      "file": "assets/js/wizard.js",
+      "name": "<callback>",
+      "line": 339,
+      "column": 29,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 9
+    },
+    {
+      "file": "assets/js/wizard.js",
+      "name": "<callback>",
+      "line": 342,
+      "column": 65,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 36
+    },
+    {
+      "file": "assets/js/wizard.js",
+      "name": "pollCertificate",
+      "line": 351,
+      "column": 9,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 6
+    },
+    {
+      "file": "assets/js/wizard.js",
+      "name": "<callback>",
+      "line": 353,
+      "column": 82,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 6
+    },
+    {
+      "file": "assets/js/wizard.js",
+      "name": "<callback>",
+      "line": 369,
+      "column": 47,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 1
+    },
+    {
+      "file": "assets/js/wizard.js",
+      "name": "<callback>",
+      "line": 371,
+      "column": 21,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 1
+    },
+    {
+      "file": "assets/js/wizard.js",
+      "name": "<callback>",
+      "line": 379,
+      "column": 41,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 2
+    },
+    {
+      "file": "assets/js/wizard.js",
+      "name": "<callback>",
+      "line": 387,
+      "column": 48,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 8
+    },
+    {
+      "file": "assets/js/wizard.js",
+      "name": "<callback>",
+      "line": 400,
+      "column": 74,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 4
+    },
+    {
+      "file": "assets/js/wizard.js",
+      "name": "<callback>",
+      "line": 410,
+      "column": 21,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 1
+    },
+    {
+      "file": "assets/js/wizard.js",
+      "name": "<callback>",
+      "line": 412,
+      "column": 23,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 4
+    },
+    {
+      "file": "assets/js/wizard.js",
+      "name": "<callback>",
+      "line": 416,
+      "column": 45,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 1
+    },
+    {
+      "file": "assets/js/wizard.js",
+      "name": "<callback>",
+      "line": 422,
+      "column": 56,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 2
+    },
+    {
+      "file": "assets/js/wizard.js",
+      "name": "<callback>",
+      "line": 426,
+      "column": 50,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 1
+    },
+    {
+      "file": "assets/js/wizard.js",
+      "name": "<callback>",
+      "line": 431,
+      "column": 21,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 1
+    },
+    {
+      "file": "assets/js/wizard.js",
+      "name": "<callback>",
+      "line": 439,
+      "column": 34,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 2
+    },
+    {
+      "file": "Documentation/assets/js/docs.js",
+      "name": "<script>",
+      "line": 1,
+      "column": 1,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 1
+    },
+    {
+      "file": "Documentation/assets/js/docs.js",
+      "name": "setSidebarVisible",
+      "line": 7,
+      "column": 1,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 6
+    },
+    {
+      "file": "Documentation/assets/js/docs.js",
+      "name": "responsiveSidebar",
+      "line": 18,
+      "column": 1,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 4
+    },
+    {
+      "file": "Documentation/assets/js/docs.js",
+      "name": "<callback>",
+      "line": 29,
+      "column": 62,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 2
+    },
+    {
+      "file": "Documentation/assets/js/docs.js",
+      "name": "<callback>",
+      "line": 33,
+      "column": 38,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 1
+    },
+    {
+      "file": "Documentation/assets/js/docs.js",
+      "name": "<callback>",
+      "line": 40,
+      "column": 22,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 10
+    },
+    {
+      "file": "Documentation/assets/js/docs.js",
+      "name": "<callback>",
+      "line": 41,
+      "column": 43,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 1
+    },
+    {
+      "file": "Documentation/assets/js/highlight-custom.js",
+      "name": "<script>",
+      "line": 1,
+      "column": 1,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxEntryCount": 3
+    }
+  ],
+  "views": [
+    {
+      "file": "src/Views/SMARL_AWSWizard.php",
+      "name": "SmartSyncS3\\Views\\SMARL_AWSWizard->__construct",
+      "line": 12,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxBranchHit": 1
+    },
+    {
+      "file": "src/Views/SMARL_AWSWizard.php",
+      "name": "SmartSyncS3\\Views\\SMARL_AWSWizard->loadView",
+      "line": 19,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxBranchHit": 1
+    },
+    {
+      "file": "src/Views/SMARL_AWSWizard.php",
+      "name": "SmartSyncS3\\Views\\SMARL_AWSWizard->addAdminSubMenu",
+      "line": 29,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxBranchHit": 1
+    },
+    {
+      "file": "src/Views/SMARL_AWSWizard.php",
+      "name": "SmartSyncS3\\Views\\SMARL_AWSWizard->renderAWSWizardPage",
+      "line": 41,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxBranchHit": 1
+    },
+    {
+      "file": "src/Views/SMARL_CustomUrl.php",
+      "name": "SmartSyncS3\\Views\\SMARL_CustomUrl->__construct",
+      "line": 11,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxBranchHit": 1
+    },
+    {
+      "file": "src/Views/SMARL_CustomUrl.php",
+      "name": "SmartSyncS3\\Views\\SMARL_CustomUrl->loadView",
+      "line": 18,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxBranchHit": 1
+    },
+    {
+      "file": "src/Views/SMARL_CustomUrl.php",
+      "name": "SmartSyncS3\\Views\\SMARL_CustomUrl->addAdminSubMenu",
+      "line": 23,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxBranchHit": 1
+    },
+    {
+      "file": "src/Views/SMARL_CustomUrl.php",
+      "name": "SmartSyncS3\\Views\\SMARL_CustomUrl->renderCustomUrlPage",
+      "line": 35,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxBranchHit": 1
+    },
+    {
+      "file": "src/Views/SMARL_SettingsPage.php",
+      "name": "SmartSyncS3\\Views\\SMARL_SettingsPage->__construct",
+      "line": 13,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxBranchHit": 1
+    },
+    {
+      "file": "src/Views/SMARL_SettingsPage.php",
+      "name": "SmartSyncS3\\Views\\SMARL_SettingsPage->loadView",
+      "line": 19,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxBranchHit": 1
+    },
+    {
+      "file": "src/Views/SMARL_SettingsPage.php",
+      "name": "SmartSyncS3\\Views\\SMARL_SettingsPage->addAdminSubMenu",
+      "line": 24,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxBranchHit": 1
+    },
+    {
+      "file": "src/Views/SMARL_SettingsPage.php",
+      "name": "SmartSyncS3\\Views\\SMARL_SettingsPage->renderSettingsPage",
+      "line": 36,
+      "reviewed": true,
+      "executed": true,
+      "observedMaxBranchHit": 1
+    }
+  ]
+}

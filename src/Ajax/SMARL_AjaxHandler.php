@@ -15,13 +15,11 @@ class SMARL_AjaxHandler {
     public function __construct(?SMARL_CloudConfig $configuration) {
         $this->appConfig = $configuration;
         $this->s3SyncSettings = new SMARL_S3SyncSettings();
-        $this->s3SyncSettings->load();
     }
     /** Refresh registered callbacks after WordPress changes the current blog. */
     public function setConfiguration(SMARL_CloudConfig $configuration): void {
         $this->appConfig = $configuration;
         $this->s3SyncSettings = new SMARL_S3SyncSettings();
-        $this->s3SyncSettings->load();
     }
     public function initializeActions(): void {
         foreach (['clear_cloudfront_cache' => 'clearCloudFrontCache', 'toggle_cdn' => 'toggleCdn', 'toggle_media_auto_delete' => 'toggleMediaAutoDelete', 'sync_local_to_aws' => 'syncLocalToAws', 'stop_all_processes' => 'stopAllProcesses', 'sync_aws_to_local' => 'syncAwsToLocal', 'set_sync_state' => 'setSyncState', 'get_sync_state' => 'getSyncState', 'check_sync_status' => 'checkSyncStatus', 'fetch_aws_analytics' => 'fetchAwsAnalytics'] as $action => $method) {
@@ -50,7 +48,7 @@ class SMARL_AjaxHandler {
     }
     private function fingerprint(SMARL_CloudConfig $config): string {
         $data = $config->toArray();
-        return hash('sha256', wp_json_encode(array_intersect_key($data, array_flip(['bucket', 'region', 'service_provider', 'iam_key', 'iam_secret', 'cloudflareEndpoint', 'googleServicePath', 'bunnyStoragePassword']))));
+        return hash('sha256', wp_json_encode(array_intersect_key($data, array_flip(['bucket', 'region', 'service_provider', 'iam_key', 'iam_secret', 'cloudflareEndpoint', 'googleServicePath', 'bunnyStoragePassword', 'bunnyStorageEndpoint']))));
     }
     /** @phpstan-impure A different request can stop the run between calls. */
     private function isCurrentRun(string $runId): bool {
@@ -242,6 +240,7 @@ class SMARL_AjaxHandler {
         $counts = SMARL_Helper::queueStatusCounts($s->runId);
         $s->s3SyncProcessedFiles = $counts['completed'] + $counts['failed'];
         $ok = $counts['pending'] === 0 && $counts['in_progress'] === 0 && $counts['failed'] === 0 && $counts['completed'] === $s->s3SyncTotalFiles && !$s->s3SyncErrors;
+        if ($ok && $s->s3SyncDirection === 'upload' && $s->syncType === 'media') SMARL_Helper::bindCompletedOffloadedFiles($this->configured(), $s->runId);
         $s->syncState = 'default';
         $s->s3SyncStatus = $ok ? 'completed' : 'failed';
         if ($s->saveForRun($s->runId) && $s->s3SyncDirection === 'upload') { $this->setEligibility($ok); }
@@ -256,33 +255,47 @@ class SMARL_AjaxHandler {
     }
     public function stopAllProcesses(): void {
         $this->authorize();
-        self::resetSyncState($this->s3SyncSettings);
+        try { self::resetSyncState($this->s3SyncSettings); }
+        catch (Throwable $e) { wp_send_json_error(esc_html__('Unable to confirm the sync has stopped. Check the WordPress database and try again.', 'smartsync-lite-media-offloader-and-assets-cdn'), 400); }
         wp_send_json_success(['message' => esc_html__('Stopped all queued sync processes. An active file transfer may finish before stopping.', 'smartsync-lite-media-offloader-and-assets-cdn')]);
     }
     public static function resetSyncState(SMARL_S3SyncSettings $s3SyncSettings): void {
-        $s3SyncSettings->reset();
-        if (function_exists('as_unschedule_all_actions')) { as_unschedule_all_actions('process_s3_sync_batch'); }
+        try { $s3SyncSettings->reset(); }
+        finally { if (function_exists('as_unschedule_all_actions')) { as_unschedule_all_actions('process_s3_sync_batch'); } }
     }
     public function toggleCdn(): void {
         $this->authorize();
         try {
-            $config = $this->configured();
             $type = $this->requestType();
             $enabled = $this->requestBoolean('useCdn');
-            if (!$enabled && $type === 'media' && SMARL_Helper::hasMissingOffloadedFiles()) { throw new \RuntimeException(__('Restore offloaded media locally before disabling its CDN.', 'smartsync-lite-media-offloader-and-assets-cdn')); }
-            $eligible = $type === 'media' ? $config->canEnableMediaCDN : $config->canEnableAssetCDN;
-            if ($enabled && (!$eligible || $config->getPublicBaseUrl() === '')) { throw new \RuntimeException(__('Complete a successful sync and configure a public URL before enabling CDN.', 'smartsync-lite-media-offloader-and-assets-cdn')); }
-            if ($type === 'media') { $config->useCdnForMedia = $enabled; }
-            else { $config->useCdnForAssets = $enabled; }
-            $config->save();
-        } catch (Throwable $e) { wp_send_json_error($e->getMessage(), 400); }
+            $this->changeConfiguration(static function (SMARL_CloudConfig $config) use ($type, $enabled): void {
+                if (!$enabled && $type === 'media' && SMARL_Helper::hasMissingOffloadedFiles()) { throw new \RuntimeException(__('Restore offloaded media locally before disabling its CDN.', 'smartsync-lite-media-offloader-and-assets-cdn')); }
+                $eligible = $type === 'media' ? $config->canEnableMediaCDN : $config->canEnableAssetCDN;
+                if ($enabled && (!$eligible || $config->getPublicBaseUrl() === '')) { throw new \RuntimeException(__('Complete a successful sync and configure a public URL before enabling CDN.', 'smartsync-lite-media-offloader-and-assets-cdn')); }
+                if ($type === 'media') { $config->useCdnForMedia = $enabled; }
+                else { $config->useCdnForAssets = $enabled; }
+            });
+        } catch (Throwable $e) { wp_send_json_error($e->getMessage(), $e->getCode() === 409 ? 409 : 400); }
         wp_send_json_success(['message' => esc_html__('CDN setting updated successfully.', 'smartsync-lite-media-offloader-and-assets-cdn')]);
     }
     public function toggleMediaAutoDelete(): void {
         $this->authorize();
-        try { $config = $this->configured(); $config->mediaAutoDelete = $this->requestBoolean('state'); $config->save(); }
-        catch (Throwable $e) { wp_send_json_error($e->getMessage(), 400); }
+        try {
+            $enabled = $this->requestBoolean('state');
+            $this->changeConfiguration(static function (SMARL_CloudConfig $config) use ($enabled): void { $config->mediaAutoDelete = $enabled; });
+        } catch (Throwable $e) { wp_send_json_error($e->getMessage(), $e->getCode() === 409 ? 409 : 400); }
         wp_send_json_success(['message' => esc_html__('Automatic local cleanup setting updated.', 'smartsync-lite-media-offloader-and-assets-cdn')]);
+    }
+    private function changeConfiguration(callable $change): void {
+        $lock = SMARL_Helper::acquireSyncLock();
+        if ($lock === null) { throw new \RuntimeException(__('Another sync or configuration request is running. Try again shortly.', 'smartsync-lite-media-offloader-and-assets-cdn'), 409); }
+        try {
+            $config = SMARL_CloudConfig::load();
+            if (!$config->isConfigured()) { throw new \RuntimeException(__('Cloud storage is not configured.', 'smartsync-lite-media-offloader-and-assets-cdn')); }
+            $change($config);
+            $config->save();
+            $this->appConfig = $config;
+        } finally { SMARL_Helper::releaseSyncLock($lock); }
     }
     public function clearCloudFrontCache(): void {
         $this->authorize();

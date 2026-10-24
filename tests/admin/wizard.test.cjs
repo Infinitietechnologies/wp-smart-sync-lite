@@ -55,7 +55,7 @@ test('Google file is required and appended exactly once; plain object names are 
     app.$('#step-1-next').trigger('click');
     const listing = app.latest('list_s3_buckets');
     assert.equal(listing.options.data.getAll('service_json').length, 1);
-    listing.resolve({ buckets: [{ name: 'fixture-google-bucket' }] });
+    listing.resolve({ buckets: [{ name: 'fixture-google-bucket' }], selectionToken: '11111111111111111111111111111111' });
     assert.doesNotMatch(app.$('#aws_bucket_list').text(), /undefined/);
     app.$('#step-2-next').trigger('click');
     assert.equal(app.latest('configure_aws').options.data.bucket_region, 'US');
@@ -140,4 +140,46 @@ test('persisted endpoint/public URL and password inputs are escaped in rendered 
     assert.match(html, /&quot;/);
     const bunny = render('wizard', { service_provider: 'bunny', iam_secret: 'fixture-api|fixture-password' });
     assert.doesNotMatch(bunny, /fixture-password/);
+});
+
+test('R2 bucket-scoped credentials can connect when account-wide bucket discovery is forbidden', async t => {
+    const app = await providerApp('cloudflare', { cloudflareEndpoint: 'https://' + 'a'.repeat(32) + '.r2.cloudflarestorage.com', cloudflareUrl: 'cdn.example.test' });
+    t.after(() => app.close());
+    app.$('#step-1-next').trigger('click');
+    app.latest('list_s3_buckets').fail('Access denied to account-wide bucket listing');
+    assert.equal(app.$('#manual-bucket-entry').prop('checked'), true);
+    app.$('#manual_bucket_name').val('scoped-existing-bucket');
+    app.$('#step-2-next').trigger('click');
+    const saving = app.latest('configure_aws');
+    assert.ok(saving, 'Existing bucket access must not depend on permission to list the entire account');
+    assert.equal(saving.options.data.bucket_type, 'existing');
+    assert.equal(saving.options.data.bucket_name, 'scoped-existing-bucket');
+    assert.equal(saving.options.data.bucket_region, 'auto');
+});
+
+test('Bunny connection failures return to credentials and unusable pull zones explain the fix safely', async t => {
+    const app = await providerApp('bunny', { iam_secret: 'fixture-account-key' });
+    t.after(() => app.close());
+    app.$('#step-1-next').trigger('click');
+    app.latest('list_s3_buckets').fail('Use your account API key, not the storage password');
+    assert.equal(app.$('#wizard-step-1').prop('hidden'), false);
+    app.$('#step-1-next').trigger('click');
+    app.latest('list_s3_buckets').resolve({ buckets: [{ name: 'workflow-zone', region: 'DE', pullzones: [], issue: 'Connect a public pull zone <script>unsafe</script>' }] });
+    assert.equal(app.$('#bunny-pull-zone-help').prop('hidden'), false);
+    assert.match(app.$('#bunny-pull-zone-help').text(), /Connect a public pull zone/);
+    assert.equal(app.$('#bunny-pull-zone-help script').length, 0);
+    app.$('#step-2-next').trigger('click');
+    assert.equal(app.latest('configure_aws'), undefined);
+});
+
+test('China and GovCloud buckets use direct S3 setup without offering commercial CloudFront provisioning', async t => {
+    for (const region of ['cn-north-1', 'us-gov-west-1']) {
+        const app = await providerApp('aws');
+        t.after(() => app.close());
+        app.$('#step-1-next').trigger('click');
+        app.latest('list_s3_buckets').resolve({ buckets: [{ name: 'partition-bucket', region }] });
+        app.$('#step-2-next').trigger('click');
+        assert.equal(app.latest('configure_aws').options.data.use_cloudfront, false);
+        assert.equal(app.latest('configure_aws').options.data.bucket_region, region);
+    }
 });

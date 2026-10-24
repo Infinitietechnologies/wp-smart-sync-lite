@@ -21,6 +21,64 @@ use InvalidArgumentException;
 class SMARL_Helper
 {
 
+    /** Object ownership follows the stable storage address, not rotating credentials or CDN settings. */
+    public static function storageTargetFingerprint(\SmartSyncS3\Models\SMARL_CloudConfig $config): string {
+        $provider = $config->serviceProvider;
+        $region = strtolower(trim($config->region));
+        $endpoint = '';
+        if ($provider === 'bunny') {
+            $endpoint = $config->getBunnyStorageEndpoint();
+            $region = ''; // US/NY aliases can describe the same canonical API host.
+        } elseif ($provider === 'cloudflare') {
+            $endpoint = $config->cloudflareEndpoint === '' ? '' : \SmartSyncS3\Models\SMARL_CloudConfig::validateCloudflareEndpoint($config->cloudflareEndpoint);
+            $region = 'auto';
+        }
+        return hash('sha256', wp_json_encode(['provider' => $provider, 'bucket' => $config->bucket, 'region' => $region, 'endpoint' => $endpoint]));
+    }
+
+    /** Bind legacy manifests before switching targets, while the caller owns the configuration lease. */
+    public static function bindLegacyOffloadedFiles(\SmartSyncS3\Models\SMARL_CloudConfig $config): void {
+        $fingerprint = self::storageTargetFingerprint($config);
+        for ($page = 1; ; $page++) {
+            $ids = get_posts(['post_type' => 'attachment', 'post_status' => ['inherit', 'private', 'publish', 'trash'], 'fields' => 'ids', 'posts_per_page' => 100,
+                'paged' => $page, 'orderby' => 'ID', 'order' => 'ASC', 'meta_key' => '_smarl_offloaded_files', 'no_found_rows' => true]);
+            foreach ($ids as $id) {
+                $manifest = get_post_meta((int) $id, '_smarl_offloaded_files', true);
+                if (!is_array($manifest) || !$manifest || get_post_meta((int) $id, '_smarl_offload_target', true) !== '') continue;
+                self::saveOffloadTarget((int) $id, $fingerprint);
+            }
+            if (count($ids) < 100) return;
+        }
+    }
+
+    /** A bulk copy may transfer ownership only after every tracked key was copied successfully. */
+    public static function bindCompletedOffloadedFiles(\SmartSyncS3\Models\SMARL_CloudConfig $config, string $runId): void {
+        global $wpdb;
+        $fingerprint = self::storageTargetFingerprint($config);
+        $table = $wpdb->prefix . 'smarl_file_sync_queue';
+        for ($page = 1; ; $page++) {
+            $ids = get_posts(['post_type' => 'attachment', 'post_status' => ['inherit', 'private', 'publish', 'trash'], 'fields' => 'ids', 'posts_per_page' => 100,
+                'paged' => $page, 'orderby' => 'ID', 'order' => 'ASC', 'meta_key' => '_smarl_offloaded_files', 'no_found_rows' => true]);
+            foreach ($ids as $id) {
+                if (get_post_meta((int) $id, '_smarl_offload_target', true) === $fingerprint) continue;
+                $manifest = get_post_meta((int) $id, '_smarl_offloaded_files', true);
+                if (!is_array($manifest) || !$manifest || count(array_filter($manifest, 'is_string')) !== count($manifest)) continue;
+                $keys = array_values(array_unique($manifest));
+                $placeholders = implode(',', array_fill(0, count($keys), '%s'));
+                $rows = $wpdb->get_results($wpdb->prepare("SELECT relative_path FROM $table WHERE run_id = %s AND status = %s AND relative_path IN ($placeholders)", array_merge([$runId, 'completed'], $keys)), ARRAY_A);
+                if ($wpdb->last_error !== '') throw new \RuntimeException(__('Unable to verify copied attachment files.', 'smartsync-lite-media-offloader-and-assets-cdn'));
+                $completed = array_fill_keys(array_column($rows ?: [], 'relative_path'), true);
+                if (count(array_filter($keys, static fn(string $key): bool => isset($completed[$key]))) === count($keys)) self::saveOffloadTarget((int) $id, $fingerprint);
+            }
+            if (count($ids) < 100) return;
+        }
+    }
+
+    private static function saveOffloadTarget(int $id, string $fingerprint): void {
+        update_post_meta($id, '_smarl_offload_target', $fingerprint);
+        if (get_post_meta($id, '_smarl_offload_target', true) !== $fingerprint) throw new \RuntimeException(__('Unable to record the attachment storage target.', 'smartsync-lite-media-offloader-and-assets-cdn'));
+    }
+
     /**
      * Returns the S3 pricing per region.
      *
@@ -172,11 +230,19 @@ class SMARL_Helper
 
     public static function getS3Files(\Aws\S3\S3Client $s3Client, string $bucket): array {
         $files = [];
-        foreach ($s3Client->getPaginator('ListObjectsV2', ['Bucket' => $bucket]) as $page) {
+        $arguments = ['Bucket' => $bucket];
+        $seen = [];
+        do {
+            $page = $s3Client->listObjectsV2($arguments);
             foreach ($page['Contents'] ?? [] as $item) {
                 if (isset($item['Key'])) { $files[] = ['key' => $item['Key'], 'size' => (int) ($item['Size'] ?? 0)]; }
             }
-        }
+            if (empty($page['IsTruncated'])) break;
+            $token = $page['NextContinuationToken'] ?? null;
+            if (!is_string($token) || $token === '' || isset($seen[$token])) throw new \RuntimeException('Invalid storage pagination response.');
+            $seen[$token] = true;
+            $arguments['ContinuationToken'] = $token;
+        } while (true);
         return $files;
     }
 
@@ -337,23 +403,29 @@ class SMARL_Helper
     /** The unique options index serializes start/batch work across web and cron requests. */
     public static function acquireSyncLock(int $ttl = 900): ?string {
         global $wpdb;
+        $now = time();
+        if ($ttl <= 0 || $ttl > PHP_INT_MAX - $now) { throw new \InvalidArgumentException('A positive, non-overflowing lock duration is required.'); }
         $name = 'smarl_sync_lock';
-        $existing = get_option($name, null);
-        if ($existing !== null && (!is_array($existing) || !is_string($existing['token'] ?? null) || (int) ($existing['expires'] ?? 0) < time())) {
-            $wpdb->query($wpdb->prepare("DELETE FROM {$wpdb->options} WHERE option_name = %s AND option_value = %s", $name, maybe_serialize($existing)));
-            wp_cache_delete($name, 'options');
-            wp_cache_delete('notoptions', 'options');
+        // Request-local option caches can outlive another request's lease. The database is authoritative.
+        $raw = $wpdb->get_var($wpdb->prepare("SELECT option_value FROM {$wpdb->options} WHERE option_name = %s", $name));
+        $existing = maybe_unserialize($raw);
+        if ($raw !== null && (!is_array($existing) || !is_string($existing['token'] ?? null) || (int) ($existing['expires'] ?? 0) <= $now)) {
+            $wpdb->query($wpdb->prepare("DELETE FROM {$wpdb->options} WHERE option_name = %s AND option_value = %s", $name, $raw));
         }
+        wp_cache_delete($name, 'options');
+        wp_cache_delete('notoptions', 'options');
         $token = bin2hex(random_bytes(16));
-        return add_option($name, ['token' => $token, 'expires' => time() + $ttl], '', false) ? $token : null;
+        return add_option($name, ['token' => $token, 'expires' => $now + $ttl], '', false) ? $token : null;
     }
 
     public static function releaseSyncLock(string $token): void {
         global $wpdb;
         $name = 'smarl_sync_lock';
-        $value = get_option($name);
-        if (!is_array($value) || !hash_equals((string) ($value['token'] ?? ''), $token)) { return; }
-        $wpdb->query($wpdb->prepare("DELETE FROM {$wpdb->options} WHERE option_name = %s AND option_value = %s", $name, maybe_serialize($value)));
+        $raw = $wpdb->get_var($wpdb->prepare("SELECT option_value FROM {$wpdb->options} WHERE option_name = %s", $name));
+        $value = maybe_unserialize($raw);
+        if (is_array($value) && is_string($value['token'] ?? null) && hash_equals($value['token'], $token)) {
+            $wpdb->query($wpdb->prepare("DELETE FROM {$wpdb->options} WHERE option_name = %s AND option_value = %s", $name, $raw));
+        }
         wp_cache_delete($name, 'options');
         wp_cache_delete('notoptions', 'options');
     }

@@ -28,6 +28,7 @@ test('settings uses its own localized AJAX config; canceled confirmation never a
     assert.equal(request.options.data.type, 'media');
     assert.ok(app.$('.sync-button').toArray().every(button => button.disabled));
     request.reject({ message: 'Permission denied' });
+    idle(app);
     assert.equal(app.$('#current-sync-state').val(), '');
     assert.ok(app.$('.sync-button').toArray().every(button => !button.disabled));
     assert.match(app.$('#sync-log-container').text(), /Permission denied/);
@@ -75,13 +76,17 @@ test('zero-total status stays finite and stop ignores late polling responses', a
     assert.ok(app.$('.sync-button').toArray().every(button => !button.disabled));
 });
 
-test('status request failure and sync start transport failure restore usable buttons', async t => {
+test('status and start transport failures recheck server state before restoring usable buttons', async t => {
     const app = await boot('settings');
     t.after(() => app.close());
     app.latest('check_sync_status').fail();
+    assert.ok(app.$('.sync-button').toArray().every(button => button.disabled));
+    app.runTimer();
+    idle(app);
     assert.ok(app.$('.sync-button').toArray().every(button => !button.disabled));
     app.$('#sync-aws-to-local').trigger('click');
     app.latest('sync_aws_to_local').fail();
+    idle(app);
     assert.equal(app.$('#current-sync-state').val(), '');
     assert.ok(app.$('.sync-button').toArray().every(button => !button.disabled));
 });

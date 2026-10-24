@@ -1,4 +1,6 @@
 /.agents
 /.git
+/.github
 /tests
+/dist
 /.DS_Store

@@ -11,10 +11,16 @@ function setSidebarVisible(visible) {
     sidebar.setAttribute('aria-hidden', String(!visible));
     sidebar.toggleAttribute('inert', !visible);
     sidebarToggler.setAttribute('aria-expanded', String(visible));
+    if (!visible && sidebar.contains(document.activeElement)) sidebarToggler.focus();
 }
 
+let previousDesktop;
 function responsiveSidebar() {
-    setSidebarVisible(window.innerWidth >= 1200);
+    const desktop = window.innerWidth >= 1200;
+    if (desktop !== previousDesktop) {
+        setSidebarVisible(desktop);
+        previousDesktop = desktop;
+    }
 }
 
 window.addEventListener('load', responsiveSidebar);

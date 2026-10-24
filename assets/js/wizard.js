@@ -29,6 +29,8 @@ jQuery(function ($) {
         let buckets = [];
         let listingGeneration = 0;
         let saving = false;
+        let savedControls = [];
+        let googleSelectionToken = '';
         const awsRegions = [
             'us-east-1', 'us-east-2', 'us-west-1', 'us-west-2', 'ca-central-1',
             'eu-west-1', 'eu-west-2', 'eu-west-3', 'eu-central-1', 'eu-south-1',
@@ -40,6 +42,7 @@ jQuery(function ($) {
         const digitalOceanRegions = ['nyc1', 'nyc2', 'nyc3', 'ams3', 'sfo2', 'sfo3', 'sgp1', 'lon1', 'fra1', 'tor1'];
 
         function provider() { return $('#service_provider').val(); }
+        function supportsManualBucket() { return ['aws', 'digitalocean', 'wasabi', 'cloudflare'].includes(provider()); }
 
         function selectedBucket() {
             const value = $('#aws_bucket_list').val();
@@ -54,11 +57,17 @@ jQuery(function ($) {
                 if (typeof zone === 'string' && zone) select.append($('<option>').val(zone).text(zone));
             });
             if (!select.children().length) select.append($('<option>').val('').text(text('select_pull_zone', 'Select a pull zone.')));
+            const issue = bucket && typeof bucket.issue === 'string' ? bucket.issue : '';
+            $('#bunny-pull-zone-help').text(issue).prop('hidden', !issue);
         }
 
         function chooseBucketType() {
             const existing = $('input[name="bucket_type"]:checked').val() !== 'new';
-            $('#existing-bucket-options').toggleClass('d-none', !existing);
+            const manual = existing && supportsManualBucket() && $('#manual-bucket-entry').prop('checked');
+            $('#existing-bucket-options').toggleClass('d-none', !existing || manual);
+            $('#manual-bucket-selector').toggleClass('d-none', !existing || !supportsManualBucket());
+            $('#manual-bucket-fields').toggleClass('d-none', !manual);
+            $('#manual-bucket-region-field').toggleClass('d-none', provider() === 'cloudflare');
             $('#new-bucket-options').toggleClass('d-none', existing);
             $('#pull-zones-container').toggleClass('d-none', provider() !== 'bunny' || !existing);
         }
@@ -71,12 +80,36 @@ jQuery(function ($) {
             panel.find('h2').attr('tabindex', '-1').trigger('focus');
         }
 
+        function invalidateDiscovery() {
+            if (saving) return;
+            listingGeneration++;
+            buckets = [];
+            googleSelectionToken = '';
+            $('#aws_bucket_list, #pull-zones').empty();
+            $('#bunny-pull-zone-help').text('').prop('hidden', true);
+            $('#step-1-next').prop('disabled', false);
+            $('#aws-wizard').attr('aria-busy', 'false');
+            showMessage('');
+        }
+
+        function restoreControls() {
+            savedControls.forEach(function (item) { $(item.element).prop('disabled', item.disabled); });
+            savedControls = [];
+            $('#aws-wizard').attr('aria-busy', 'false');
+        }
+
         function updateProvider() {
             listingGeneration++;
             buckets = [];
+            googleSelectionToken = '';
             $('#aws_bucket_list, #pull-zones').empty();
+            $('#bunny-pull-zone-help').text('').prop('hidden', true);
             $('#step-1-next').prop('disabled', false);
+            $('#aws-wizard').attr('aria-busy', 'false');
             const value = provider();
+            $('#manual-bucket-entry').prop('checked', false);
+            const savedRegion = $('#manual_bucket_region').attr('data-saved-provider') === value ? $('#manual_bucket_region').attr('data-saved-region') : '';
+            $('#manual_bucket_region').val(savedRegion || (value === 'digitalocean' ? 'nyc3' : value === 'cloudflare' ? 'auto' : 'us-east-1'));
             $('.config-inputs').addClass('d-none');
             if (['aws', 'digitalocean', 'wasabi', 'cloudflare'].includes(value)) $('.aws-sdk-inputs').removeClass('d-none');
             if (value === 'google') $('.google-inputs').removeClass('d-none');
@@ -119,8 +152,21 @@ jQuery(function ($) {
             const value = provider();
             const token = ++listingGeneration;
             $('#step-1-next').prop('disabled', true);
+            $('#aws-wizard').attr('aria-busy', 'true');
+            showMessage(text('loading_buckets'));
             $('#aws_bucket_list').empty().append($('<option>').val('').text(text('loading_buckets')));
             buckets = [];
+            function listingFailed(response, fallback) {
+                $('#aws_bucket_list').empty().append($('<option>').val('').text(text('no_buckets', 'No buckets available.')));
+                if (supportsManualBucket()) {
+                    $('#manual-bucket-entry').prop('checked', true);
+                    chooseBucketType();
+                    showStep(2);
+                } else {
+                    showStep(1);
+                }
+                showMessage(errorMessage(response, fallback));
+            }
             const form = new FormData();
             form.append('action', 'list_s3_buckets');
             form.append('nonce', config.nonce);
@@ -136,9 +182,7 @@ jQuery(function ($) {
             $.ajax({ url: config.ajax_url, method: 'POST', data: form, processData: false, contentType: false }).done(function (response) {
                 if (token !== listingGeneration) return;
                 if (!response || !response.success || !response.data || !Array.isArray(response.data.buckets)) {
-                    $('#aws_bucket_list').empty().append($('<option>').val('').text(text('no_buckets', 'No buckets available.')));
-                    showMessage(errorMessage(response, text('load_buckets_failed')));
-                    showStep(2);
+                    listingFailed(response, text('load_buckets_failed'));
                     return;
                 }
                 const validBuckets = response.data.buckets.every(function (bucket) {
@@ -146,10 +190,11 @@ jQuery(function ($) {
                         (bucket.region === undefined || typeof bucket.region === 'string');
                 });
                 if (!validBuckets) {
-                    showMessage(text('invalid_bucket_response', 'The bucket response is invalid.'));
+                    listingFailed(null, text('invalid_bucket_response', 'The bucket response is invalid.'));
                     return;
                 }
                 buckets = response.data.buckets;
+                googleSelectionToken = value === 'google' && typeof response.data.selectionToken === 'string' ? response.data.selectionToken : '';
                 const select = $('#aws_bucket_list').empty();
                 buckets.forEach(function (bucket, index) {
                     // Keep provider data out of HTML and option values, especially credentials.
@@ -161,32 +206,38 @@ jQuery(function ($) {
                 showStep(2);
             }).fail(function (xhr) {
                 if (token !== listingGeneration) return;
-                $('#aws_bucket_list').empty().append($('<option>').val('').text(text('no_buckets', 'No buckets available.')));
-                showMessage(errorMessage(xhr.responseJSON, text('load_buckets_error')));
-                showStep(2);
+                listingFailed(xhr.responseJSON, text('load_buckets_error'));
             }).always(function () {
-                if (token === listingGeneration) $('#step-1-next').prop('disabled', false);
+                if (token === listingGeneration) {
+                    $('#step-1-next').prop('disabled', false);
+                    $('#aws-wizard').attr('aria-busy', 'false');
+                }
             });
         }
 
         function configurationData(useCloudFront) {
             if (!credentialsValid()) return null;
             const value = provider();
+            if (value === 'google' && $('#service-json')[0].files.length && !googleSelectionToken) {
+                showMessage(text('invalid_bucket_response', 'The bucket response is invalid.'));
+                return null;
+            }
             const bucketType = $('input[name="bucket_type"]:checked').val();
             if (!['existing', 'new'].includes(bucketType) || (value === 'bunny' && bucketType !== 'existing')) return null;
             const selected = selectedBucket();
-            const name = bucketType === 'new' ? $('#new_bucket_name').val().trim() : selected && selected.name;
-            let region = bucketType === 'new' ? $('#new_bucket_region').val() : selected && selected.region;
+            const manual = bucketType === 'existing' && supportsManualBucket() && $('#manual-bucket-entry').prop('checked');
+            const name = bucketType === 'new' ? $('#new_bucket_name').val().trim() : manual ? $('#manual_bucket_name').val().trim() : selected && selected.name;
+            let region = bucketType === 'new' ? $('#new_bucket_region').val() : manual ? $('#manual_bucket_region').val().trim() : selected && selected.region;
             if (!name) { showMessage(text('bucket_required')); return null; }
             const namePattern = value === 'google' ? /^[a-z0-9][a-z0-9._-]{1,220}[a-z0-9]$/ : /^[a-z0-9][a-z0-9.-]{1,61}[a-z0-9]$/;
-            if (bucketType === 'new' && (!namePattern.test(name) || name.includes('..') ||
+            if ((bucketType === 'new' || manual) && (!namePattern.test(name) || name.includes('..') ||
                 (value !== 'google' && (name.includes('.-') || name.includes('-.'))) || /^\d+\.\d+\.\d+\.\d+$/.test(name))) {
                 showMessage(text('invalid_bucket_name', 'Enter a valid bucket name.')); return null;
             }
             if (value === 'google') region = bucketType === 'new' ? 'US' : region || 'US';
             if (value === 'cloudflare') region = 'auto';
             if (value === 'wasabi' && bucketType === 'new') region = $('#wasabi_bucket_region').val().trim();
-            if (!region) { showMessage(text('bucket_required')); return null; }
+            if (!region || !/^[a-zA-Z0-9-]+$/.test(region)) { showMessage(text('bucket_required')); return null; }
             const pullZone = $('#pull-zones').val();
             if (value === 'bunny' && (!selected || !Array.isArray(selected.pullzones) || !selected.pullzones.includes(pullZone))) {
                 showMessage(text('select_pull_zone', 'Select a pull zone.')); return null;
@@ -197,7 +248,8 @@ jQuery(function ($) {
                 iam_key: value === 'bunny' ? pullZone : value === 'google' ? '' : $('#aws_iam_key').val().trim(),
                 iam_secret: value === 'bunny' ? $('#bunny-api-key').val().trim() : value === 'google' ? '' : $('#aws_iam_secret').val(),
                 cloudflare_endpoint: value === 'cloudflare' ? $('#cloudflare-endpoint').val().trim() : '',
-                cloudflare_url: value === 'cloudflare' ? $('#cloudflare-url').val().trim() : ''
+                cloudflare_url: value === 'cloudflare' ? $('#cloudflare-url').val().trim() : '',
+                google_selection_token: value === 'google' ? googleSelectionToken : ''
             };
         }
 
@@ -206,8 +258,14 @@ jQuery(function ($) {
             const data = configurationData(useCloudFront);
             if (!data) return;
             saving = true;
-            $('#aws-wizard button, #service_provider').prop('disabled', true);
+            const token = listingGeneration;
+            savedControls = $('#aws-wizard :input').toArray().map(function (element) {
+                return { element: element, disabled: element.disabled };
+            });
+            $('#aws-wizard :input').prop('disabled', true);
+            $('#aws-wizard').attr('aria-busy', 'true');
             request('configure_aws', data).done(function (response) {
+                if (token !== listingGeneration) return;
                 if (response && response.success) {
                     showMessage(text('configuration_saved'));
                     showStep('final');
@@ -215,15 +273,19 @@ jQuery(function ($) {
                     showMessage(errorMessage(response, text('configuration_failed')));
                 }
             }).fail(function (xhr) {
+                if (token !== listingGeneration) return;
                 showMessage(errorMessage(xhr.responseJSON, text('configuration_error', 'Could not save the configuration.')));
             }).always(function () {
+                if (token !== listingGeneration) return;
                 saving = false;
-                $('#aws-wizard button, #service_provider').prop('disabled', false);
+                restoreControls();
             });
         }
 
         $('#service_provider').on('change', updateProvider);
+        $('#aws_iam_key, #aws_iam_secret, #bunny-api-key, #cloudflare-endpoint, #cloudflare-url, #wasabi_bucket_region, #service-json').on('input change', invalidateDiscovery);
         $('input[name="bucket_type"]').on('change', chooseBucketType);
+        $('#manual-bucket-entry').on('change', chooseBucketType);
         $('#aws_bucket_list').on('change', fillPullZones);
         $('#step-1-next').on('click', function () {
             showMessage('');
@@ -231,8 +293,9 @@ jQuery(function ($) {
         });
         $('#step-2-next').on('click', function () {
             showMessage('');
-            if (!configurationData(false)) return;
-            if (provider() === 'aws') {
+            const data = configurationData(false);
+            if (!data) return;
+            if (provider() === 'aws' && !/^(cn-|us-gov-)/.test(data.bucket_region)) {
                 showStep(3);
             } else {
                 saveConfiguration(false);
@@ -242,6 +305,14 @@ jQuery(function ($) {
         $('#step-3-back').on('click', function () { showStep(2); });
         $('#use-cloudfront-yes').on('click', function () { saveConfiguration(true); });
         $('#use-cloudfront-no').on('click', function () { saveConfiguration(false); });
+        $(window).on('pagehide', function () { listingGeneration++; });
+        $(window).on('pageshow', function (event) {
+            if (!(event.originalEvent && event.originalEvent.persisted)) return;
+            saving = false;
+            restoreControls();
+            invalidateDiscovery();
+            showStep(1);
+        });
         updateProvider();
     }
 
@@ -250,8 +321,11 @@ jQuery(function ($) {
         let timer;
         let generation = 0;
         let certificateArn = '';
+        let attaching = false;
 
         function domainStatus(status) {
+            attaching = status === 'attaching';
+            $('#custom-domain, #generate-certificate, #check-dns-records').prop('disabled', attaching);
             $('#cloudfront-attachment-button').prop('disabled', status !== 'verified');
             $(document).trigger('smartsync:domain-status', [status]);
         }
@@ -303,6 +377,7 @@ jQuery(function ($) {
         }
 
         $('#custom-domain').on('input', function () {
+            if (attaching) return;
             cancelPolling();
             certificateArn = '';
             $('#records, #domain-message').empty();
@@ -310,6 +385,7 @@ jQuery(function ($) {
             $('#generate-certificate').prop('disabled', false);
         });
         $('#generate-certificate').on('click', function () {
+            if (attaching) return;
             const domain = $('#custom-domain').val().trim().replace(/\.$/, '');
             if (!/^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z](?:[a-z0-9-]{0,61}[a-z0-9])?$/i.test(domain)) {
                 $('#domain-message').text(text('invalid_domain', 'Enter a domain name without a scheme or path.'));
@@ -338,7 +414,7 @@ jQuery(function ($) {
             });
         });
         $('#check-dns-records').on('click', function () {
-            if (!certificateArn) return;
+            if (attaching || !certificateArn) return;
             window.clearTimeout(timer);
             $(this).prop('hidden', true);
             pollCertificate(generation);
@@ -349,15 +425,26 @@ jQuery(function ($) {
             domainStatus('attaching');
             request('attach_to_cloudfront').done(function (response) {
                 if (token !== generation) return;
-                domainStatus(response && response.success ? 'attached' : 'verified');
+                domainStatus(response && response.success ? 'attached' : 'domain');
+                $('#check-dns-records').prop('hidden', !!(response && response.success));
                 $('#domain-message').text(response && response.success ? text('certificate_attached') : errorMessage(response, text('attachment_failed')));
             }).fail(function (xhr) {
                 if (token !== generation) return;
-                domainStatus('verified');
+                domainStatus('domain');
+                $('#check-dns-records').prop('hidden', false);
                 $('#domain-message').text(errorMessage(xhr.responseJSON, text('attachment_error')));
             });
         });
         $(window).on('pagehide', cancelPolling);
+        $(window).on('pageshow', function (event) {
+            if (!(event.originalEvent && event.originalEvent.persisted)) return;
+            cancelPolling();
+            $('#check-dns-records').prop('hidden', true);
+            if (certificateArn) {
+                domainStatus('pending');
+                pollCertificate(generation);
+            }
+        });
         domainStatus('domain');
         try {
             const initial = JSON.parse($('#initial_certificates').text() || '{}');

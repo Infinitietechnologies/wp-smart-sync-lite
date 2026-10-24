@@ -1,0 +1,2338 @@
+{
+    "runs": 58,
+    "captures": 115,
+    "executed": 214,
+    "total": 214,
+    "sourceHashes": {
+        "aws-s3-smartsync-wp.php": "088a6e237bcb29f824ebd54e314d21df58b02dc2655c4da5c50ae412d9719d57",
+        "src/Ajax/SMARL_AjaxHandler.php": "9bf56d0dcf7141172f3767d55c23a6f3ab525ee145512682556e0b09a6111619",
+        "src/Ajax/SMARL_AwsConfigAjax.php": "069be12d2b1618662b7122935419d4a87ca3447f94c4d1f5babf773950dd83d9",
+        "src/Constants/SMARL_Constant.php": "05eed90ba51020f7aad73d87c46fdadc7615b80b34b99986b8f1e2d7cdca7533",
+        "src/Exceptions/SMARL_ProviderException.php": "90330d019bc523aa60c17653097ab4fd51bedee37453c7649a58c978b2e9f2ec",
+        "src/Helpers/SMARL_AwsHelper.php": "4ef96e14ff775f95ed1dbeac21213744d15c45dc8c9a043a8f16e137751e3aa3",
+        "src/Helpers/SMARL_Helper.php": "49b5ef1d14c98566ea385dd7c2cb1ddc875563061474306d093bf4b8ba54df2b",
+        "src/Models/SMARL_CloudConfig.php": "2933c2e8b6b1899874706185daecaa8fbecc36e1dce61614991b57adc5db6498",
+        "src/Models/SMARL_CustomUrl.php": "feb0bff07261eb63e86f97ec3805c1024f159107e0d2d9f174a3b4927ae6dd2e",
+        "src/Models/SMARL_S3SyncSettings.php": "6ca340eca55adabfd2cf1e3735aade3287bba26aef1af5c8c8b89576d3b45683",
+        "src/SMARL_SmartSync.php": "6638e9ed177bde121f9f43ce23fbce0e951dd604d3e44870b4db7a814002b156",
+        "src/Services/SMARLI_GoogleService.php": "3aa76ccffb63576a1db242f2af62c542c895971e5b581cb188d4301750e8ede2",
+        "src/Services/SMARLI_WasabiBucketManager.php": "809d1939ebe0e6f78398948cbeeab3a9254f14239b612fa9be44f1e7f46f4788",
+        "src/Views/SMARL_AWSWizard.php": "638467e2f43ba6d03791c8de505295b372f204052aae0a59f9a612f537b71ec7",
+        "src/Views/SMARL_CustomUrl.php": "06135b0db6f235cb0b795e9dfa8fe36d9819593fc0dda8b2663624ff19b92e6e",
+        "src/Views/SMARL_SettingsPage.php": "54d05dba3b3f40bc932510f2be01e3f3835cd8bbc38500d157afb529ed641591",
+        "uninstall.php": "9f31180b5d8fadcff489c33837473983db8c23260a5d4dd46b8a3ef8a1240eb9"
+    },
+    "functions": [
+        {
+            "name": "SmartSyncS3\\Ajax\\SMARL_AjaxHandler::__construct",
+            "file": "src/Ajax/SMARL_AjaxHandler.php",
+            "line": 15,
+            "end": 18,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Ajax\\SMARL_AjaxHandler::authorize",
+            "file": "src/Ajax/SMARL_AjaxHandler.php",
+            "line": 30,
+            "end": 33,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Ajax\\SMARL_AjaxHandler::changeConfiguration",
+            "file": "src/Ajax/SMARL_AjaxHandler.php",
+            "line": 289,
+            "end": 299,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Ajax\\SMARL_AjaxHandler::checkSyncStatus",
+            "file": "src/Ajax/SMARL_AjaxHandler.php",
+            "line": 70,
+            "end": 79,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Ajax\\SMARL_AjaxHandler::clearCloudFrontCache",
+            "file": "src/Ajax/SMARL_AjaxHandler.php",
+            "line": 300,
+            "end": 305,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Ajax\\SMARL_AjaxHandler::configured",
+            "file": "src/Ajax/SMARL_AjaxHandler.php",
+            "line": 34,
+            "end": 37,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Ajax\\SMARL_AjaxHandler::downloadFile",
+            "file": "src/Ajax/SMARL_AjaxHandler.php",
+            "line": 225,
+            "end": 237,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Ajax\\SMARL_AjaxHandler::fetchAwsAnalytics",
+            "file": "src/Ajax/SMARL_AjaxHandler.php",
+            "line": 60,
+            "end": 69,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Ajax\\SMARL_AjaxHandler::fingerprint",
+            "file": "src/Ajax/SMARL_AjaxHandler.php",
+            "line": 49,
+            "end": 52,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Ajax\\SMARL_AjaxHandler::finishRun",
+            "file": "src/Ajax/SMARL_AjaxHandler.php",
+            "line": 238,
+            "end": 247,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Ajax\\SMARL_AjaxHandler::getSyncState",
+            "file": "src/Ajax/SMARL_AjaxHandler.php",
+            "line": 80,
+            "end": 80,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Ajax\\SMARL_AjaxHandler::initializeActions",
+            "file": "src/Ajax/SMARL_AjaxHandler.php",
+            "line": 24,
+            "end": 29,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Ajax\\SMARL_AjaxHandler::isCurrentRun",
+            "file": "src/Ajax/SMARL_AjaxHandler.php",
+            "line": 54,
+            "end": 59,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Ajax\\SMARL_AjaxHandler::noConfigurationFound",
+            "file": "src/Ajax/SMARL_AjaxHandler.php",
+            "line": 320,
+            "end": 320,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Ajax\\SMARL_AjaxHandler::processS3Batch",
+            "file": "src/Ajax/SMARL_AjaxHandler.php",
+            "line": 161,
+            "end": 224,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Ajax\\SMARL_AjaxHandler::purgeCloudFrontCache",
+            "file": "src/Ajax/SMARL_AjaxHandler.php",
+            "line": 306,
+            "end": 312,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Ajax\\SMARL_AjaxHandler::requestBoolean",
+            "file": "src/Ajax/SMARL_AjaxHandler.php",
+            "line": 43,
+            "end": 48,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Ajax\\SMARL_AjaxHandler::requestType",
+            "file": "src/Ajax/SMARL_AjaxHandler.php",
+            "line": 38,
+            "end": 42,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Ajax\\SMARL_AjaxHandler::resetSyncState",
+            "file": "src/Ajax/SMARL_AjaxHandler.php",
+            "line": 262,
+            "end": 265,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Ajax\\SMARL_AjaxHandler::scheduleBatch",
+            "file": "src/Ajax/SMARL_AjaxHandler.php",
+            "line": 157,
+            "end": 160,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Ajax\\SMARL_AjaxHandler::setConfiguration",
+            "file": "src/Ajax/SMARL_AjaxHandler.php",
+            "line": 20,
+            "end": 23,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Ajax\\SMARL_AjaxHandler::setEligibility",
+            "file": "src/Ajax/SMARL_AjaxHandler.php",
+            "line": 248,
+            "end": 255,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Ajax\\SMARL_AjaxHandler::setSyncState",
+            "file": "src/Ajax/SMARL_AjaxHandler.php",
+            "line": 81,
+            "end": 90,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Ajax\\SMARL_AjaxHandler::startSync",
+            "file": "src/Ajax/SMARL_AjaxHandler.php",
+            "line": 93,
+            "end": 156,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Ajax\\SMARL_AjaxHandler::stopAllProcesses",
+            "file": "src/Ajax/SMARL_AjaxHandler.php",
+            "line": 256,
+            "end": 261,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Ajax\\SMARL_AjaxHandler::syncAwsToLocal",
+            "file": "src/Ajax/SMARL_AjaxHandler.php",
+            "line": 92,
+            "end": 92,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Ajax\\SMARL_AjaxHandler::syncLocalToAws",
+            "file": "src/Ajax/SMARL_AjaxHandler.php",
+            "line": 91,
+            "end": 91,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Ajax\\SMARL_AjaxHandler::toggleCdn",
+            "file": "src/Ajax/SMARL_AjaxHandler.php",
+            "line": 266,
+            "end": 280,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Ajax\\SMARL_AjaxHandler::toggleMediaAutoDelete",
+            "file": "src/Ajax/SMARL_AjaxHandler.php",
+            "line": 281,
+            "end": 288,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Ajax\\SMARL_AjaxHandler::uploadToBunnyCDN",
+            "file": "src/Ajax/SMARL_AjaxHandler.php",
+            "line": 313,
+            "end": 319,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Ajax\\SMARL_AwsConfigAjax::__construct",
+            "file": "src/Ajax/SMARL_AwsConfigAjax.php",
+            "line": 20,
+            "end": 20,
+            "executed": true,
+            "sources": {
+                "run.php": true,
+                "sync_audit2.php": true,
+                "wp-cli.phar": true,
+                "core.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Ajax\\SMARL_AwsConfigAjax::authorize",
+            "file": "src/Ajax/SMARL_AwsConfigAjax.php",
+            "line": 34,
+            "end": 40,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Ajax\\SMARL_AwsConfigAjax::bunnyAccountGet",
+            "file": "src/Ajax/SMARL_AwsConfigAjax.php",
+            "line": 431,
+            "end": 445,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Ajax\\SMARL_AwsConfigAjax::bunnyZones",
+            "file": "src/Ajax/SMARL_AwsConfigAjax.php",
+            "line": 384,
+            "end": 429,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Ajax\\SMARL_AwsConfigAjax::certificateRecords",
+            "file": "src/Ajax/SMARL_AwsConfigAjax.php",
+            "line": 496,
+            "end": 508,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Ajax\\SMARL_AwsConfigAjax::checkDnsRecord",
+            "file": "src/Ajax/SMARL_AwsConfigAjax.php",
+            "line": 567,
+            "end": 591,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Ajax\\SMARL_AwsConfigAjax::configureAws",
+            "file": "src/Ajax/SMARL_AwsConfigAjax.php",
+            "line": 283,
+            "end": 382,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Ajax\\SMARL_AwsConfigAjax::configureCloudFront",
+            "file": "src/Ajax/SMARL_AwsConfigAjax.php",
+            "line": 168,
+            "end": 247,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Ajax\\SMARL_AwsConfigAjax::configurePublicBucket",
+            "file": "src/Ajax/SMARL_AwsConfigAjax.php",
+            "line": 145,
+            "end": 157,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Ajax\\SMARL_AwsConfigAjax::createBucket",
+            "file": "src/Ajax/SMARL_AwsConfigAjax.php",
+            "line": 107,
+            "end": 119,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Ajax\\SMARL_AwsConfigAjax::directPublicUrl",
+            "file": "src/Ajax/SMARL_AwsConfigAjax.php",
+            "line": 249,
+            "end": 262,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Ajax\\SMARL_AwsConfigAjax::distributionDnsVerified",
+            "file": "src/Ajax/SMARL_AwsConfigAjax.php",
+            "line": 561,
+            "end": 565,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Ajax\\SMARL_AwsConfigAjax::domainMatchesCertificate",
+            "file": "src/Ajax/SMARL_AwsConfigAjax.php",
+            "line": 551,
+            "end": 559,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Ajax\\SMARL_AwsConfigAjax::generateSslCertificate",
+            "file": "src/Ajax/SMARL_AwsConfigAjax.php",
+            "line": 510,
+            "end": 549,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Ajax\\SMARL_AwsConfigAjax::initializeActions",
+            "file": "src/Ajax/SMARL_AwsConfigAjax.php",
+            "line": 25,
+            "end": 32,
+            "executed": true,
+            "sources": {
+                "run.php": true,
+                "sync_audit2.php": true,
+                "wp-cli.phar": true,
+                "core.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Ajax\\SMARL_AwsConfigAjax::input",
+            "file": "src/Ajax/SMARL_AwsConfigAjax.php",
+            "line": 42,
+            "end": 47,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Ajax\\SMARL_AwsConfigAjax::listS3Buckets",
+            "file": "src/Ajax/SMARL_AwsConfigAjax.php",
+            "line": 447,
+            "end": 494,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Ajax\\SMARL_AwsConfigAjax::newConfiguration",
+            "file": "src/Ajax/SMARL_AwsConfigAjax.php",
+            "line": 49,
+            "end": 49,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Ajax\\SMARL_AwsConfigAjax::readBucketPolicy",
+            "file": "src/Ajax/SMARL_AwsConfigAjax.php",
+            "line": 121,
+            "end": 134,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Ajax\\SMARL_AwsConfigAjax::requireCloudFront",
+            "file": "src/Ajax/SMARL_AwsConfigAjax.php",
+            "line": 59,
+            "end": 66,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Ajax\\SMARL_AwsConfigAjax::requireFreshCloudFront",
+            "file": "src/Ajax/SMARL_AwsConfigAjax.php",
+            "line": 69,
+            "end": 82,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Ajax\\SMARL_AwsConfigAjax::sameExistingTarget",
+            "file": "src/Ajax/SMARL_AwsConfigAjax.php",
+            "line": 265,
+            "end": 281,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Ajax\\SMARL_AwsConfigAjax::saveCloudFrontCheckpoint",
+            "file": "src/Ajax/SMARL_AwsConfigAjax.php",
+            "line": 160,
+            "end": 166,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Ajax\\SMARL_AwsConfigAjax::sendError",
+            "file": "src/Ajax/SMARL_AwsConfigAjax.php",
+            "line": 51,
+            "end": 57,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Ajax\\SMARL_AwsConfigAjax::setBucketPolicy",
+            "file": "src/Ajax/SMARL_AwsConfigAjax.php",
+            "line": 137,
+            "end": 143,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Ajax\\SMARL_AwsConfigAjax::setConfiguration",
+            "file": "src/Ajax/SMARL_AwsConfigAjax.php",
+            "line": 23,
+            "end": 23,
+            "executed": true,
+            "sources": {
+                "run.php": true,
+                "wp-cli.phar": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Ajax\\SMARL_AwsConfigAjax::updateCloudFrontAlternateDomain",
+            "file": "src/Ajax/SMARL_AwsConfigAjax.php",
+            "line": 593,
+            "end": 623,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Ajax\\SMARL_AwsConfigAjax::validateAwsConfiguration",
+            "file": "src/Ajax/SMARL_AwsConfigAjax.php",
+            "line": 94,
+            "end": 105,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Ajax\\SMARL_AwsConfigAjax::validateDomain",
+            "file": "src/Ajax/SMARL_AwsConfigAjax.php",
+            "line": 84,
+            "end": 92,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Helpers\\SMARL_AwsHelper::createCloudfrontArray",
+            "file": "src/Helpers/SMARL_AwsHelper.php",
+            "line": 21,
+            "end": 67,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Helpers\\SMARL_AwsHelper::generateOACArray",
+            "file": "src/Helpers/SMARL_AwsHelper.php",
+            "line": 7,
+            "end": 19,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Helpers\\SMARL_Helper::acquireSyncLock",
+            "file": "src/Helpers/SMARL_Helper.php",
+            "line": 404,
+            "end": 419,
+            "executed": true,
+            "sources": {
+                "run.php": true,
+                "sync_audit2.php": true,
+                "wp-cli.phar": true,
+                "core.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Helpers\\SMARL_Helper::bindCompletedOffloadedFiles",
+            "file": "src/Helpers/SMARL_Helper.php",
+            "line": 55,
+            "end": 75,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Helpers\\SMARL_Helper::bindLegacyOffloadedFiles",
+            "file": "src/Helpers/SMARL_Helper.php",
+            "line": 40,
+            "end": 52,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Helpers\\SMARL_Helper::calculateStorageDigitalOceanPrice",
+            "file": "src/Helpers/SMARL_Helper.php",
+            "line": 447,
+            "end": 449,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Helpers\\SMARL_Helper::checkCNAME",
+            "file": "src/Helpers/SMARL_Helper.php",
+            "line": 206,
+            "end": 217,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Helpers\\SMARL_Helper::checkPluginCompatibility",
+            "file": "src/Helpers/SMARL_Helper.php",
+            "line": 138,
+            "end": 158,
+            "executed": true,
+            "sources": {
+                "render-view.php": true,
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Helpers\\SMARL_Helper::currentSiteMediaDirectory",
+            "file": "src/Helpers/SMARL_Helper.php",
+            "line": 295,
+            "end": 301,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Helpers\\SMARL_Helper::formatBytes",
+            "file": "src/Helpers/SMARL_Helper.php",
+            "line": 433,
+            "end": 437,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Helpers\\SMARL_Helper::getExtension",
+            "file": "src/Helpers/SMARL_Helper.php",
+            "line": 168,
+            "end": 198,
+            "executed": true,
+            "sources": {
+                "run.php": true,
+                "wp-cli.phar": true,
+                "core.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Helpers\\SMARL_Helper::getFileExtensionFromUrl",
+            "file": "src/Helpers/SMARL_Helper.php",
+            "line": 226,
+            "end": 229,
+            "executed": true,
+            "sources": {
+                "run.php": true,
+                "wp-cli.phar": true,
+                "core.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Helpers\\SMARL_Helper::getFileSyncQueueData",
+            "file": "src/Helpers/SMARL_Helper.php",
+            "line": 369,
+            "end": 375,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Helpers\\SMARL_Helper::getRegionPrices",
+            "file": "src/Helpers/SMARL_Helper.php",
+            "line": 88,
+            "end": 128,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Helpers\\SMARL_Helper::getS3Files",
+            "file": "src/Helpers/SMARL_Helper.php",
+            "line": 231,
+            "end": 247,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Helpers\\SMARL_Helper::hasMissingOffloadedFiles",
+            "file": "src/Helpers/SMARL_Helper.php",
+            "line": 388,
+            "end": 401,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Helpers\\SMARL_Helper::isCurrentSiteMediaKey",
+            "file": "src/Helpers/SMARL_Helper.php",
+            "line": 311,
+            "end": 314,
+            "executed": true,
+            "sources": {
+                "run.php": true,
+                "wp-cli.phar": true,
+                "core.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Helpers\\SMARL_Helper::mediaPathWithinSite",
+            "file": "src/Helpers/SMARL_Helper.php",
+            "line": 303,
+            "end": 308,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Helpers\\SMARL_Helper::pathWithinRoot",
+            "file": "src/Helpers/SMARL_Helper.php",
+            "line": 290,
+            "end": 293,
+            "executed": true,
+            "sources": {
+                "run.php": true,
+                "wp-cli.phar": true,
+                "core.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Helpers\\SMARL_Helper::queueStatusCounts",
+            "file": "src/Helpers/SMARL_Helper.php",
+            "line": 377,
+            "end": 385,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Helpers\\SMARL_Helper::relativeKeyForPath",
+            "file": "src/Helpers/SMARL_Helper.php",
+            "line": 277,
+            "end": 288,
+            "executed": true,
+            "sources": {
+                "run.php": true,
+                "wp-cli.phar": true,
+                "core.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Helpers\\SMARL_Helper::releaseSyncLock",
+            "file": "src/Helpers/SMARL_Helper.php",
+            "line": 421,
+            "end": 431,
+            "executed": true,
+            "sources": {
+                "run.php": true,
+                "sync_audit2.php": true,
+                "wp-cli.phar": true,
+                "core.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Helpers\\SMARL_Helper::renderProModal",
+            "file": "src/Helpers/SMARL_Helper.php",
+            "line": 464,
+            "end": 464,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Helpers\\SMARL_Helper::renderSwitch",
+            "file": "src/Helpers/SMARL_Helper.php",
+            "line": 451,
+            "end": 462,
+            "executed": true,
+            "sources": {
+                "render-view.php": true,
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Helpers\\SMARL_Helper::replaceBaseUrl",
+            "file": "src/Helpers/SMARL_Helper.php",
+            "line": 439,
+            "end": 444,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Helpers\\SMARL_Helper::replaceQueue",
+            "file": "src/Helpers/SMARL_Helper.php",
+            "line": 358,
+            "end": 366,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Helpers\\SMARL_Helper::resolveLocalPath",
+            "file": "src/Helpers/SMARL_Helper.php",
+            "line": 250,
+            "end": 275,
+            "executed": true,
+            "sources": {
+                "run.php": true,
+                "wp-cli.phar": true,
+                "core.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Helpers\\SMARL_Helper::saveOffloadTarget",
+            "file": "src/Helpers/SMARL_Helper.php",
+            "line": 77,
+            "end": 80,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Helpers\\SMARL_Helper::scanLocalFiles",
+            "file": "src/Helpers/SMARL_Helper.php",
+            "line": 328,
+            "end": 350,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Helpers\\SMARL_Helper::scanSyncFiles",
+            "file": "src/Helpers/SMARL_Helper.php",
+            "line": 316,
+            "end": 325,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Helpers\\SMARL_Helper::storageTargetFingerprint",
+            "file": "src/Helpers/SMARL_Helper.php",
+            "line": 25,
+            "end": 37,
+            "executed": true,
+            "sources": {
+                "run.php": true,
+                "wp-cli.phar": true,
+                "core.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Helpers\\SMARL_Helper::updateLocalFilesDB",
+            "file": "src/Helpers/SMARL_Helper.php",
+            "line": 352,
+            "end": 356,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Models\\SMARL_CloudConfig::bunnyRequest",
+            "file": "src/Models/SMARL_CloudConfig.php",
+            "line": 384,
+            "end": 421,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Models\\SMARL_CloudConfig::configureGooglePublicAccess",
+            "file": "src/Models/SMARL_CloudConfig.php",
+            "line": 321,
+            "end": 336,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Models\\SMARL_CloudConfig::createDigitalOceanSpace",
+            "file": "src/Models/SMARL_CloudConfig.php",
+            "line": 201,
+            "end": 209,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Models\\SMARL_CloudConfig::createGoogleBucket",
+            "file": "src/Models/SMARL_CloudConfig.php",
+            "line": 315,
+            "end": 319,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Models\\SMARL_CloudConfig::credentials",
+            "file": "src/Models/SMARL_CloudConfig.php",
+            "line": 196,
+            "end": 196,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Models\\SMARL_CloudConfig::delete",
+            "file": "src/Models/SMARL_CloudConfig.php",
+            "line": 135,
+            "end": 135,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Models\\SMARL_CloudConfig::deleteObject",
+            "file": "src/Models/SMARL_CloudConfig.php",
+            "line": 258,
+            "end": 267,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Models\\SMARL_CloudConfig::downloadObject",
+            "file": "src/Models/SMARL_CloudConfig.php",
+            "line": 249,
+            "end": 256,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Models\\SMARL_CloudConfig::fromArray",
+            "file": "src/Models/SMARL_CloudConfig.php",
+            "line": 61,
+            "end": 76,
+            "executed": true,
+            "sources": {
+                "render-view.php": true,
+                "run.php": true,
+                "sync_audit2.php": true,
+                "wp-cli.phar": true,
+                "core.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Models\\SMARL_CloudConfig::getAcmClient",
+            "file": "src/Models/SMARL_CloudConfig.php",
+            "line": 199,
+            "end": 199,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Models\\SMARL_CloudConfig::getBunnyStorageEndpoint",
+            "file": "src/Models/SMARL_CloudConfig.php",
+            "line": 345,
+            "end": 352,
+            "executed": true,
+            "sources": {
+                "run.php": true,
+                "wp-cli.phar": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Models\\SMARL_CloudConfig::getBunnyStreamClient",
+            "file": "src/Models/SMARL_CloudConfig.php",
+            "line": 378,
+            "end": 382,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Models\\SMARL_CloudConfig::getCloudfrontClient",
+            "file": "src/Models/SMARL_CloudConfig.php",
+            "line": 197,
+            "end": 197,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Models\\SMARL_CloudConfig::getGoogleStorageClient",
+            "file": "src/Models/SMARL_CloudConfig.php",
+            "line": 312,
+            "end": 312,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Models\\SMARL_CloudConfig::getPublicBaseUrl",
+            "file": "src/Models/SMARL_CloudConfig.php",
+            "line": 163,
+            "end": 163,
+            "executed": true,
+            "sources": {
+                "run.php": true,
+                "wp-cli.phar": true,
+                "core.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Models\\SMARL_CloudConfig::getS3Client",
+            "file": "src/Models/SMARL_CloudConfig.php",
+            "line": 176,
+            "end": 194,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Models\\SMARL_CloudConfig::getStsClient",
+            "file": "src/Models/SMARL_CloudConfig.php",
+            "line": 198,
+            "end": 198,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Models\\SMARL_CloudConfig::googleBucket",
+            "file": "src/Models/SMARL_CloudConfig.php",
+            "line": 313,
+            "end": 313,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Models\\SMARL_CloudConfig::init",
+            "file": "src/Models/SMARL_CloudConfig.php",
+            "line": 136,
+            "end": 136,
+            "executed": true,
+            "sources": {
+                "run.php": true,
+                "wp-cli.phar": true,
+                "core.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Models\\SMARL_CloudConfig::isConfigured",
+            "file": "src/Models/SMARL_CloudConfig.php",
+            "line": 138,
+            "end": 145,
+            "executed": true,
+            "sources": {
+                "run.php": true,
+                "wp-cli.phar": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Models\\SMARL_CloudConfig::listObjects",
+            "file": "src/Models/SMARL_CloudConfig.php",
+            "line": 269,
+            "end": 310,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Models\\SMARL_CloudConfig::load",
+            "file": "src/Models/SMARL_CloudConfig.php",
+            "line": 93,
+            "end": 134,
+            "executed": true,
+            "sources": {
+                "run.php": true,
+                "sync_audit2.php": true,
+                "wp-cli.phar": true,
+                "core.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Models\\SMARL_CloudConfig::normalizePublicBaseUrl",
+            "file": "src/Models/SMARL_CloudConfig.php",
+            "line": 147,
+            "end": 161,
+            "executed": true,
+            "sources": {
+                "run.php": true,
+                "wp-cli.phar": true,
+                "core.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Models\\SMARL_CloudConfig::putS3Object",
+            "file": "src/Models/SMARL_CloudConfig.php",
+            "line": 247,
+            "end": 247,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Models\\SMARL_CloudConfig::save",
+            "file": "src/Models/SMARL_CloudConfig.php",
+            "line": 85,
+            "end": 92,
+            "executed": true,
+            "sources": {
+                "run.php": true,
+                "wp-cli.phar": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Models\\SMARL_CloudConfig::toArray",
+            "file": "src/Models/SMARL_CloudConfig.php",
+            "line": 78,
+            "end": 83,
+            "executed": true,
+            "sources": {
+                "run.php": true,
+                "sync_audit2.php": true,
+                "wp-cli.phar": true,
+                "core.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Models\\SMARL_CloudConfig::uploadObject",
+            "file": "src/Models/SMARL_CloudConfig.php",
+            "line": 218,
+            "end": 245,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Models\\SMARL_CloudConfig::validateBunnyStorageEndpoint",
+            "file": "src/Models/SMARL_CloudConfig.php",
+            "line": 355,
+            "end": 366,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Models\\SMARL_CloudConfig::validateCloudflareEndpoint",
+            "file": "src/Models/SMARL_CloudConfig.php",
+            "line": 165,
+            "end": 174,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Models\\SMARL_CloudConfig::validateObjectKey",
+            "file": "src/Models/SMARL_CloudConfig.php",
+            "line": 211,
+            "end": 216,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Models\\SMARL_CloudConfig::verifyBunnyConnection",
+            "file": "src/Models/SMARL_CloudConfig.php",
+            "line": 369,
+            "end": 375,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Models\\SMARL_CloudConfig::verifyGoogleConnection",
+            "file": "src/Models/SMARL_CloudConfig.php",
+            "line": 339,
+            "end": 343,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Models\\SMARL_CustomUrl::__construct",
+            "file": "src/Models/SMARL_CustomUrl.php",
+            "line": 17,
+            "end": 26,
+            "executed": true,
+            "sources": {
+                "render-view.php": true,
+                "run.php": true,
+                "sync_audit2.php": true,
+                "wp-cli.phar": true,
+                "core.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Models\\SMARL_CustomUrl::fromArray",
+            "file": "src/Models/SMARL_CustomUrl.php",
+            "line": 34,
+            "end": 41,
+            "executed": true,
+            "sources": {
+                "render-view.php": true,
+                "run.php": true,
+                "sync_audit2.php": true,
+                "wp-cli.phar": true,
+                "core.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Models\\SMARL_CustomUrl::load",
+            "file": "src/Models/SMARL_CustomUrl.php",
+            "line": 28,
+            "end": 32,
+            "executed": true,
+            "sources": {
+                "run.php": true,
+                "sync_audit2.php": true,
+                "wp-cli.phar": true,
+                "core.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Models\\SMARL_CustomUrl::reset",
+            "file": "src/Models/SMARL_CustomUrl.php",
+            "line": 43,
+            "end": 51,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Models\\SMARL_CustomUrl::save",
+            "file": "src/Models/SMARL_CustomUrl.php",
+            "line": 54,
+            "end": 60,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Models\\SMARL_CustomUrl::toArray",
+            "file": "src/Models/SMARL_CustomUrl.php",
+            "line": 62,
+            "end": 70,
+            "executed": true,
+            "sources": {
+                "render-view.php": true,
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Models\\SMARL_S3SyncSettings::fromArray",
+            "file": "src/Models/SMARL_S3SyncSettings.php",
+            "line": 75,
+            "end": 92,
+            "executed": true,
+            "sources": {
+                "run.php": true,
+                "sync_audit2.php": true,
+                "wp-cli.phar": true,
+                "core.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Models\\SMARL_S3SyncSettings::load",
+            "file": "src/Models/SMARL_S3SyncSettings.php",
+            "line": 22,
+            "end": 46,
+            "executed": true,
+            "sources": {
+                "run.php": true,
+                "sync_audit2.php": true,
+                "wp-cli.phar": true,
+                "core.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Models\\SMARL_S3SyncSettings::reset",
+            "file": "src/Models/SMARL_S3SyncSettings.php",
+            "line": 71,
+            "end": 74,
+            "executed": true,
+            "sources": {
+                "run.php": true,
+                "sync_audit2.php": true,
+                "wp-cli.phar": true,
+                "core.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Models\\SMARL_S3SyncSettings::save",
+            "file": "src/Models/SMARL_S3SyncSettings.php",
+            "line": 47,
+            "end": 55,
+            "executed": true,
+            "sources": {
+                "run.php": true,
+                "sync_audit2.php": true,
+                "wp-cli.phar": true,
+                "core.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Models\\SMARL_S3SyncSettings::saveForRun",
+            "file": "src/Models/SMARL_S3SyncSettings.php",
+            "line": 57,
+            "end": 70,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Models\\SMARL_S3SyncSettings::toArray",
+            "file": "src/Models/SMARL_S3SyncSettings.php",
+            "line": 93,
+            "end": 93,
+            "executed": true,
+            "sources": {
+                "run.php": true,
+                "sync_audit2.php": true,
+                "wp-cli.phar": true,
+                "core.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\SMARL_SmartSync::__construct",
+            "file": "src/SMARL_SmartSync.php",
+            "line": 101,
+            "end": 109,
+            "executed": true,
+            "sources": {
+                "run.php": true,
+                "sync_audit2.php": true,
+                "wp-cli.phar": true,
+                "core.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\SMARL_SmartSync::activateRegisterHook",
+            "file": "src/SMARL_SmartSync.php",
+            "line": 503,
+            "end": 518,
+            "executed": true,
+            "sources": {
+                "wp-cli.phar": true,
+                "core.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\SMARL_SmartSync::attachmentFileHash",
+            "file": "src/SMARL_SmartSync.php",
+            "line": 888,
+            "end": 894,
+            "executed": true,
+            "sources": {
+                "run.php": true,
+                "wp-cli.phar": true,
+                "core.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\SMARL_SmartSync::attachmentFiles",
+            "file": "src/SMARL_SmartSync.php",
+            "line": 990,
+            "end": 1017,
+            "executed": true,
+            "sources": {
+                "run.php": true,
+                "wp-cli.phar": true,
+                "core.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\SMARL_SmartSync::attachmentUploadFailed",
+            "file": "src/SMARL_SmartSync.php",
+            "line": 908,
+            "end": 912,
+            "executed": true,
+            "sources": {
+                "run.php": true,
+                "wp-cli.phar": true,
+                "core.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\SMARL_SmartSync::canCleanLocalMedia",
+            "file": "src/SMARL_SmartSync.php",
+            "line": 978,
+            "end": 988,
+            "executed": true,
+            "sources": {
+                "run.php": true,
+                "wp-cli.phar": true,
+                "core.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\SMARL_SmartSync::cloudKeyOwners",
+            "file": "src/SMARL_SmartSync.php",
+            "line": 1080,
+            "end": 1083,
+            "executed": true,
+            "sources": {
+                "run.php": true,
+                "wp-cli.phar": true,
+                "core.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\SMARL_SmartSync::completeAttachmentUpload",
+            "file": "src/SMARL_SmartSync.php",
+            "line": 781,
+            "end": 790,
+            "executed": true,
+            "sources": {
+                "run.php": true,
+                "wp-cli.phar": true,
+                "core.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\SMARL_SmartSync::deActivateHook",
+            "file": "src/SMARL_SmartSync.php",
+            "line": 479,
+            "end": 497,
+            "executed": true,
+            "sources": {
+                "run.php": true,
+                "wp-cli.phar": true,
+                "core.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\SMARL_SmartSync::deleteAttachmentObjects",
+            "file": "src/SMARL_SmartSync.php",
+            "line": 1029,
+            "end": 1060,
+            "executed": true,
+            "sources": {
+                "run.php": true,
+                "wp-cli.phar": true,
+                "core.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\SMARL_SmartSync::deleteCloudKey",
+            "file": "src/SMARL_SmartSync.php",
+            "line": 1115,
+            "end": 1127,
+            "executed": true,
+            "sources": {
+                "run.php": true,
+                "wp-cli.phar": true,
+                "core.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\SMARL_SmartSync::deleteFromS3",
+            "file": "src/SMARL_SmartSync.php",
+            "line": 1129,
+            "end": 1144,
+            "executed": true,
+            "sources": {
+                "run.php": true,
+                "wp-cli.phar": true,
+                "core.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\SMARL_SmartSync::enqueueScripts",
+            "file": "src/SMARL_SmartSync.php",
+            "line": 524,
+            "end": 760,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\SMARL_SmartSync::flushAttachmentUploads",
+            "file": "src/SMARL_SmartSync.php",
+            "line": 792,
+            "end": 808,
+            "executed": true,
+            "sources": {
+                "run.php": true,
+                "sync_audit2.php": true,
+                "wp-cli.phar": true,
+                "core.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\SMARL_SmartSync::flushCurrentBlogUploads",
+            "file": "src/SMARL_SmartSync.php",
+            "line": 810,
+            "end": 869,
+            "executed": true,
+            "sources": {
+                "run.php": true,
+                "wp-cli.phar": true,
+                "core.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\SMARL_SmartSync::forgetCloudKeyOwnership",
+            "file": "src/SMARL_SmartSync.php",
+            "line": 1098,
+            "end": 1113,
+            "executed": true,
+            "sources": {
+                "run.php": true,
+                "wp-cli.phar": true,
+                "core.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\SMARL_SmartSync::generateUrlFromBase",
+            "file": "src/SMARL_SmartSync.php",
+            "line": 371,
+            "end": 386,
+            "executed": true,
+            "sources": {
+                "run.php": true,
+                "wp-cli.phar": true,
+                "core.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\SMARL_SmartSync::getAttachmentUrl",
+            "file": "src/SMARL_SmartSync.php",
+            "line": 256,
+            "end": 269,
+            "executed": true,
+            "sources": {
+                "run.php": true,
+                "wp-cli.phar": true,
+                "core.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\SMARL_SmartSync::hasCloudKeyProvenance",
+            "file": "src/SMARL_SmartSync.php",
+            "line": 1063,
+            "end": 1078,
+            "executed": true,
+            "sources": {
+                "run.php": true,
+                "wp-cli.phar": true,
+                "core.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\SMARL_SmartSync::hasOtherCloudOwner",
+            "file": "src/SMARL_SmartSync.php",
+            "line": 1085,
+            "end": 1096,
+            "executed": true,
+            "sources": {
+                "run.php": true,
+                "wp-cli.phar": true,
+                "core.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\SMARL_SmartSync::hasUnchangedAttachment",
+            "file": "src/SMARL_SmartSync.php",
+            "line": 896,
+            "end": 906,
+            "executed": true,
+            "sources": {
+                "run.php": true,
+                "wp-cli.phar": true,
+                "core.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\SMARL_SmartSync::initializeActions",
+            "file": "src/SMARL_SmartSync.php",
+            "line": 132,
+            "end": 143,
+            "executed": true,
+            "sources": {
+                "run.php": true,
+                "sync_audit2.php": true,
+                "wp-cli.phar": true,
+                "core.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\SMARL_SmartSync::initializeFilters",
+            "file": "src/SMARL_SmartSync.php",
+            "line": 116,
+            "end": 127,
+            "executed": true,
+            "sources": {
+                "run.php": true,
+                "sync_audit2.php": true,
+                "wp-cli.phar": true,
+                "core.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\SMARL_SmartSync::initializeHooks",
+            "file": "src/SMARL_SmartSync.php",
+            "line": 193,
+            "end": 198,
+            "executed": true,
+            "sources": {
+                "sync_audit2.php": true,
+                "wp-cli.phar": true,
+                "core.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\SMARL_SmartSync::initializeViews",
+            "file": "src/SMARL_SmartSync.php",
+            "line": 168,
+            "end": 180,
+            "executed": true,
+            "sources": {
+                "sync_audit2.php": true,
+                "wp-cli.phar": true,
+                "core.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\SMARL_SmartSync::loadPluginTextDomain",
+            "file": "src/SMARL_SmartSync.php",
+            "line": 145,
+            "end": 147,
+            "executed": true,
+            "sources": {
+                "sync_audit2.php": true,
+                "wp-cli.phar": true,
+                "core.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\SMARL_SmartSync::localObjectKey",
+            "file": "src/SMARL_SmartSync.php",
+            "line": 1020,
+            "end": 1027,
+            "executed": true,
+            "sources": {
+                "run.php": true,
+                "wp-cli.phar": true,
+                "core.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\SMARL_SmartSync::mediaTargetFingerprint",
+            "file": "src/SMARL_SmartSync.php",
+            "line": 883,
+            "end": 886,
+            "executed": true,
+            "sources": {
+                "run.php": true,
+                "wp-cli.phar": true,
+                "core.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\SMARL_SmartSync::onPluginActivation",
+            "file": "src/SMARL_SmartSync.php",
+            "line": 241,
+            "end": 246,
+            "executed": true,
+            "sources": {
+                "wp-cli.phar": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\SMARL_SmartSync::onPluginDeactivation",
+            "file": "src/SMARL_SmartSync.php",
+            "line": 228,
+            "end": 233,
+            "executed": true,
+            "sources": {
+                "wp-cli.phar": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\SMARL_SmartSync::onPluginUninstall",
+            "file": "src/SMARL_SmartSync.php",
+            "line": 204,
+            "end": 206,
+            "executed": true,
+            "sources": {
+                "wp-cli.phar": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\SMARL_SmartSync::onPluginUpdate",
+            "file": "src/SMARL_SmartSync.php",
+            "line": 215,
+            "end": 220,
+            "executed": true,
+            "sources": {
+                "wp-cli.phar": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\SMARL_SmartSync::queueAttachmentUpload",
+            "file": "src/SMARL_SmartSync.php",
+            "line": 768,
+            "end": 778,
+            "executed": true,
+            "sources": {
+                "run.php": true,
+                "wp-cli.phar": true,
+                "core.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\SMARL_SmartSync::refreshMediaConfiguration",
+            "file": "src/SMARL_SmartSync.php",
+            "line": 872,
+            "end": 881,
+            "executed": true,
+            "sources": {
+                "run.php": true,
+                "wp-cli.phar": true,
+                "core.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\SMARL_SmartSync::registerAutoload",
+            "file": "src/SMARL_SmartSync.php",
+            "line": 182,
+            "end": 187,
+            "executed": true,
+            "sources": {
+                "wp-cli.phar": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\SMARL_SmartSync::replaceBaseUrl",
+            "file": "src/SMARL_SmartSync.php",
+            "line": 395,
+            "end": 403,
+            "executed": true,
+            "sources": {
+                "run.php": true,
+                "wp-cli.phar": true,
+                "core.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\SMARL_SmartSync::rewriteContentImageTag",
+            "file": "src/SMARL_SmartSync.php",
+            "line": 297,
+            "end": 300,
+            "executed": true,
+            "sources": {
+                "core.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\SMARL_SmartSync::rewriteContentMedia",
+            "file": "src/SMARL_SmartSync.php",
+            "line": 303,
+            "end": 341,
+            "executed": true,
+            "sources": {
+                "core.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\SMARL_SmartSync::rewriteContentMediaUrl",
+            "file": "src/SMARL_SmartSync.php",
+            "line": 343,
+            "end": 369,
+            "executed": true,
+            "sources": {
+                "core.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\SMARL_SmartSync::rewriteImageSources",
+            "file": "src/SMARL_SmartSync.php",
+            "line": 271,
+            "end": 282,
+            "executed": true,
+            "sources": {
+                "run.php": true,
+                "core.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\SMARL_SmartSync::rewriteLocalUrl",
+            "file": "src/SMARL_SmartSync.php",
+            "line": 405,
+            "end": 472,
+            "executed": true,
+            "sources": {
+                "run.php": true,
+                "wp-cli.phar": true,
+                "core.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\SMARL_SmartSync::s3UploadNewMedia",
+            "file": "src/SMARL_SmartSync.php",
+            "line": 762,
+            "end": 765,
+            "executed": true,
+            "sources": {
+                "wp-cli.phar": true,
+                "core.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\SMARL_SmartSync::shouldUseLocalAttachment",
+            "file": "src/SMARL_SmartSync.php",
+            "line": 284,
+            "end": 295,
+            "executed": true,
+            "sources": {
+                "run.php": true,
+                "wp-cli.phar": true,
+                "core.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\SMARL_SmartSync::switchBlogConfiguration",
+            "file": "src/SMARL_SmartSync.php",
+            "line": 150,
+            "end": 166,
+            "executed": true,
+            "sources": {
+                "run.php": true,
+                "wp-cli.phar": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\SMARL_SmartSync::uploadAttachment",
+            "file": "src/SMARL_SmartSync.php",
+            "line": 914,
+            "end": 976,
+            "executed": true,
+            "sources": {
+                "run.php": true,
+                "wp-cli.phar": true,
+                "core.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Services\\SMARLI_GoogleService::__construct",
+            "file": "src/Services/SMARLI_GoogleService.php",
+            "line": 14,
+            "end": 21,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Services\\SMARLI_GoogleService::additionalAuthenticatedData",
+            "file": "src/Services/SMARLI_GoogleService.php",
+            "line": 49,
+            "end": 52,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Services\\SMARLI_GoogleService::cleanupCredentials",
+            "file": "src/Services/SMARLI_GoogleService.php",
+            "line": 207,
+            "end": 217,
+            "executed": true,
+            "sources": {
+                "run.php": true,
+                "core.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Services\\SMARLI_GoogleService::createPublicBucket",
+            "file": "src/Services/SMARLI_GoogleService.php",
+            "line": 219,
+            "end": 227,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Services\\SMARLI_GoogleService::credentialsNeedMigration",
+            "file": "src/Services/SMARLI_GoogleService.php",
+            "line": 166,
+            "end": 174,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Services\\SMARLI_GoogleService::deleteCredentialFile",
+            "file": "src/Services/SMARLI_GoogleService.php",
+            "line": 199,
+            "end": 205,
+            "executed": true,
+            "sources": {
+                "run.php": true,
+                "core.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Services\\SMARLI_GoogleService::deleteLegacyCredentialFile",
+            "file": "src/Services/SMARLI_GoogleService.php",
+            "line": 187,
+            "end": 197,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Services\\SMARLI_GoogleService::encryptionKey",
+            "file": "src/Services/SMARLI_GoogleService.php",
+            "line": 44,
+            "end": 47,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Services\\SMARLI_GoogleService::getBuckets",
+            "file": "src/Services/SMARLI_GoogleService.php",
+            "line": 23,
+            "end": 31,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Services\\SMARLI_GoogleService::getCredentialsDirectory",
+            "file": "src/Services/SMARLI_GoogleService.php",
+            "line": 33,
+            "end": 42,
+            "executed": true,
+            "sources": {
+                "run.php": true,
+                "core.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Services\\SMARLI_GoogleService::getProjectId",
+            "file": "src/Services/SMARLI_GoogleService.php",
+            "line": 137,
+            "end": 141,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Services\\SMARLI_GoogleService::getServiceJSON",
+            "file": "src/Services/SMARLI_GoogleService.php",
+            "line": 117,
+            "end": 135,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Services\\SMARLI_GoogleService::getTempPath",
+            "file": "src/Services/SMARLI_GoogleService.php",
+            "line": 143,
+            "end": 154,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Services\\SMARLI_GoogleService::hasPendingSelections",
+            "file": "src/Services/SMARLI_GoogleService.php",
+            "line": 156,
+            "end": 164,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Services\\SMARLI_GoogleService::migrateCredentials",
+            "file": "src/Services/SMARLI_GoogleService.php",
+            "line": 177,
+            "end": 185,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Services\\SMARLI_GoogleService::moveFileTemp",
+            "file": "src/Services/SMARLI_GoogleService.php",
+            "line": 79,
+            "end": 115,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Services\\SMARLI_GoogleService::storeCredentials",
+            "file": "src/Services/SMARLI_GoogleService.php",
+            "line": 54,
+            "end": 76,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Services\\SMARLI_WasabiBucketManager::createBucket",
+            "file": "src/Services/SMARLI_WasabiBucketManager.php",
+            "line": 11,
+            "end": 39,
+            "executed": true,
+            "sources": {
+                "run.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Views\\SMARL_AWSWizard::__construct",
+            "file": "src/Views/SMARL_AWSWizard.php",
+            "line": 12,
+            "end": 15,
+            "executed": true,
+            "sources": {
+                "render-view.php": true,
+                "sync_audit2.php": true,
+                "wp-cli.phar": true,
+                "core.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Views\\SMARL_AWSWizard::addAdminSubMenu",
+            "file": "src/Views/SMARL_AWSWizard.php",
+            "line": 27,
+            "end": 37,
+            "executed": true,
+            "sources": {
+                "render-view.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Views\\SMARL_AWSWizard::loadView",
+            "file": "src/Views/SMARL_AWSWizard.php",
+            "line": 17,
+            "end": 20,
+            "executed": true,
+            "sources": {
+                "sync_audit2.php": true,
+                "render-view.php": true,
+                "wp-cli.phar": true,
+                "core.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Views\\SMARL_AWSWizard::renderAWSWizardPage",
+            "file": "src/Views/SMARL_AWSWizard.php",
+            "line": 39,
+            "end": 254,
+            "executed": true,
+            "sources": {
+                "render-view.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Views\\SMARL_CustomUrl::__construct",
+            "file": "src/Views/SMARL_CustomUrl.php",
+            "line": 11,
+            "end": 14,
+            "executed": true,
+            "sources": {
+                "render-view.php": true,
+                "sync_audit2.php": true,
+                "wp-cli.phar": true,
+                "core.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Views\\SMARL_CustomUrl::addAdminSubMenu",
+            "file": "src/Views/SMARL_CustomUrl.php",
+            "line": 21,
+            "end": 31,
+            "executed": true,
+            "sources": {
+                "render-view.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Views\\SMARL_CustomUrl::loadView",
+            "file": "src/Views/SMARL_CustomUrl.php",
+            "line": 16,
+            "end": 19,
+            "executed": true,
+            "sources": {
+                "render-view.php": true,
+                "sync_audit2.php": true,
+                "wp-cli.phar": true,
+                "core.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Views\\SMARL_CustomUrl::renderCustomUrlPage",
+            "file": "src/Views/SMARL_CustomUrl.php",
+            "line": 33,
+            "end": 81,
+            "executed": true,
+            "sources": {
+                "render-view.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Views\\SMARL_SettingsPage::__construct",
+            "file": "src/Views/SMARL_SettingsPage.php",
+            "line": 13,
+            "end": 16,
+            "executed": true,
+            "sources": {
+                "render-view.php": true,
+                "sync_audit2.php": true,
+                "wp-cli.phar": true,
+                "core.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Views\\SMARL_SettingsPage::addAdminSubMenu",
+            "file": "src/Views/SMARL_SettingsPage.php",
+            "line": 22,
+            "end": 33,
+            "executed": true,
+            "sources": {
+                "render-view.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Views\\SMARL_SettingsPage::loadView",
+            "file": "src/Views/SMARL_SettingsPage.php",
+            "line": 17,
+            "end": 20,
+            "executed": true,
+            "sources": {
+                "sync_audit2.php": true,
+                "render-view.php": true,
+                "wp-cli.phar": true,
+                "core.php": true
+            }
+        },
+        {
+            "name": "SmartSyncS3\\Views\\SMARL_SettingsPage::renderSettingsPage",
+            "file": "src/Views/SMARL_SettingsPage.php",
+            "line": 35,
+            "end": 205,
+            "executed": true,
+            "sources": {
+                "render-view.php": true
+            }
+        },
+        {
+            "name": "smarl_file_sync_queue_create_table",
+            "file": "aws-s3-smartsync-wp.php",
+            "line": 28,
+            "end": null,
+            "executed": true,
+            "sources": {
+                "wp-cli.phar": true,
+                "core.php": true
+            }
+        },
+        {
+            "name": "smarl_maybe_upgrade_schema",
+            "file": "aws-s3-smartsync-wp.php",
+            "line": 54,
+            "end": null,
+            "executed": true,
+            "sources": {
+                "sync_audit2.php": true,
+                "wp-cli.phar": true,
+                "core.php": true
+            }
+        },
+        {
+            "name": "smarl_uninstall_legacy_credential",
+            "file": "uninstall.php",
+            "line": 8,
+            "end": null,
+            "executed": true,
+            "sources": {
+                "core.php": true
+            }
+        },
+        {
+            "name": "smarl_uninstall_site",
+            "file": "uninstall.php",
+            "line": 42,
+            "end": null,
+            "executed": true,
+            "sources": {
+                "core.php": true
+            }
+        }
+    ]
+}

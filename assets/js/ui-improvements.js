@@ -76,7 +76,11 @@ jQuery(function ($) {
         );
         wrapper.append(indicator);
         let startTime = 0;
-        $(document).on('smartsync:sync-started', function () { startTime = Date.now(); });
+        let baselineProcessed = 0;
+        $(document).on('smartsync:sync-started', function () {
+            startTime = Date.now();
+            baselineProcessed = 0;
+        });
         $(document).on('smartsync:running', function (_, isRunning) {
             indicator.toggleClass('active', !!isRunning);
         });
@@ -87,8 +91,11 @@ jQuery(function ($) {
             const running = status.status === 'processing';
             progress.prop('hidden', !running);
             indicator.toggleClass('active', running);
-            if (!running) { startTime = 0; return; }
-            if (!startTime) startTime = Date.now();
+            if (!running) { startTime = 0; baselineProcessed = 0; return; }
+            if (!startTime || completed < baselineProcessed) {
+                startTime = Date.now();
+                baselineProcessed = completed;
+            }
             inner.css('width', percent + '%');
             bar.attr('aria-valuenow', percent.toFixed(1));
             percentage.text(percent.toFixed(1) + '%');
@@ -96,7 +103,8 @@ jQuery(function ($) {
             processed.text(completed);
             remaining.text(Math.max(0, total - completed));
             const elapsed = (Date.now() - startTime) / 1000;
-            const seconds = completed && elapsed >= 1 ? Math.round(elapsed / completed * Math.max(0, total - completed)) : null;
+            const observed = completed - baselineProcessed;
+            const seconds = observed > 0 && elapsed >= 1 ? Math.round(elapsed / observed * Math.max(0, total - completed)) : null;
             time.text(seconds === null ? '--:--' : Math.floor(seconds / 60) + ':' + String(seconds % 60).padStart(2, '0'));
         });
     }

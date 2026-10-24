@@ -80,12 +80,17 @@ class SMARL_SmartSync
     private array $pendingAttachments = [];
     private array $pendingCleanups = [];
     private array $completedAttachmentMetadata = [];
+    private array $completedAttachmentFiles = [];
+    private array $pendingCloudDeletions = [];
+    private array $cloudKeyTargets = [];
+    private array $sharedCloudKeys = [];
+    private array $configurationSnapshot = [];
     private array $localDeliveryUsed = [];
     private int $localCleanupDepth = 0;
     private array $deletedCloudKeys = [];
     private int $currentBlogId;
     private array $blogRuntimeStates = [];
-    private const BLOG_RUNTIME_FIELDS = ['pendingAttachments', 'pendingCleanups', 'completedAttachmentMetadata', 'localDeliveryUsed', 'deletedCloudKeys', 'localCleanupDepth'];
+    private const BLOG_RUNTIME_FIELDS = ['pendingAttachments', 'pendingCleanups', 'completedAttachmentMetadata', 'completedAttachmentFiles', 'pendingCloudDeletions', 'cloudKeyTargets', 'sharedCloudKeys', 'localDeliveryUsed', 'deletedCloudKeys', 'localCleanupDepth'];
 
     /**
      * Constructor for the SmartSync class.
@@ -96,6 +101,7 @@ class SMARL_SmartSync
     public function __construct(string $plugin_root)
     {
         $this->config = SMARL_CloudConfig::load();
+        $this->configurationSnapshot = $this->config->toArray();
         $this->currentBlogId = get_current_blog_id();
         $this->pluginRoot = $plugin_root;
         $this->awsConfigAjax = new SMARL_AwsConfigAjax(configuration: $this->config);
@@ -154,6 +160,7 @@ class SMARL_SmartSync
             $this->currentBlogId = $newBlogId;
         }
         $this->config = SMARL_CloudConfig::load();
+        $this->configurationSnapshot = $this->config->toArray();
         $this->awsConfigAjax->setConfiguration($this->config);
         $this->ajaxHandlers->setConfiguration($this->config);
     }
@@ -388,7 +395,7 @@ class SMARL_SmartSync
     public function replaceBaseUrl(string $src): string
     {
         try {
-            return $this->config->useCdnForAssets ? $this->rewriteLocalUrl($src) : $src;
+            return $this->config->useCdnForAssets && in_array(strtolower(SMARL_Helper::getFileExtensionFromUrl($src)), SMARL_Helper::getExtension('assets'), true) ? $this->rewriteLocalUrl($src) : $src;
         }catch (Throwable $error){
             return $src;
         }
@@ -405,7 +412,28 @@ class SMARL_SmartSync
         $origins = [wp_parse_url(site_url('/'))];
         if (is_multisite()) $origins[] = wp_parse_url(network_site_url('/'));
         $keyPath = null;
+        // The configured uploads URL is a trusted first-party origin even with a custom host/path.
+        if ($media) {
+            $uploads = wp_upload_dir();
+            $upload = wp_parse_url($uploads['baseurl']);
+            if ($upload && !empty($upload['host']) && strcasecmp($source['host'], $upload['host']) === 0) {
+                $sourceScheme = strtolower($source['scheme'] ?? ($upload['scheme'] ?? 'https'));
+                $uploadScheme = strtolower($upload['scheme'] ?? 'https');
+                $sourcePort = $source['port'] ?? ($sourceScheme === 'https' ? 443 : 80);
+                $uploadPort = $upload['port'] ?? ($uploadScheme === 'https' ? 443 : 80);
+                $uploadPath = rtrim($upload['path'] ?? '', '/');
+                if (in_array($sourceScheme, ['http', 'https'], true) && in_array($uploadScheme, ['http', 'https'], true)
+                    && ($sourcePort === $uploadPort || (!isset($source['port']) && !isset($upload['port'])))
+                    && strpos($path, $uploadPath . '/') === 0) {
+                    $tail = rawurldecode(substr($path, strlen($uploadPath) + 1));
+                    $key = SMARL_Helper::relativeKeyForPath(rtrim($uploads['basedir'], '/\\') . '/' . $tail);
+                    if (!SMARL_Helper::isCurrentSiteMediaKey($key)) return $url;
+                    $keyPath = implode('/', array_map('rawurlencode', explode('/', $key)));
+                }
+            }
+        }
         foreach ($origins as $site) {
+            if ($keyPath !== null) break;
             if (!$site || empty($site['host']) || strcasecmp($source['host'], $site['host']) !== 0) continue;
             $sourceScheme = strtolower($source['scheme'] ?? ($site['scheme'] ?? 'https'));
             if (!in_array($sourceScheme, ['http', 'https'], true)) continue;
@@ -741,7 +769,7 @@ class SMARL_SmartSync
     {
         if ($this->config->isConfigured() && (int) $postId > 0) {
             $data = is_array($metadata) ? $metadata : [];
-            if (($this->completedAttachmentMetadata[(int) $postId] ?? null) !== md5(serialize($data))) {
+            if (!$this->hasUnchangedAttachment((int) $postId, $data)) {
                 $this->pendingAttachments[(int) $postId] = $data;
                 unset($this->pendingCleanups[(int) $postId]);
             }
@@ -764,9 +792,9 @@ class SMARL_SmartSync
     public function flushAttachmentUploads(): void
     {
         $ids = [];
-        if ($this->pendingAttachments || $this->pendingCleanups) $ids[] = $this->currentBlogId;
+        if ($this->pendingAttachments || $this->pendingCleanups || $this->pendingCloudDeletions) $ids[] = $this->currentBlogId;
         foreach ($this->blogRuntimeStates as $id => $state) {
-            if ($id !== $this->currentBlogId && (!empty($state['pendingAttachments']) || !empty($state['pendingCleanups']))) $ids[] = $id;
+            if ($id !== $this->currentBlogId && (!empty($state['pendingAttachments']) || !empty($state['pendingCleanups']) || !empty($state['pendingCloudDeletions']))) $ids[] = $id;
         }
         foreach (array_unique($ids) as $id) {
             if ($id === get_current_blog_id()) {
@@ -790,23 +818,97 @@ class SMARL_SmartSync
         }
         $cleanups = $this->pendingCleanups;
         $this->pendingCleanups = [];
-        foreach ($cleanups as $postId => $files) {
-            if (isset($this->localDeliveryUsed[$postId]) || !$this->canCleanLocalMedia()) {
-                continue;
-            }
-            $this->localCleanupDepth++;
+        foreach ($cleanups as $postId => $cleanup) {
+            $lock = SMARL_Helper::acquireSyncLock();
+            if ($lock === null) continue;
             try {
-                foreach ($files as $file) {
-                    if (is_file($file)) {
-                        wp_delete_file($file);
-                    }
+                $this->refreshMediaConfiguration();
+                if ($cleanup['target'] !== $this->mediaTargetFingerprint()) {
+                    $this->attachmentUploadFailed($postId);
+                    continue;
                 }
+                if (isset($this->localDeliveryUsed[$postId]) || !$this->canCleanLocalMedia()) continue;
+                $files = $cleanup['files'];
+                if ($this->attachmentFiles($postId, (array) wp_get_attachment_metadata($postId, true)) !== $files) throw new \RuntimeException('Attachment files changed after upload.');
+                // Verify the complete attachment before deleting any local member.
+                foreach ($files as $file) {
+                    $this->localObjectKey($file);
+                    if (is_file($file) && ($cleanup['hashes'][$file] ?? null) !== $this->attachmentFileHash($file)) throw new \RuntimeException('Local media changed after upload.');
+                }
+                $this->localCleanupDepth++;
+                try {
+                    foreach ($files as $file) {
+                        if (is_file($file)) {
+                            wp_delete_file($file);
+                        }
+                    }
+                } finally { $this->localCleanupDepth--; }
             } catch (Throwable $error) {
+                unset($this->completedAttachmentMetadata[$postId], $this->completedAttachmentFiles[$postId]);
                 update_post_meta($postId, '_smarl_offload_error', __('Local media cleanup could not finish. Cloud copies were retained.', 'smartsync-lite-media-offloader-and-assets-cdn'));
             } finally {
-                $this->localCleanupDepth--;
+                SMARL_Helper::releaseSyncLock($lock);
             }
         }
+        $deletions = $this->pendingCloudDeletions;
+        $this->pendingCloudDeletions = [];
+        if ($deletions) {
+            $lock = SMARL_Helper::acquireSyncLock();
+            if ($lock !== null) {
+                try {
+                    $this->refreshMediaConfiguration();
+                    foreach ($deletions as $key => $deletion) {
+                        try {
+                            $this->localObjectKey($deletion['path']);
+                            if (!file_exists($deletion['path']) && !is_link($deletion['path']) && $deletion['target'] === $this->mediaTargetFingerprint()) $this->deleteCloudKey($key);
+                        } catch (Throwable $error) { /* A changed or unsafe path cannot authorize cloud deletion. */ }
+                    }
+                } finally { SMARL_Helper::releaseSyncLock($lock); }
+            }
+        }
+    }
+
+    /** Reload settings changed by another request without replacing injected clients for unchanged settings. */
+    private function refreshMediaConfiguration(): void
+    {
+        $fresh = SMARL_CloudConfig::load();
+        if ($fresh->toArray() !== $this->configurationSnapshot) {
+            $this->config = $fresh;
+            $this->configurationSnapshot = $fresh->toArray();
+            $this->awsConfigAjax->setConfiguration($fresh);
+            $this->ajaxHandlers->setConfiguration($fresh);
+        }
+    }
+
+    private function mediaTargetFingerprint(): string
+    {
+        return hash('sha256', SMARL_Helper::storageTargetFingerprint($this->config) . serialize([$this->config->url, $this->config->cloudfrontUrl, $this->config->useCloudFront]));
+    }
+
+    private function attachmentFileHash(string $file): string
+    {
+        clearstatcache(true, $file);
+        $hash = is_readable($file) ? hash_file('sha256', $file) : false;
+        if ($hash === false) throw new \RuntimeException('Unable to verify local media bytes.');
+        return $hash;
+    }
+
+    private function hasUnchangedAttachment(int $postId, array $metadata): bool
+    {
+        if (($this->completedAttachmentMetadata[$postId] ?? null) !== md5(serialize($metadata))) return false;
+        try {
+            $files = $this->attachmentFiles($postId, $metadata);
+            $hashes = $this->completedAttachmentFiles[$postId] ?? [];
+            if ($files !== array_keys($hashes)) return false;
+            foreach ($files as $file) if (is_file($file) && $this->attachmentFileHash($file) !== $hashes[$file]) return false;
+            return true;
+        } catch (Throwable $error) { return false; }
+    }
+
+    private function attachmentUploadFailed(int $postId): void
+    {
+        unset($this->pendingCleanups[$postId], $this->completedAttachmentMetadata[$postId], $this->completedAttachmentFiles[$postId]);
+        update_post_meta($postId, '_smarl_offload_error', __('Media upload failed. Local files were retained; check your storage configuration and retry.', 'smartsync-lite-media-offloader-and-assets-cdn'));
     }
 
     private function uploadAttachment(int $postId, array $metadata): void
@@ -815,39 +917,62 @@ class SMARL_SmartSync
         if (!$attachment || $attachment->post_type !== 'attachment') {
             return;
         }
-        $this->completedAttachmentMetadata[$postId] = md5(serialize($metadata));
-        $uploadedKeys = get_post_meta($postId, '_smarl_offloaded_files', true);
-        $uploadedKeys = is_array($uploadedKeys) ? array_values(array_filter($uploadedKeys, 'is_string')) : [];
-        $files = [];
-        $failed = false;
+        $lock = SMARL_Helper::acquireSyncLock();
+        if ($lock === null) { $this->attachmentUploadFailed($postId); return; }
         try {
-            $files = $this->attachmentFiles($postId, $metadata);
-            foreach ($files as $file) {
-                $key = $this->localObjectKey($file);
-                if (!is_file($file)) {
-                    if (!in_array($key, $uploadedKeys, true)) $failed = true;
-                    continue;
+            $this->refreshMediaConfiguration();
+            if (!$this->config->isConfigured()) { $this->attachmentUploadFailed($postId); return; }
+            $target = $this->mediaTargetFingerprint();
+            $this->completedAttachmentMetadata[$postId] = md5(serialize($metadata));
+            $previousKeys = get_post_meta($postId, '_smarl_offloaded_files', true);
+            $previousKeys = is_array($previousKeys) ? array_values(array_filter($previousKeys, 'is_string')) : [];
+            $storageTarget = SMARL_Helper::storageTargetFingerprint($this->config);
+            $sameTarget = get_post_meta($postId, '_smarl_offload_target', true) === $storageTarget;
+            $uploadedKeys = $sameTarget ? $previousKeys : [];
+            $files = [];
+            $hashes = [];
+            $failed = false;
+            try {
+                $files = $this->attachmentFiles($postId, $metadata);
+                foreach ($files as $file) {
+                    $key = $this->localObjectKey($file);
+                    $hashes[$file] = null;
+                    if (!is_file($file)) {
+                        if (!in_array($key, $uploadedKeys, true)) $failed = true;
+                        continue;
+                    }
+                    try {
+                        $before = $this->attachmentFileHash($file);
+                        $this->config->uploadObject($key, $file);
+                        unset($this->deletedCloudKeys[$key]);
+                        $uploadedKeys[] = $key;
+                        $hashes[$file] = $before;
+                        if ($before !== $this->attachmentFileHash($file)) $failed = true;
+                    } catch (Throwable $error) {
+                        $failed = true;
+                    }
                 }
-                try {
-                    $this->config->uploadObject($key, $file);
-                    unset($this->deletedCloudKeys[$key]);
-                    $uploadedKeys[] = $key;
-                } catch (Throwable $error) {
-                    $failed = true;
-                }
+            } catch (Throwable $error) {
+                $failed = true;
             }
+            $this->refreshMediaConfiguration();
+            if ($target !== $this->mediaTargetFingerprint()) $failed = true;
+            // Preserve previous ownership after a partial migration; only a verified full upload replaces it.
+            if (!$failed || $sameTarget || !$previousKeys) {
+                update_post_meta($postId, '_smarl_offloaded_files', array_values(array_unique($uploadedKeys)));
+                update_post_meta($postId, '_smarl_offload_target', $storageTarget);
+                foreach ($uploadedKeys as $key) $this->cloudKeyTargets[$key] = $storageTarget;
+            }
+            if ($failed) {
+                $this->attachmentUploadFailed($postId);
+                return;
+            }
+            delete_post_meta($postId, '_smarl_offload_error');
+            $this->completedAttachmentFiles[$postId] = $hashes;
+            $this->pendingCleanups[$postId] = ['files' => $files, 'hashes' => $hashes, 'target' => $target];
         } catch (Throwable $error) {
-            $failed = true;
-        }
-        update_post_meta($postId, '_smarl_offloaded_files', array_values(array_unique($uploadedKeys)));
-        if ($failed) {
-            unset($this->pendingCleanups[$postId]);
-            unset($this->completedAttachmentMetadata[$postId]);
-            update_post_meta($postId, '_smarl_offload_error', __('Media upload failed. Local files were retained; check your storage configuration and retry.', 'smartsync-lite-media-offloader-and-assets-cdn'));
-            return;
-        }
-        delete_post_meta($postId, '_smarl_offload_error');
-        $this->pendingCleanups[$postId] = $files;
+            $this->attachmentUploadFailed($postId);
+        } finally { SMARL_Helper::releaseSyncLock($lock); }
     }
 
     private function canCleanLocalMedia(): bool
@@ -875,8 +1000,8 @@ class SMARL_SmartSync
         if (is_array($backups)) {
             $sizes = array_merge($sizes, $backups);
         }
-        if (!empty($metadata['original_image'])) {
-            $sizes[] = ['file' => $metadata['original_image']];
+        foreach (['original_image', 'source_image', 'animated_video', 'animated_video_poster'] as $companion) {
+            if (!empty($metadata[$companion])) $sizes[] = ['file' => $metadata[$companion]];
         }
         foreach ($sizes as $size) {
             $name = is_array($size) ? ($size['file'] ?? '') : '';
@@ -908,17 +1033,83 @@ class SMARL_SmartSync
         if (!$this->config->isConfigured() || !is_array($keys)) {
             return;
         }
-        foreach ($keys as $key) {
-            if (is_string($key) && $key !== '') {
-                try {
-                    SMARL_Helper::resolveLocalPath($key);
-                    if (is_multisite() && !SMARL_Helper::isCurrentSiteMediaKey($key)) continue;
-                    $this->deleteCloudKey($key);
-                } catch (Throwable $error) {
-                    // Stored metadata cannot expand the local object-key boundary.
+        $lock = SMARL_Helper::acquireSyncLock();
+        if ($lock === null) return;
+        try {
+            $this->refreshMediaConfiguration();
+            $target = SMARL_Helper::storageTargetFingerprint($this->config);
+            if (get_post_meta((int) $postId, '_smarl_offload_target', true) !== $target) return;
+            foreach ($keys as $key) {
+                if (is_string($key) && $key !== '') {
+                    try {
+                        SMARL_Helper::resolveLocalPath($key);
+                        if (is_multisite() && !SMARL_Helper::isCurrentSiteMediaKey($key)) continue;
+                        if ($this->hasOtherCloudOwner($key, (int) $postId)) {
+                            $this->sharedCloudKeys[$key] = true;
+                            continue;
+                        }
+                        $this->deleteCloudKey($key);
+                    } catch (Throwable $error) {
+                        // Stored metadata cannot expand the local object-key boundary.
+                    }
                 }
             }
+        } catch (Throwable $error) {
+            // Missing or changed provenance cannot authorize deleting another storage target.
+        } finally { SMARL_Helper::releaseSyncLock($lock); }
+    }
+
+    /** Generic file filters can only remove objects with attachment ownership proven for this target. */
+    private function hasCloudKeyProvenance(string $key): bool
+    {
+        $target = SMARL_Helper::storageTargetFingerprint($this->config);
+        if (isset($this->cloudKeyTargets[$key]) && $this->cloudKeyTargets[$key] === $target) return true;
+        for ($page = 1; ; $page++) {
+            $ids = $this->cloudKeyOwners($key, $page);
+            foreach ($ids as $id) {
+                $owner = get_post_meta((int) $id, '_smarl_offload_target', true);
+                $keys = get_post_meta((int) $id, '_smarl_offloaded_files', true);
+                if ($owner !== $target || !is_array($keys)) continue;
+                foreach ($keys as $ownedKey) if (is_string($ownedKey)) $this->cloudKeyTargets[$ownedKey] = $owner;
+                if (isset($this->cloudKeyTargets[$key]) && $this->cloudKeyTargets[$key] === $target) return true;
+            }
+            if (count($ids) < 100) return false;
         }
+    }
+
+    private function cloudKeyOwners(string $key, int $page): array
+    {
+        return get_posts(['post_type' => 'attachment', 'post_status' => ['inherit', 'private', 'publish', 'trash'], 'fields' => 'ids', 'posts_per_page' => 100, 'paged' => $page, 'orderby' => 'ID', 'order' => 'ASC', 'meta_key' => '_smarl_offloaded_files', 'meta_value' => serialize($key), 'meta_compare' => 'LIKE', 'no_found_rows' => true]);
+    }
+
+    private function hasOtherCloudOwner(string $key, int $excludedId): bool
+    {
+        $target = SMARL_Helper::storageTargetFingerprint($this->config);
+        for ($page = 1; ; $page++) {
+            $ids = $this->cloudKeyOwners($key, $page);
+            foreach ($ids as $id) {
+                $keys = get_post_meta((int) $id, '_smarl_offloaded_files', true);
+                if ((int) $id !== $excludedId && get_post_meta((int) $id, '_smarl_offload_target', true) === $target && is_array($keys) && in_array($key, $keys, true)) return true;
+            }
+            if (count($ids) < 100) return false;
+        }
+    }
+
+    private function forgetCloudKeyOwnership(string $key): void
+    {
+        $target = SMARL_Helper::storageTargetFingerprint($this->config);
+        // Gather owners first: changing manifests can alter the paginated LIKE query.
+        $owners = [];
+        for ($page = 1; ; $page++) {
+            $ids = $this->cloudKeyOwners($key, $page);
+            foreach ($ids as $id) $owners[] = (int) $id;
+            if (count($ids) < 100) break;
+        }
+        foreach ($owners as $id) {
+            $keys = get_post_meta($id, '_smarl_offloaded_files', true);
+            if (get_post_meta($id, '_smarl_offload_target', true) === $target && is_array($keys) && in_array($key, $keys, true)) update_post_meta($id, '_smarl_offloaded_files', array_values(array_filter($keys, static fn($ownedKey) => $ownedKey !== $key)));
+        }
+        unset($this->cloudKeyTargets[$key], $this->sharedCloudKeys[$key]);
     }
 
     private function deleteCloudKey(string $key): void
@@ -929,6 +1120,7 @@ class SMARL_SmartSync
         try {
             $this->config->deleteObject($key);
             $this->deletedCloudKeys[$key] = true;
+            $this->forgetCloudKeyOwnership($key);
         } catch (Throwable $error) {
             // Keep WordPress deletion behavior; a provider failure must not crash the request.
         }
@@ -942,7 +1134,8 @@ class SMARL_SmartSync
             $uploads = wp_upload_dir();
             if (!empty($uploads['basedir'])) {
                 SMARL_Helper::relativeKeyForPath($file, $uploads['basedir']);
-                $this->deleteCloudKey($this->localObjectKey($file));
+                $key = $this->localObjectKey($file);
+                if (!isset($this->sharedCloudKeys[$key]) && $this->hasCloudKeyProvenance($key)) $this->pendingCloudDeletions[$key] = ['path' => $file, 'target' => $this->mediaTargetFingerprint()];
             }
         } catch (Throwable $error) {
             // Invalid or unrelated local paths do not identify cloud objects.

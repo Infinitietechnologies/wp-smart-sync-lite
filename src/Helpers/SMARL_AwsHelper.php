@@ -8,7 +8,8 @@ class SMARL_AwsHelper
     {
         return [
             'OriginAccessControlConfig' => [
-                'Name' => "$bucketName-oac-" . bin2hex(random_bytes(8)),
+                // S3 permits 63-character bucket names; CloudFront limits the entire OAC name to 64.
+                'Name' => substr((string) $bucketName, 0, 43) . '-oac-' . bin2hex(random_bytes(8)),
                 'Description' => "OAC for $bucketName",
                 'SigningProtocol' => 'sigv4',
                 'SigningBehavior' => 'always',

@@ -52,7 +52,11 @@ class SMARL_CustomUrl
 
 
     public function save(): void {
-        update_option(self::$optionName, $this->toArray(), false);
+        global $wpdb;
+        $data = $this->toArray();
+        update_option(self::$optionName, $data, false);
+        $saved = maybe_unserialize($wpdb->get_var($wpdb->prepare("SELECT option_value FROM {$wpdb->options} WHERE option_name = %s", self::$optionName)));
+        if ($saved !== $data) throw new \SmartSyncS3\Exceptions\SMARL_ProviderException(__('Custom domain settings could not be saved. Check the WordPress database and try again.', 'smartsync-lite-media-offloader-and-assets-cdn'));
     }
 
     public function toArray(): array {

@@ -60,6 +60,7 @@ smartsync_test('media cleanup retains remote original and old-month thumbnail', 
     $core->deleteAttachmentObjects(101);
     smartsync_assert_same(array_keys($storage->uploads), $storage->deletes);
     $core->deleteFromS3($paths[0]);
+    $core->flushAttachmentUploads();
     smartsync_assert_same(2, count($storage->deletes), 'Normal file deletion must not repeat remote manifest deletions');
 });
 
@@ -188,7 +189,8 @@ smartsync_test('cleanup filter exception restores cloud deletion context', funct
     smartsync_assert_same([], $storage->deletes);
     smartsync_assert_true(is_file($paths[0]));
     remove_filter('wp_delete_file', $throw, 20);
-    $core->deleteFromS3($paths[0]);
+    wp_delete_file($paths[0]);
+    $core->flushAttachmentUploads();
     smartsync_assert_same(['wp-content/uploads/2020/01/core-107.jpg'], $storage->deletes);
 });
 

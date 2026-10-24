@@ -1,7 +1,10 @@
 <?php
 // Isolated WordPress rendering fixture. No bootstrap, credentials, storage, or network calls.
 define('ABSPATH', dirname(__DIR__, 2) . '/');
-function current_user_can($capability) { return true; }
+function current_user_can($capability) { return $GLOBALS['smartsync_view_allowed'] ?? true; }
+function add_action($hook, $callback) { $GLOBALS['smartsync_view_actions'][$hook][] = $callback; }
+function add_menu_page(...$arguments) { $GLOBALS['smartsync_view_menu'] = $arguments; return 'fixture-menu'; }
+function add_submenu_page(...$arguments) { $GLOBALS['smartsync_view_menu'] = $arguments; return 'fixture-menu'; }
 function esc_html($value) { return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8'); }
 function esc_attr($value) { return esc_html($value); }
 function esc_url($value) { return esc_html($value); }
@@ -27,6 +30,7 @@ require ABSPATH . 'src/Models/SMARL_CustomUrl.php';
 require ABSPATH . 'src/Models/SMARL_CloudConfig.php';
 require ABSPATH . 'src/Helpers/SMARL_Helper.php';
 $data = isset($argv[2]) ? json_decode(base64_decode($argv[2]), true, 512, JSON_THROW_ON_ERROR) : [];
+$GLOBALS['smartsync_view_allowed'] = ($data['__can_manage'] ?? true) === true;
 $config = \SmartSyncS3\Models\SMARL_CloudConfig::fromArray($data);
 $config->customUrl = \SmartSyncS3\Models\SMARL_CustomUrl::fromArray($data['__custom'] ?? []);
 $views = [
@@ -37,4 +41,11 @@ $views = [
 [$view, $method] = $views[$argv[1]];
 require ABSPATH . 'src/Views/' . $view . '.php';
 $class = '\\SmartSyncS3\\Views\\' . $view;
-(new $class($config))->$method();
+$instance = new $class($config);
+if (!empty($data['__inspect_menu'])) {
+    $instance->loadView();
+    foreach ($GLOBALS['smartsync_view_actions']['admin_menu'] ?? [] as $callback) $callback();
+    echo wp_json_encode($GLOBALS['smartsync_view_menu']);
+} else {
+    $instance->$method();
+}

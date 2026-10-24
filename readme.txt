@@ -2,9 +2,9 @@
 Contributors: infinitietech, jaysparmar
 Tags: aws, s3, cloudfront, cdn, sync
 Requires at least: 6.5
-Tested up to: 7.1
+Tested up to: 7.1.3
 Requires PHP: 8.1
-Stable tag: 1.7.1
+Stable tag: 1.7.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -62,6 +62,21 @@ No, you can use the plugin with S3 alone, but CloudFront improves performance.
 2. **AWS Integration Panel** – Enter IAM credentials for authentication.
 
 == Changelog ==
+= 1.7.3 =
+* Preserve cloud-object ownership across storage changes and shared attachments; protect changed local files during cleanup.
+* Repair interrupted sync recovery, cancellation, coordination caches, cyclic listings and bounded progress logs.
+* Stream large Bunny uploads, verify credential changes and settings persistence, and retain CloudFront provisioning receipts for retries.
+* Recover admin polling and browser navigation, invalidate stale provider discovery, and show active synchronization indicators.
+
+= 1.7.2 =
+- Verify Bunny storage access before saving and distinguish account API keys from storage credentials.
+- Handle paginated Bunny zones, regional storage hostnames, and active HTTPS-ready public pull zones.
+- Allow existing S3-compatible buckets to be entered without account-wide listing permission.
+- Correct DigitalOcean SDK region handling for new Spaces buckets.
+- Correct dotted S3 HTTPS URLs, China endpoints, partition-specific bucket policies, and unsupported automatic CloudFront setup.
+- Preserve newer provider settings when changing CDN or local-cleanup switches.
+- Read Google conditional IAM policies safely and merge public-read membership without duplicate role bindings.
+
 = 1.7.1 =
 - Repair restore queues, progress, cancellation, and provider dispatch.
 - Keep cloud copies during local media cleanup and retain local files after upload failures.
@@ -88,6 +103,8 @@ php wp-cli.phar i18n make-pot . languages/wp-smartsync.pot --exclude=vendor,test
 ```
 
 == Requirements and data handling ==
+
+WordPress 6.5 or later is required. This release has been tested with WordPress 7.1.3, the latest stable release verified on 24 October 2026. Compatibility checks also track the latest stable WordPress version in CI.
 
 PHP 8.1 or later and the bundled Composer dependencies are required. For a source checkout, run `composer install` using the included lockfile before installing the plugin.
 

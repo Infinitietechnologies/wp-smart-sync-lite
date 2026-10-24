@@ -17,6 +17,20 @@ This generates temporary local authentication cookies, seeds deliberately invali
 
 Cloud provisioning, billing, DNS propagation, storage transfers, and delivery remain outside this browser smoke test.
 
+## Native Bunny connection browser smoke
+
+Unlike the general browser smoke above, this test allows browser requests to reach the real WordPress admin-ajax handlers. Only WordPress's outbound Bunny account/storage HTTP is replaced with synthetic responses.
+
+    npm run test:provider-browser -- --wordpress=C:/temp/smartsync-wordpress-audit-fixture/wordpress --wp-cli=C:/temp/wp-cli.phar --url=http://127.0.0.1:8097 --seed-fixture
+
+Use a disposable fixture with SmartSync active, administrator ID 1, and its smartsync-audit-isolation.php MU plugin blocking external HTTP. The path must contain smartsync-wordpress-audit-fixture/wordpress. Run serially with other fixture tests and with no pending SmartSync actions.
+
+The runner writes a temporary, explicitly guarded MU wrapper for tests/integration/bunny-http-fixture.php. It starts a loopback PHP server only when the target port is free, and stops only that owned process. It snapshots/restores configuration, domain, sync/lock, and relevant transient options; it removes its own wrapper and fake request-log option afterward. Existing server processes are retained.
+
+Coverage includes a native HTTP 400 for the wrong account key, retry, paginated account/details responses, system-host preference and certificate/disabled/suspended/token filtering, a storage connection probe before saving, saved provider-reported endpoint, recognized settings, native analytics and auto-delete toggle requests, and 320/1280 pixel screenshots. The intentional 400 is allowed; other local HTTP failures and JavaScript runtime errors fail the test. No browser AJAX responses are intercepted or fulfilled. External browser resources remain blocked.
+
+This proves the local browser/PHP/WordPress HTTP wiring against fixtures. It does not establish live Bunny account permissions, host/DNS/TLS availability, or provider acceptance.
+
 ## Bundled documentation
 
 The regular Node suite also checks Documentation/index.html local HTML/CSS resources, fragment targets, and sidebar behavior. To smoke-test the standalone page in Edge/Chromium:

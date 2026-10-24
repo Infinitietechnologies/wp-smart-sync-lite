@@ -41,7 +41,11 @@ final class SmartSyncTestDatabase {
         $this->last_error = '';
         return $this->pdo->query($sql)->fetchAll($output === ARRAY_A ? PDO::FETCH_ASSOC : PDO::FETCH_OBJ);
     }
-    public function get_var(string $sql): mixed { $v = $this->pdo->query($sql)->fetchColumn(); return $v === false ? null : $v; }
+    public function get_var(string $sql): mixed {
+        $v = $this->pdo->query($sql)->fetchColumn();
+        if (is_callable($GLOBALS['smartsync_test_sql_read_hook'] ?? null)) ($GLOBALS['smartsync_test_sql_read_hook'])($sql, $v);
+        return $v === false ? null : $v;
+    }
     public function get_row(string $sql, string $output = OBJECT): mixed { return $this->get_results($sql, $output)[0] ?? null; }
     public function insert(string $table, array $data, mixed $format = null): int|false {
         $sql = 'INSERT INTO ' . $table . ' (' . implode(',', array_keys($data)) . ') VALUES (' . implode(',', array_fill(0, count($data), '?')) . ')';
@@ -98,6 +102,10 @@ function smartsync_test_remove_entry(string $path): void {
 function smartsync_test_reset(): void {
     foreach (['smartsync_test_options', 'smartsync_test_hooks', 'smartsync_test_transients', 'smartsync_test_cache', 'smartsync_test_jobs', 'smartsync_test_meta', 'smartsync_test_posts', 'smartsync_test_assets', 'smartsync_test_http_requests'] as $name) { $GLOBALS[$name] = []; }
     $GLOBALS['smartsync_test_http'] = null;
+    $GLOBALS['smartsync_test_cache_reads'] = [];
+    $GLOBALS['smartsync_test_meta_write_failures'] = [];
+    $GLOBALS['smartsync_test_option_read_hook'] = null;
+    $GLOBALS['smartsync_test_sql_read_hook'] = null;
     gc_collect_cycles();
     if (is_dir(ABSPATH)) {
         $resolved = str_replace('\\', '/', (string) realpath(ABSPATH));
@@ -122,8 +130,15 @@ function smartsync_test_reset(): void {
 function maybe_serialize(mixed $v): string { return is_array($v) || is_object($v) ? serialize($v) : (string) $v; }
 function maybe_unserialize(mixed $v): mixed { if (!is_string($v)) { return $v; } $r = @unserialize($v); return $r !== false || $v === 'b:0;' ? $r : $v; }
 function get_option(string $name, mixed $default = false): mixed {
+    $alloptions = $GLOBALS['smartsync_test_cache']['options']['alloptions'] ?? [];
+    if (!empty($GLOBALS['smartsync_test_cache_reads']['alloptions']) && array_key_exists($name, $alloptions)) return maybe_unserialize($alloptions[$name]);
+    if (!empty($GLOBALS['smartsync_test_cache_reads'][$name]) && array_key_exists($name, $GLOBALS['smartsync_test_cache']['options'] ?? [])) {
+        return $GLOBALS['smartsync_test_cache']['options'][$name];
+    }
     $db = $GLOBALS['wpdb']; $v = $db->get_var($db->prepare('SELECT option_value FROM wp_options WHERE option_name=%s', $name));
-    return $v === null ? $default : maybe_unserialize($v);
+    $result = $v === null ? $default : maybe_unserialize($v);
+    if (is_callable($GLOBALS['smartsync_test_option_read_hook'] ?? null)) ($GLOBALS['smartsync_test_option_read_hook'])($name, $result);
+    return $result;
 }
 function add_option(string $name, mixed $value = '', mixed $deprecated = '', mixed $autoload = null): bool {
     if (get_option($name, null) !== null) { return false; }
@@ -215,7 +230,7 @@ function get_posts(array $args = []): array {
 }
 function get_attached_file(int $id, bool $unfiltered = false): string { $v = get_post_meta($id, '_wp_attached_file', true); return str_starts_with($v, '/') || preg_match('/^[A-Za-z]:/', $v) ? $v : wp_upload_dir()['basedir'] . '/' . $v; }
 function get_post_meta(int $id, string $key = '', bool $single = false): mixed { return $GLOBALS['smartsync_test_meta'][$id][$key] ?? ($single ? '' : []); }
-function update_post_meta(int $id, string $key, mixed $value, mixed ...$args): bool { $GLOBALS['smartsync_test_meta'][$id][$key] = $value; return true; }
+function update_post_meta(int $id, string $key, mixed $value, mixed ...$args): bool { if (!empty($GLOBALS['smartsync_test_meta_write_failures'][$id][$key])) return false; $GLOBALS['smartsync_test_meta'][$id][$key] = $value; return true; }
 function delete_post_meta(int $id, string $key, mixed ...$args): bool { unset($GLOBALS['smartsync_test_meta'][$id][$key]); return true; }
 function wp_get_attachment_metadata(int $id, bool $unfiltered = false): mixed { return get_post_meta($id, '_wp_attachment_metadata', true); }
 function wp_delete_file(string $file): bool { $path = apply_filters('wp_delete_file', $file); return $path ? @unlink($path) : false; }

@@ -61,10 +61,10 @@ function smarl_uninstall_site(): void
     }
     $wpdb->query("DROP TABLE IF EXISTS `{$wpdb->prefix}smarl_file_sync_queue`");
 
-    foreach (['smarl_settings', 'smarl_sync_settings', 'custom_url_option', 'service_json_path_temp', 'smarl_db_version', 'smarl_sync_lock', 'smarl_queue_generation', 'aws_s3_cloudfront_settings', 'use_aws'] as $option) {
+    foreach (['smarl_settings', 'smarl_sync_settings', 'custom_url_option', 'smarl_cloudfront_pending', 'service_json_path_temp', 'smarl_db_version', 'smarl_sync_lock', 'smarl_queue_generation', 'aws_s3_cloudfront_settings', 'use_aws'] as $option) {
         delete_option($option);
     }
-    foreach (['_smarl_offloaded_files', '_smarl_offload_error'] as $metaKey) {
+    foreach (['_smarl_offloaded_files', '_smarl_offload_error', '_smarl_offload_target'] as $metaKey) {
         delete_post_meta_by_key($metaKey);
     }
     $transientOptions = $wpdb->get_col($wpdb->prepare("SELECT option_name FROM `{$wpdb->options}` WHERE option_name LIKE %s OR option_name LIKE %s", $wpdb->esc_like('_transient_smarl_') . '%', $wpdb->esc_like('_transient_timeout_smarl_') . '%'));

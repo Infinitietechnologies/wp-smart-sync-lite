@@ -4,7 +4,7 @@ use SmartSyncS3\Models\SMARL_CloudConfig;
 use SmartSyncS3\Models\SMARL_S3SyncSettings;
 
 smartsync_test('a stopped run cannot be resurrected by a stale progress snapshot', function () {
-    $active = new SMARL_S3SyncSettings(); $active->runId = 'run-old'; $active->s3SyncStatus = 'processing'; $active->syncState = 'syncing'; $active->s3SyncTotalFiles = 5; $active->save();
+    $active = new SMARL_S3SyncSettings(); $active->runId = 'run-old'; $active->s3SyncDirection = 'upload'; $active->s3SyncStatus = 'processing'; $active->syncState = 'syncing'; $active->s3SyncTotalFiles = 5; $active->save();
     $worker = new SMARL_S3SyncSettings(); $worker->load();
     (new SMARL_S3SyncSettings())->reset();
     $worker->s3SyncProcessedFiles = 3;
@@ -14,9 +14,9 @@ smartsync_test('a stopped run cannot be resurrected by a stale progress snapshot
 });
 
 smartsync_test('a stale worker cannot replace a newer run even when both snapshots are processing', function () {
-    $first = new SMARL_S3SyncSettings(); $first->runId = 'run-first'; $first->s3SyncStatus = 'processing'; $first->save();
+    $first = new SMARL_S3SyncSettings(); $first->runId = 'run-first'; $first->s3SyncDirection = 'upload'; $first->s3SyncStatus = 'processing'; $first->save();
     $worker = new SMARL_S3SyncSettings(); $worker->load();
-    $next = new SMARL_S3SyncSettings(); $next->runId = 'run-next'; $next->s3SyncStatus = 'processing'; $next->s3SyncTotalFiles = 12; $next->save();
+    $next = new SMARL_S3SyncSettings(); $next->runId = 'run-next'; $next->s3SyncDirection = 'upload'; $next->s3SyncStatus = 'processing'; $next->s3SyncTotalFiles = 12; $next->save();
     $worker->s3SyncStatus = 'completed';
     smartsync_assert_same(false, $worker->saveForRun('run-first'));
     $persisted = new SMARL_S3SyncSettings(); $persisted->load();
@@ -24,7 +24,7 @@ smartsync_test('a stale worker cannot replace a newer run even when both snapsho
 });
 
 smartsync_test('conditional progress persistence permits the current completion and rejects duplicate terminal writes', function () {
-    $worker = new SMARL_S3SyncSettings(); $worker->runId = 'run-current'; $worker->s3SyncStatus = 'processing'; $worker->save();
+    $worker = new SMARL_S3SyncSettings(); $worker->runId = 'run-current'; $worker->s3SyncDirection = 'upload'; $worker->s3SyncStatus = 'processing'; $worker->save();
     smartsync_assert_same(true, $worker->saveForRun('run-current'));
     $worker->s3SyncStatus = 'completed'; $worker->s3SyncProcessedFiles = 4;
     smartsync_assert_same(true, $worker->saveForRun('run-current'));
@@ -34,7 +34,7 @@ smartsync_test('conditional progress persistence permits the current completion 
 });
 
 smartsync_test('progress reload and compare-and-swap clear stale option cache entries', function () {
-    $worker = new SMARL_S3SyncSettings(); $worker->runId = 'run-cache'; $worker->s3SyncStatus = 'processing'; $worker->save();
+    $worker = new SMARL_S3SyncSettings(); $worker->runId = 'run-cache'; $worker->s3SyncDirection = 'upload'; $worker->s3SyncStatus = 'processing'; $worker->save();
     wp_cache_set('smarl_sync_settings', ['runId' => 'run-obsolete'], 'options');
     $worker->load(); smartsync_assert_same(false, wp_cache_get('smarl_sync_settings', 'options'));
     wp_cache_set('smarl_sync_settings', ['runId' => 'run-obsolete'], 'options');

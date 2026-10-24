@@ -11,6 +11,7 @@ use SmartSyncS3\Models\SMARL_CloudConfig;
 use SmartSyncS3\Models\SMARL_CustomUrl;
 use SmartSyncS3\Models\SMARL_S3SyncSettings;
 use SmartSyncS3\Services\SMARLI_GoogleService;
+use SmartSyncS3\Exceptions\SMARL_ProviderException;
 
 /** Privileged provider provisioning and CloudFront custom domain endpoints. */
 class SMARL_AwsConfigAjax
@@ -49,7 +50,7 @@ class SMARL_AwsConfigAjax
 
     private function sendError(\Throwable $error): void
     {
-        $message = $error instanceof InvalidArgumentException ? $error->getMessage()
+        $message = $error instanceof InvalidArgumentException || $error instanceof SMARL_ProviderException ? $error->getMessage()
             : __('The cloud provider request failed. Check the credentials, permissions, region, and provider settings, then try again.', 'smartsync-lite-media-offloader-and-assets-cdn');
         if ($error instanceof AwsException && $error->getAwsErrorCode()) $message .= ' (' . preg_replace('/[^a-zA-Z0-9_-]/', '', $error->getAwsErrorCode()) . ')';
         wp_send_json_error($message, in_array($error->getCode(), [404, 409], true) ? $error->getCode() : 400);
@@ -106,7 +107,7 @@ class SMARL_AwsConfigAjax
     private function createBucket(SMARL_CloudConfig $config): void
     {
         if ($config->serviceProvider === 'google') {
-            (new SMARLI_GoogleService($config->googleServicePath))->createPublicBucket($config->bucket, $config->region);
+            $config->createGoogleBucket();
             return;
         }
         $client = $config->getS3Client();
@@ -117,8 +118,7 @@ class SMARL_AwsConfigAjax
         $client->waitUntil('BucketExists', ['Bucket' => $config->bucket]);
     }
 
-    /** Preserve unrelated bucket statements rather than replacing an existing policy. */
-    private function setBucketPolicy($client, string $bucket, array $statement): void
+    private function readBucketPolicy($client, string $bucket): array
     {
         $policy = ['Version' => '2012-10-17', 'Statement' => []];
         try {
@@ -130,6 +130,13 @@ class SMARL_AwsConfigAjax
         } catch (AwsException $error) {
             if (!in_array($error->getAwsErrorCode(), ['NoSuchBucketPolicy', 'NoSuchPolicy'], true)) throw $error;
         }
+        return $policy;
+    }
+
+    /** Preserve unrelated bucket statements rather than replacing an existing policy. */
+    private function setBucketPolicy($client, string $bucket, array $statement): void
+    {
+        $policy = $this->readBucketPolicy($client, $bucket);
         $policy['Statement'] = array_values(array_filter($policy['Statement'], static fn($item) => !in_array($item['Sid'] ?? '', ['SmartSyncPublicRead', 'SmartSyncCloudFrontRead'], true)));
         $policy['Statement'][] = $statement;
         $client->putBucketPolicy(['Bucket' => $bucket, 'Policy' => json_encode($policy, JSON_THROW_ON_ERROR)]);
@@ -138,32 +145,97 @@ class SMARL_AwsConfigAjax
     private function configurePublicBucket(SMARL_CloudConfig $config): void
     {
         if ($config->serviceProvider === 'google') {
-            $bucket = (new SMARLI_GoogleService($config->googleServicePath))->storage->bucket($config->bucket);
-            if (!$bucket->exists()) throw new InvalidArgumentException('The selected Google bucket does not exist.');
-            $iam = $bucket->iam();
-            $policy = $iam->policy();
-            $binding = ['role' => 'roles/storage.objectViewer', 'members' => ['allUsers']];
-            if (!in_array($binding, $policy['bindings'] ?? [], true)) $policy['bindings'][] = $binding;
-            $iam->setPolicy($policy);
+            $config->configureGooglePublicAccess();
         } elseif ($config->serviceProvider === 'aws') {
             $client = $config->getS3Client();
+            $partition = str_starts_with($config->region, 'cn-') ? 'aws-cn' : (str_starts_with($config->region, 'us-gov-') ? 'aws-us-gov' : 'aws');
             $client->putPublicAccessBlock(['Bucket' => $config->bucket, 'PublicAccessBlockConfiguration' => [
                 'BlockPublicAcls' => true, 'IgnorePublicAcls' => true, 'BlockPublicPolicy' => false, 'RestrictPublicBuckets' => false,
             ]]);
-            $this->setBucketPolicy($client, $config->bucket, ['Sid' => 'SmartSyncPublicRead', 'Effect' => 'Allow', 'Principal' => '*', 'Action' => 's3:GetObject', 'Resource' => 'arn:aws:s3:::' . $config->bucket . '/*']);
+            $this->setBucketPolicy($client, $config->bucket, ['Sid' => 'SmartSyncPublicRead', 'Effect' => 'Allow', 'Principal' => '*', 'Action' => 's3:GetObject', 'Resource' => 'arn:' . $partition . ':s3:::' . $config->bucket . '/*']);
         }
+    }
+
+    /** No credentials are stored in this receipt; it survives a failed later provisioning step. */
+    private function saveCloudFrontCheckpoint(array $checkpoints): void
+    {
+        global $wpdb;
+        update_option('smarl_cloudfront_pending', $checkpoints, false);
+        $saved = maybe_unserialize($wpdb->get_var($wpdb->prepare("SELECT option_value FROM {$wpdb->options} WHERE option_name = %s", 'smarl_cloudfront_pending')));
+        if ($saved !== $checkpoints) throw new RuntimeException('Unable to save the CloudFront recovery checkpoint.');
     }
 
     private function configureCloudFront(SMARL_CloudConfig $config): void
     {
-        $cloudFront = $config->getCloudfrontClient();
-        $oac = $cloudFront->createOriginAccessControl(SMARL_AwsHelper::generateOACArray($config->bucket));
-        $distribution = $cloudFront->createDistribution(SMARL_AwsHelper::createCloudfrontArray($config->bucket, $config->region, $oac['OriginAccessControl']['Id']));
-        $config->distributionId = $distribution['Distribution']['Id'];
-        $config->cloudfrontUrl = $distribution['Distribution']['DomainName'];
-        $config->url = $config->cloudfrontUrl;
-        $account = $config->getStsClient('us-east-1')->getCallerIdentity()['Account'];
+        global $wpdb;
+        // Fail read permissions and account discovery before allocating either paid resource.
+        $account = $config->getStsClient('us-east-1')->getCallerIdentity()['Account'] ?? '';
+        if (!is_string($account) || !preg_match('/^\d{12}$/', $account)) throw new RuntimeException('AWS did not return a valid account identity.');
         $client = $config->getS3Client();
+        $this->readBucketPolicy($client, $config->bucket);
+        $cloudFront = $config->getCloudfrontClient();
+        $raw = $wpdb->get_var($wpdb->prepare("SELECT option_value FROM {$wpdb->options} WHERE option_name = %s", 'smarl_cloudfront_pending'));
+        $checkpoints = $raw === null ? [] : maybe_unserialize($raw);
+        if (!is_array($checkpoints)) throw new InvalidArgumentException(__('The CloudFront recovery records are invalid. Review the saved AWS resources before retrying setup.', 'smartsync-lite-media-offloader-and-assets-cdn'));
+        $key = hash('sha256', $account . ':' . $config->region . ':' . $config->bucket);
+        if (isset($checkpoints[$key])) {
+            $entry = $checkpoints[$key];
+            if (!is_array($entry) || ($entry['account'] ?? '') !== $account || ($entry['bucket'] ?? '') !== $config->bucket || ($entry['region'] ?? '') !== $config->region
+                || !is_string($entry['oac_name'] ?? null) || !is_string($entry['caller_reference'] ?? null)
+                || !is_string($entry['oac_id'] ?? null) || !is_string($entry['distribution_id'] ?? null)) {
+                throw new InvalidArgumentException(__('The CloudFront recovery record does not match this storage target. Review its AWS resources before retrying.', 'smartsync-lite-media-offloader-and-assets-cdn'));
+            }
+        } else {
+            $entry = ['account' => $account, 'bucket' => $config->bucket, 'region' => $config->region,
+                'oac_name' => SMARL_AwsHelper::generateOACArray($config->bucket)['OriginAccessControlConfig']['Name'],
+                'caller_reference' => bin2hex(random_bytes(16)), 'oac_id' => '', 'distribution_id' => '', 'domain' => ''];
+            $checkpoints[$key] = $entry;
+            try { $this->saveCloudFrontCheckpoint($checkpoints); }
+            catch (\Throwable $error) { throw new SMARL_ProviderException(__('Unable to save the CloudFront recovery record. No CloudFront resources were created. Check the WordPress database before retrying.', 'smartsync-lite-media-offloader-and-assets-cdn')); }
+        }
+        if ($entry['oac_id'] !== '') {
+            $oac = $cloudFront->getOriginAccessControl(['Id' => $entry['oac_id']])['OriginAccessControl'] ?? [];
+            $oacConfig = $oac['OriginAccessControlConfig'] ?? [];
+            if (($oac['Id'] ?? '') !== $entry['oac_id'] || ($oacConfig['Name'] ?? '') !== $entry['oac_name']
+                || ($oacConfig['OriginAccessControlOriginType'] ?? '') !== 's3' || ($oacConfig['SigningBehavior'] ?? '') !== 'always' || ($oacConfig['SigningProtocol'] ?? '') !== 'sigv4') {
+                throw new InvalidArgumentException(__('The saved CloudFront origin access control changed. Review the recovery resources before retrying.', 'smartsync-lite-media-offloader-and-assets-cdn'));
+            }
+        } else {
+            $oacArgs = SMARL_AwsHelper::generateOACArray($config->bucket);
+            $oacArgs['OriginAccessControlConfig']['Name'] = $entry['oac_name'];
+            $entry['oac_id'] = $cloudFront->createOriginAccessControl($oacArgs)['OriginAccessControl']['Id'];
+            $checkpoints[$key] = $entry;
+            try { $this->saveCloudFrontCheckpoint($checkpoints); }
+            catch (\Throwable $error) {
+                /* translators: %s: AWS origin access control ID. */
+                throw new SMARL_ProviderException(sprintf(__('CloudFront created origin access control %s, but its recovery record could not be saved. Review that AWS resource before retrying setup.', 'smartsync-lite-media-offloader-and-assets-cdn'), $entry['oac_id']));
+            }
+        }
+        if ($entry['distribution_id'] !== '') {
+            $distribution = $cloudFront->getDistribution(['Id' => $entry['distribution_id']])['Distribution'] ?? [];
+            $distributionConfig = $distribution['DistributionConfig'] ?? [];
+            $origins = $distributionConfig['Origins']['Items'] ?? [];
+            if (($distribution['Id'] ?? '') !== $entry['distribution_id'] || ($distributionConfig['CallerReference'] ?? '') !== $entry['caller_reference']
+                || count($origins) !== 1 || ($origins[0]['DomainName'] ?? '') !== $config->bucket . '.s3.' . $config->region . '.amazonaws.com'
+                || ($origins[0]['OriginAccessControlId'] ?? '') !== $entry['oac_id']) {
+                throw new InvalidArgumentException(__('The saved CloudFront distribution changed. Review the recovery resources before retrying.', 'smartsync-lite-media-offloader-and-assets-cdn'));
+            }
+        } else {
+            $distributionArgs = SMARL_AwsHelper::createCloudfrontArray($config->bucket, $config->region, $entry['oac_id']);
+            $distributionArgs['DistributionConfig']['CallerReference'] = $entry['caller_reference'];
+            $distribution = $cloudFront->createDistribution($distributionArgs)['Distribution'];
+            $entry['distribution_id'] = $distribution['Id'];
+            $entry['domain'] = $distribution['DomainName'];
+            $checkpoints[$key] = $entry;
+            try { $this->saveCloudFrontCheckpoint($checkpoints); }
+            catch (\Throwable $error) {
+                /* translators: 1: AWS distribution ID, 2: AWS origin access control ID. */
+                throw new SMARL_ProviderException(sprintf(__('CloudFront created distribution %1$s with origin access control %2$s, but its recovery record could not be saved. Review those AWS resources before retrying setup.', 'smartsync-lite-media-offloader-and-assets-cdn'), $entry['distribution_id'], $entry['oac_id']));
+            }
+        }
+        $config->distributionId = $entry['distribution_id'];
+        $config->cloudfrontUrl = $distribution['DomainName'];
+        $config->url = $config->cloudfrontUrl;
         $this->setBucketPolicy($client, $config->bucket, [
             'Sid' => 'SmartSyncCloudFrontRead', 'Effect' => 'Allow', 'Principal' => ['Service' => 'cloudfront.amazonaws.com'],
             'Action' => 's3:GetObject', 'Resource' => 'arn:aws:s3:::' . $config->bucket . '/*',
@@ -177,7 +249,9 @@ class SMARL_AwsConfigAjax
     private function directPublicUrl(SMARL_CloudConfig $config): string
     {
         return match ($config->serviceProvider) {
-            'aws' => $config->bucket . '.s3.' . $config->region . '.amazonaws.com',
+            'aws' => str_contains($config->bucket, '.')
+                ? 's3.' . $config->region . (str_starts_with($config->region, 'cn-') ? '.amazonaws.com.cn/' : '.amazonaws.com/') . $config->bucket
+                : $config->bucket . '.s3.' . $config->region . (str_starts_with($config->region, 'cn-') ? '.amazonaws.com.cn' : '.amazonaws.com'),
             'digitalocean' => $config->bucket . '.' . $config->region . '.digitaloceanspaces.com',
             'wasabi' => ($config->region === 'us-east-1' ? 's3.wasabisys.com' : 's3.' . $config->region . '.wasabisys.com') . '/' . $config->bucket,
             'google' => 'storage.googleapis.com/' . $config->bucket,
@@ -193,9 +267,17 @@ class SMARL_AwsConfigAjax
         if ($type !== 'existing' || $current->bucket === '' || $requested->serviceProvider !== $current->serviceProvider
             || $requested->bucket !== $current->bucket || $requested->useCloudFront !== $current->useCloudFront) return false;
         if ($requested->serviceProvider !== 'cloudflare' && strcasecmp($requested->region, $current->region) !== 0) return false;
+        if ($requested->serviceProvider === 'bunny' && $requested->getBunnyStorageEndpoint() !== $current->getBunnyStorageEndpoint()) {
+            // Older settings guessed a host from region and had no saved endpoint. Trust verified metadata
+            // from the same account/zone when correcting that guess, preserving remote-only delivery.
+            if ($current->bunnyStorageEndpoint !== '' || !hash_equals($current->iamSecret, $requested->iamSecret)) return false;
+        }
         if ($requested->serviceProvider === 'cloudflare' && SMARL_CloudConfig::validateCloudflareEndpoint($requested->cloudflareEndpoint) !== SMARL_CloudConfig::validateCloudflareEndpoint($current->cloudflareEndpoint)) return false;
         if ($requested->useCloudFront) return $current->distributionId !== '' && $current->cloudfrontUrl !== '' && $current->url !== '';
-        return SMARL_CloudConfig::normalizePublicBaseUrl($this->directPublicUrl($requested)) === $current->getPublicBaseUrl();
+        if (SMARL_CloudConfig::normalizePublicBaseUrl($this->directPublicUrl($requested)) === $current->getPublicBaseUrl()) return true;
+        // Correct older invalid TLS/partition URLs without stranding this same bucket's offloaded files.
+        return $requested->serviceProvider === 'aws'
+            && $current->getPublicBaseUrl() === 'https://' . $requested->bucket . '.s3.' . $requested->region . '.amazonaws.com';
     }
 
     public function configureAws(): void
@@ -227,9 +309,16 @@ class SMARL_AwsConfigAjax
             $config->useCloudFront = filter_var($this->input('use_cloudfront', 'false'), FILTER_VALIDATE_BOOLEAN);
             $this->validateAwsConfiguration($config->bucket, $config->serviceProvider, $config->iamSecret, $config->iamKey, $type, $config->region);
             if ($config->useCloudFront && $config->serviceProvider !== 'aws') throw new InvalidArgumentException('CloudFront setup is available only for AWS S3.');
+            if ($config->useCloudFront && preg_match('/^(?:cn-|us-gov-)/', $config->region)) {
+                throw new InvalidArgumentException(__('Automatic CloudFront setup requires commercial AWS credentials and regions. Choose direct S3 delivery for China or GovCloud buckets.', 'smartsync-lite-media-offloader-and-assets-cdn'));
+            }
             if ($config->serviceProvider === 'google') {
-                $config->googleServicePath = SMARLI_GoogleService::getTempPath();
-                if ($config->googleServicePath === '' && $current->serviceProvider === 'google') $config->googleServicePath = $current->googleServicePath;
+                $selectionToken = $this->input('google_selection_token');
+                if ($selectionToken !== '') {
+                    $config->googleServicePath = SMARLI_GoogleService::getTempPath($selectionToken);
+                    if ($config->googleServicePath === '') throw new InvalidArgumentException(__('The Google credential selection expired. List buckets again before saving.', 'smartsync-lite-media-offloader-and-assets-cdn'));
+                } elseif ($current->serviceProvider === 'google') $config->googleServicePath = $current->googleServicePath;
+                elseif (!SMARLI_GoogleService::hasPendingSelections()) $config->googleServicePath = SMARLI_GoogleService::getTempPath();
                 if (SMARLI_GoogleService::getServiceJSON($config->googleServicePath) === false) throw new InvalidArgumentException('Upload a valid Google service account JSON file first.');
             } elseif ($config->serviceProvider === 'cloudflare') {
                 $config->cloudflareEndpoint = SMARL_CloudConfig::validateCloudflareEndpoint($this->input('cloudflare_endpoint'));
@@ -242,17 +331,26 @@ class SMARL_AwsConfigAjax
                 if (!in_array($config->iamKey, $zone['pullzones'], true)) throw new InvalidArgumentException('Choose a pull zone connected to the selected Bunny storage zone.');
                 $config->region = $zone['region'];
                 $config->bunnyStoragePassword = $zone['password'];
-                $config->getBunnyStorageEndpoint();
+                $config->bunnyStorageEndpoint = $zone['endpoint'] ?? '';
+                $config->verifyBunnyConnection();
             }
             $repair = $this->sameExistingTarget($config, $current, $type);
             if ($missingLocalFiles && !$repair) throw new InvalidArgumentException('Restore offloaded media locally before reconfiguring cloud storage.');
+            if ($current->bucket !== '' && SMARL_Helper::storageTargetFingerprint($config) !== SMARL_Helper::storageTargetFingerprint($current)) {
+                SMARL_Helper::bindLegacyOffloadedFiles($current);
+            }
             if ($repair) {
                 $credentials = $config;
                 $config = clone ($this->appConfig->toArray() === $current->toArray() ? $this->appConfig : $current);
                 $config->iamKey = $credentials->iamKey;
                 $config->iamSecret = $credentials->iamSecret;
                 if ($config->serviceProvider === 'google') $config->googleServicePath = $credentials->googleServicePath;
-                if ($config->serviceProvider === 'bunny') $config->bunnyStoragePassword = $credentials->bunnyStoragePassword;
+                if ($config->serviceProvider === 'bunny') {
+                    $config->bunnyStoragePassword = $credentials->bunnyStoragePassword;
+                    $config->bunnyStorageEndpoint = $credentials->bunnyStorageEndpoint;
+                }
+                if ($config->serviceProvider === 'aws' && !$config->useCloudFront) $config->url = substr(SMARL_CloudConfig::normalizePublicBaseUrl($this->directPublicUrl($credentials)), 8);
+                if ($config->serviceProvider === 'google') $config->verifyGoogleConnection();
                 if (!in_array($config->serviceProvider, ['google', 'bunny'], true)) $config->getS3Client()->headBucket(['Bucket' => $config->bucket]);
             } else {
                 if ($type === 'new') $this->createBucket($config);
@@ -285,22 +383,65 @@ class SMARL_AwsConfigAjax
 
     private function bunnyZones(string $apiKey): array
     {
-        $response = wp_safe_remote_get('https://api.bunny.net/storagezone?page=0&perPage=1000&includeDeleted=false', [
+        $zones = [];
+        for ($page = 1; $page <= 1000; $page++) {
+            $data = $this->bunnyAccountGet('/storagezone?page=' . $page . '&perPage=1000&includeDeleted=false', $apiKey);
+            $items = array_is_list($data) ? $data : ($data['Items'] ?? null);
+            if (!is_array($items) || !array_is_list($items)) throw new InvalidArgumentException(__('Bunny returned an invalid storage zone list. Try listing the zones again.', 'smartsync-lite-media-offloader-and-assets-cdn'));
+            $hasMore = !array_is_list($data) && ($data['HasMoreItems'] ?? false) === true;
+            if ((!array_is_list($data) && isset($data['CurrentPage']) && (int) $data['CurrentPage'] !== $page) || ($hasMore && !$items)) {
+                throw new InvalidArgumentException(__('Bunny returned invalid storage zone pagination. Try again.', 'smartsync-lite-media-offloader-and-assets-cdn'));
+            }
+            foreach ($items as $item) {
+                if (!is_array($item) || !empty($item['Deleted']) || !is_string($item['Name'] ?? null) || $item['Name'] === '') continue;
+                // List responses may omit sensitive/detail fields. Fetch details only when needed.
+                if ((!is_string($item['Password'] ?? null) || $item['Password'] === '' || !isset($item['PullZones'])) && !empty($item['Id'])) {
+                    $detail = $this->bunnyAccountGet('/storagezone/' . (int) $item['Id'], $apiKey);
+                    if (($detail['Name'] ?? null) !== $item['Name']) throw new InvalidArgumentException(__('Bunny returned inconsistent storage zone details. Try again.', 'smartsync-lite-media-offloader-and-assets-cdn'));
+                    $item = array_replace($item, $detail);
+                }
+                $region = strtoupper(($item['Region'] ?? '') ?: 'DE');
+                $endpoint = '';
+                if (!empty($item['StorageHostname'])) $endpoint = SMARL_CloudConfig::validateBunnyStorageEndpoint($item['StorageHostname']);
+                $systemHosts = $customHosts = [];
+                foreach ($item['PullZones'] ?? [] as $zone) {
+                    if (!is_array($zone) || ($zone['Enabled'] ?? true) === false || !empty($zone['Suspended']) || !empty($zone['ZoneSecurityEnabled'])) continue;
+                    foreach ($zone['Hostnames'] ?? [] as $host) {
+                        if (!is_array($host) || !is_string($host['Value'] ?? null) || $host['Value'] === '') continue;
+                        try { $name = $this->validateDomain($host['Value']); }
+                        catch (InvalidArgumentException $error) { continue; }
+                        $system = !empty($host['IsSystemHostname']) || str_ends_with($name, '.b-cdn.net');
+                        if (!$system && array_key_exists('HasCertificate', $host) && !$host['HasCertificate']) continue;
+                        if ($system) $systemHosts[] = $name;
+                        else $customHosts[] = $name;
+                    }
+                }
+                $password = is_string($item['Password'] ?? null) ? $item['Password'] : '';
+                $hosts = $password !== '' ? array_values(array_unique(array_merge($systemHosts, $customHosts))) : [];
+                $zones[$item['Name']] = ['region' => $region, 'password' => $password, 'endpoint' => $endpoint, 'pullzones' => $hosts];
+                if (!$hosts) $zones[$item['Name']]['issue'] = $password === ''
+                    ? __('This account API key cannot read the storage zone credentials. Check its permissions.', 'smartsync-lite-media-offloader-and-assets-cdn')
+                    : __('Connect an active public pull zone to this storage zone. Use its Bunny hostname or a custom hostname with an issued SSL certificate; token-protected zones need signed URLs.', 'smartsync-lite-media-offloader-and-assets-cdn');
+            }
+            if (!$hasMore) return $zones;
+        }
+        throw new InvalidArgumentException(__('Bunny returned too many pages of storage zones. Try a more restricted account key.', 'smartsync-lite-media-offloader-and-assets-cdn'));
+    }
+
+    private function bunnyAccountGet(string $path, string $apiKey): array
+    {
+        $response = wp_safe_remote_get('https://api.bunny.net' . $path, [
             'timeout' => 30, 'redirection' => 0, 'headers' => ['AccessKey' => $apiKey, 'Accept' => 'application/json'],
         ]);
-        if (is_wp_error($response) || (int) wp_remote_retrieve_response_code($response) !== 200) throw new RuntimeException('Unable to list Bunny storage zones.');
-        $items = json_decode(wp_remote_retrieve_body($response), true);
-        if (!is_array($items) || !array_is_list($items)) throw new RuntimeException('Invalid Bunny zone response.');
-        $zones = [];
-        foreach ($items as $item) {
-            if (!is_array($item) || !is_string($item['Name'] ?? null) || !is_string($item['Password'] ?? null) || $item['Password'] === '') continue;
-            $hosts = [];
-            foreach ($item['PullZones'] ?? [] as $zone) foreach ($zone['Hostnames'] ?? [] as $host) {
-                if (!empty($host['Value'])) $hosts[] = $this->validateDomain($host['Value']);
-            }
-            $zones[$item['Name']] = ['region' => strtoupper(($item['Region'] ?? '') ?: 'DE'), 'password' => $item['Password'], 'pullzones' => array_values(array_unique($hosts))];
-        }
-        return $zones;
+        if (is_wp_error($response)) throw new InvalidArgumentException(__('Unable to reach the Bunny account API. Check outbound HTTPS and DNS on the WordPress server.', 'smartsync-lite-media-offloader-and-assets-cdn'));
+        $status = (int) wp_remote_retrieve_response_code($response);
+        if (in_array($status, [401, 403], true)) throw new InvalidArgumentException(__('Bunny rejected the account API key or its permissions. Use your account API key, not a storage zone password or Stream API key.', 'smartsync-lite-media-offloader-and-assets-cdn'));
+        if ($status === 429) throw new InvalidArgumentException(__('Bunny API rate limit reached. Wait a moment, then try again.', 'smartsync-lite-media-offloader-and-assets-cdn'));
+        /* translators: %d: HTTP response status code. */
+        if ($status !== 200) throw new InvalidArgumentException(sprintf(__('Bunny account API request failed (HTTP %d). Try again or check the account status.', 'smartsync-lite-media-offloader-and-assets-cdn'), $status));
+        $data = json_decode(wp_remote_retrieve_body($response), true);
+        if (!is_array($data)) throw new InvalidArgumentException(__('Bunny returned an invalid account API response. Try again.', 'smartsync-lite-media-offloader-and-assets-cdn'));
+        return $data;
     }
 
     public function listS3Buckets(): void
@@ -314,16 +455,24 @@ class SMARL_AwsConfigAjax
             $config->iamKey = $this->input('iam_key');
             $config->iamSecret = $this->input('iam_secret');
             $buckets = [];
+            $selectionToken = '';
             if ($provider === 'google') {
-                SMARLI_GoogleService::moveFileTemp();
-                $path = SMARLI_GoogleService::getTempPath();
+                $selection = SMARLI_GoogleService::moveFileTemp(true);
+                $selectionToken = $selection['selectionToken'] ?? '';
+                $path = $selection['path'] ?? '';
                 if ($path === '' && $this->appConfig->serviceProvider === 'google') $path = $this->appConfig->googleServicePath;
+                if ($path === '' && !SMARLI_GoogleService::hasPendingSelections()) $path = SMARLI_GoogleService::getTempPath();
                 $buckets = (new SMARLI_GoogleService($path))->getBuckets();
             } elseif ($provider === 'bunny') {
                 if ($config->iamSecret === '') throw new InvalidArgumentException('A Bunny account API key is required.');
+                delete_transient('smarl_bunny_zones_' . get_current_user_id());
                 $zones = $this->bunnyZones($config->iamSecret);
                 set_transient('smarl_bunny_zones_' . get_current_user_id(), ['key_hash' => hash('sha256', $config->iamSecret), 'zones' => $zones], 900);
-                foreach ($zones as $name => $zone) $buckets[] = ['name' => $name, 'region' => $zone['region'], 'pullzones' => $zone['pullzones']];
+                foreach ($zones as $name => $zone) {
+                    $bucket = ['name' => $name, 'region' => $zone['region'], 'pullzones' => $zone['pullzones']];
+                    if (isset($zone['issue'])) $bucket['issue'] = $zone['issue'];
+                    $buckets[] = $bucket;
+                }
             } else {
                 if ($config->iamKey === '' || $config->iamSecret === '') throw new InvalidArgumentException('Provider credentials are required.');
                 $config->region = $this->input('bucket_region', match ($provider) { 'digitalocean' => 'nyc3', 'cloudflare' => 'auto', default => 'us-east-1' });
@@ -341,7 +490,7 @@ class SMARL_AwsConfigAjax
                 }
             }
         } catch (\Throwable $error) { $this->sendError($error); return; }
-        wp_send_json_success(['buckets' => $buckets]);
+        wp_send_json_success(['buckets' => $buckets, 'selectionToken' => $selectionToken]);
     }
 
     private function certificateRecords(array $certificate, string $domain): array

@@ -75,9 +75,10 @@ class SMARLI_GoogleService
         return $path;
     }
 
-    public static function moveFileTemp(): void
+    /** Reserve uploads used by discovery so overlapping requests retain their exact credentials. */
+    public static function moveFileTemp(bool $reserveSelection = false): array
     {
-        if (empty($_FILES['service_json']['name'])) return;
+        if (empty($_FILES['service_json']['name'])) return [];
         $file = $_FILES['service_json'];
         if (!is_array($file) || ($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK
             || !is_string($file['tmp_name'] ?? null) || !is_uploaded_file($file['tmp_name'])
@@ -90,13 +91,26 @@ class SMARLI_GoogleService
         try {
             global $wpdb;
             $previous = get_transient('smarl_google_credentials_' . get_current_user_id());
-            $path = self::storeCredentials($credentials);
-            set_transient('smarl_google_credentials_' . get_current_user_id(), $path, 3600);
             $settings = maybe_unserialize($wpdb->get_var($wpdb->prepare("SELECT option_value FROM {$wpdb->options} WHERE option_name = %s", 'smarl_settings')));
             $active = is_array($settings) && is_string($settings['googleServicePath'] ?? null) ? $settings['googleServicePath'] : '';
+            $selections = get_transient('smarl_google_selections_' . get_current_user_id());
+            $selections = is_array($selections) ? $selections : [];
+            foreach ($selections as $token => $selection) {
+                if (!is_array($selection) || !is_string($selection['path'] ?? null) || (int) ($selection['expires'] ?? 0) <= time()) {
+                    unset($selections[$token]);
+                    if (is_array($selection) && is_string($selection['path'] ?? null) && $selection['path'] !== $active) self::deleteCredentialFile($selection['path']);
+                }
+            }
+            $path = self::storeCredentials($credentials);
+            $token = $reserveSelection ? bin2hex(random_bytes(16)) : '';
+            if ($token !== '') $selections[$token] = ['path' => $path, 'expires' => time() + 3600];
+            set_transient('smarl_google_selections_' . get_current_user_id(), $selections, 3600);
+            set_transient('smarl_google_credentials_' . get_current_user_id(), $path, 3600);
             $previousReal = is_string($previous) ? realpath($previous) : false;
             $activeReal = $active !== '' ? realpath($active) : false;
-            if (is_string($previous) && $previous !== $path && ($previousReal === false || $previousReal !== $activeReal)) self::deleteCredentialFile($previous);
+            $pinned = array_column($selections, 'path');
+            if (is_string($previous) && $previous !== $path && !in_array($previous, $pinned, true) && ($previousReal === false || $previousReal !== $activeReal)) self::deleteCredentialFile($previous);
+            return ['path' => $path, 'selectionToken' => $token];
         } finally { SMARL_Helper::releaseSyncLock($lock); }
     }
 
@@ -126,30 +140,60 @@ class SMARLI_GoogleService
         return $data === false ? false : $data['project_id'];
     }
 
-    public static function getTempPath(): string
+    public static function getTempPath(string $selectionToken = ''): string
     {
-        $path = get_transient('smarl_google_credentials_' . get_current_user_id());
+        if ($selectionToken !== '') {
+            if (!preg_match('/^[a-f0-9]{32}$/', $selectionToken)) return '';
+            $selections = get_transient('smarl_google_selections_' . get_current_user_id());
+            $selection = is_array($selections) ? ($selections[$selectionToken] ?? null) : null;
+            if (!is_array($selection) || (int) ($selection['expires'] ?? 0) <= time()) return '';
+            $path = $selection['path'] ?? '';
+        } else $path = get_transient('smarl_google_credentials_' . get_current_user_id());
         if (is_string($path) && self::getServiceJSON($path) !== false) return $path;
         return '';
     }
 
-    /** Migrate the older web-accessible upload only after validating its contents. */
-    public static function migrateCredentials(string $path): string
+    public static function hasPendingSelections(): bool
     {
-        if ($path === '' || !is_file($path)) return $path;
+        $selections = get_transient('smarl_google_selections_' . get_current_user_id());
+        if (!is_array($selections)) return false;
+        foreach ($selections as $selection) {
+            if (is_array($selection) && is_string($selection['path'] ?? null) && (int) ($selection['expires'] ?? 0) > time()) return true;
+        }
+        return false;
+    }
+
+    public static function credentialsNeedMigration(string $path): bool
+    {
+        if ($path === '' || !is_file($path)) return false;
         $directory = str_replace('\\', '/', self::getCredentialsDirectory()) . '/';
         $real = str_replace('\\', '/', realpath($path) ?: $path);
+        if (strncasecmp($real, $directory, strlen($directory)) !== 0) return true;
         $envelope = json_decode((string) file_get_contents($path), true);
-        if (strncasecmp($real, $directory, strlen($directory)) === 0 && is_array($envelope) && ($envelope['smartsync_encrypted'] ?? null) === 1) return $path;
+        return !is_array($envelope) || ($envelope['smartsync_encrypted'] ?? null) !== 1;
+    }
+
+    /** Retain the source until its new location has been durably saved by the caller. */
+    public static function migrateCredentials(string $path, bool $removeOriginal = true): string
+    {
+        if (!self::credentialsNeedMigration($path)) return $path;
         $credentials = self::getServiceJSON($path);
         if ($credentials === false) throw new RuntimeException('Stored Google credentials are invalid. Upload a service account JSON file again.');
         $privatePath = self::storeCredentials($credentials);
+        if ($removeOriginal) self::deleteLegacyCredentialFile($path);
+        return $privatePath;
+    }
+
+    public static function deleteLegacyCredentialFile(string $path): void
+    {
+        if (!is_file($path) || is_link($path) || self::getServiceJSON($path) === false) return;
+        $directory = str_replace('\\', '/', self::getCredentialsDirectory()) . '/';
+        $real = str_replace('\\', '/', realpath($path) ?: $path);
         $uploads = wp_upload_dir();
         $uploadRoot = rtrim(str_replace('\\', '/', realpath($uploads['basedir']) ?: $uploads['basedir']), '/') . '/';
         $oldTemporaryRoot = rtrim(str_replace('\\', '/', sys_get_temp_dir()), '/') . '/smartsync-credentials-' . substr(hash('sha256', ABSPATH), 0, 20) . '/';
         if ((strncasecmp($real, $uploadRoot, strlen($uploadRoot)) === 0 || strncasecmp($real, $oldTemporaryRoot, strlen($oldTemporaryRoot)) === 0 || strncasecmp($real, $directory, strlen($directory)) === 0)
             && strtolower(pathinfo($real, PATHINFO_EXTENSION)) === 'json') @unlink($path);
-        return $privatePath;
     }
 
     public static function deleteCredentialFile(string $path): void
@@ -176,7 +220,7 @@ class SMARLI_GoogleService
     {
         $bucket = $this->storage->createBucket($bucketName, ['location' => $region, 'iamConfiguration' => ['uniformBucketLevelAccess' => ['enabled' => true]]]);
         $iam = $bucket->iam();
-        $policy = $iam->policy();
+        $policy = $iam->policy(['requestedPolicyVersion' => 3]);
         $policy['bindings'][] = ['role' => 'roles/storage.objectViewer', 'members' => ['allUsers']];
         $iam->setPolicy($policy);
         return true;

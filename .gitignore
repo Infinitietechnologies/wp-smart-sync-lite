@@ -1,5 +1,6 @@
 # Composer and Node dependencies are restored from the committed lockfiles.
 /vendor/
+/dist/
 node_modules/
 
 # Local editor and operating-system files.

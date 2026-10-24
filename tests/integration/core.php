@@ -54,6 +54,7 @@ function smarl_integration_image(string $suffix): array
     wp_update_attachment_metadata($id, $metadata);
     $files = [$file];
     foreach ($metadata['sizes'] ?? [] as $size) $files[] = dirname($file) . '/' . $size['file'];
+    $GLOBALS['smarl_integration_created_files'] = array_merge($GLOBALS['smarl_integration_created_files'] ?? [], $files);
     return [$id, $metadata, $files];
 }
 
@@ -202,16 +203,18 @@ try {
     $attachments[] = $post;
     update_post_meta($post, '_smarl_offloaded_files', ['fixture/key.jpg']);
     update_post_meta($post, '_smarl_offload_error', 'fixture');
+    update_post_meta($post, '_smarl_offload_target', 'fixture-owned-target');
+    update_option('smarl_cloudfront_pending', ['fixture-target' => ['distribution_id' => 'fixture-no-cloud']], false);
     as_schedule_single_action(time() + 3600, 'process_s3_sync_batch', [1, [], [], 'upload', 'fixture-run'], 'smartsync');
     as_schedule_single_action(time() + 3600, 'smarl_fixture_unrelated_job', [], 'fixture');
     deactivate_plugins($plugin, false);
     uninstall_plugin($plugin);
-    foreach (['smarl_settings', 'smarl_sync_settings', 'custom_url_option', 'service_json_path_temp', 'smarl_db_version', 'smarl_sync_lock', 'smarl_queue_generation', 'aws_s3_cloudfront_settings', 'use_aws'] as $option) smarl_integration_assert(get_option($option, null) === null, 'Uninstall left option ' . $option);
+    foreach (['smarl_settings', 'smarl_sync_settings', 'custom_url_option', 'smarl_cloudfront_pending', 'service_json_path_temp', 'smarl_db_version', 'smarl_sync_lock', 'smarl_queue_generation', 'aws_s3_cloudfront_settings', 'use_aws'] as $option) smarl_integration_assert(get_option($option, null) === null, 'Uninstall left option ' . $option);
     smarl_integration_assert($wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', $wpdb->esc_like($table))) === null, 'Uninstall left the queue table.');
     smarl_integration_assert(!is_file($legacyCredential) && !is_file($privateCredential), 'Uninstall left owned credential files.');
     smarl_integration_assert(is_file($unrelatedFile), 'Uninstall removed an unrelated JSON file.');
     smarl_integration_assert(get_transient('smarl_google_credentials_1') === false && get_transient('smarl_bunny_zones_1') === false, 'Uninstall left cached provider credentials.');
-    smarl_integration_assert(get_post_meta($post, '_smarl_offloaded_files', true) === '' && get_post_meta($post, '_smarl_offload_error', true) === '', 'Uninstall left attachment offload metadata.');
+    smarl_integration_assert(get_post_meta($post, '_smarl_offloaded_files', true) === '' && get_post_meta($post, '_smarl_offload_error', true) === '' && get_post_meta($post, '_smarl_offload_target', true) === '', 'Uninstall left attachment offload metadata.');
     smarl_integration_assert(!as_has_scheduled_action('process_s3_sync_batch') && as_has_scheduled_action('smarl_fixture_unrelated_job'), 'Uninstall affected the wrong scheduler jobs.');
     @unlink($unrelatedFile);
     as_unschedule_all_actions('smarl_fixture_unrelated_job');
@@ -228,6 +231,8 @@ try {
     }
     $core->flushAttachmentUploads();
     $property->setValue($core, $originalConfig);
+    $fixtureUploads = rtrim(str_replace('\\', '/', wp_upload_dir()['basedir']), '/') . '/';
+    foreach ($GLOBALS['smarl_integration_created_files'] ?? [] as $file) if (str_starts_with(str_replace('\\', '/', $file), $fixtureUploads) && is_file($file)) unlink($file);
     if (!is_plugin_active($plugin)) activate_plugin($plugin);
     remove_image_size('smarl-audit-small');
 }

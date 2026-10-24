@@ -2,6 +2,10 @@
 
 Read `tests/README.md` for commands, `tests/AUDIT.md` for audit results, and `tests/admin/README.md` for browser setup. Tests/development tools are excluded from release archives by `.distignore`.
 
+Read `tests/WORDPRESS-COMPATIBILITY.md` for current minimum/latest stable WordPress verification. The compatibility workflow runs PHP/admin regressions and native MySQL integrations for exact WordPress 6.5 and WP-CLI's `latest` stable target. Validate the workflow locally with actionlint when editing it; a local YAML check does not mean GitHub-hosted jobs ran. Check native logs with WordPress debugging enabled, including a language pack and legacy progress when changing initialization or translated recovery messages.
+
+Read `tests/PROVIDER-WORKFLOWS.md` for the connection follow-up and release verification. `tests/cases/provider_contract_review.php` exercises actual SDK serialization; `provider_workflows.php` covers complete provider setup/operations and stale configuration writes. Keep these checks beyond request-shaped mock success cases.
+
 ## Local checks
 
 From the plugin root:
@@ -23,6 +27,8 @@ PHP tests use WordPress doubles, actual provider SDK mock handlers, a real SQLit
 Admin tests render actual PHP views and load maintained JavaScript/CSS in jsdom. Browser smoke additionally checks WordPress-rendered admin in Edge/Chrome at narrow/wide widths, with cloud AJAX intercepted.
 
 The Node suite also checks bundled documentation resources and navigation; `test:docs` runs its standalone page in a real local browser with external fonts/video blocked. On Windows, `./tests/path-boundaries.ps1` verifies actual junction containment and scan exclusion, then removes its own fixture without recursive deletion.
+
+`test:provider-browser` uses native WordPress admin AJAX with only outbound Bunny HTTP replaced, checking credential rejection/retry, discovery, storage probing, saved state and settings. Its guarded fixture starts/stops only its own local server and restores options. `tests/integration/providers.php` runs native Bunny configuration, real persisted Action Scheduler jobs, transfers, CDN flags and attachment lifecycle in the separate provider fixture. `package.php` verifies an extracted release; `build-plugin.ps1` creates a dependency-complete installable archive excluding development files.
 
 Two PHPStan level 5 passes use WordPress/Action Scheduler knowledge and actual vendor autoloading. Runtime classes target PHP 8.1; entrypoint analysis also covers PHP 8.0 to check its rejection guard. There are no ignores or baseline.
 

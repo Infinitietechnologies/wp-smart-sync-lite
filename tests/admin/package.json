@@ -4,7 +4,8 @@
   "scripts": {
     "test": "node --test *.test.cjs",
     "test:browser": "node browser-smoke.cjs",
-    "test:docs": "node docs-browser-smoke.cjs"
+    "test:docs": "node docs-browser-smoke.cjs",
+    "test:provider-browser": "node provider-browser-smoke.cjs"
   },
   "devDependencies": {
     "jquery": "3.7.1",

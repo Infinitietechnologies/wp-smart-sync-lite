@@ -2,6 +2,14 @@
 
 Run commands from the plugin root unless another directory is shown. The isolated PHP suite needs PHP 8.1+, PDO SQLite, and installed root Composer dependencies. The audit executed PHP on 8.3.36.
 
+## WordPress compatibility CI
+
+[Current compatibility verification](WORDPRESS-COMPATIBILITY.md) records the latest stable release, local minimum/latest results and any compatibility repairs.
+
+[wordpress-compatibility.yml](../.github/workflows/wordpress-compatibility.yml) runs on pushes, pull requests and manual dispatch. PHP 8.3 runs the locked Composer/npm regression suites. A MySQL 8.0 matrix installs WordPress 6.5 and [WP-CLI's `latest` stable release](https://developer.wordpress.org/cli/commands/core/download/), verifies core checksums, logs the resolved version and runs `core.php`, `sync.php`, `core_audit2.php` and `sync_audit2.php` serially. The floating entry checks future stable releases whenever CI runs; PHP requirements are unchanged.
+
+Each job uses a runner-temporary `smartsync-provider-workflows/fresh/smartsync-wordpress-audit-fixture/wordpress/` fixture, satisfying all four destructive-test guards. Disposable database/admin values require no repository secrets. WordPress outbound HTTP and automatic cron/updates are disabled after setup. User sites and live cloud accounts are unused; the fixture/service disappear with the runner. Browser, multisite, live-provider and publication checks remain separate. Local validation does not represent a GitHub-hosted execution.
+
 ## Isolated regressions
 
 ```powershell
@@ -47,6 +55,14 @@ Use absolute script paths if WP-CLI changes the working directory. Run these scr
 Core integration verifies old-schema upgrades, GD thumbnails, local cleanup retaining cloud copies, intentional deletion, pending/failed delivery URLs, responsive/stored HTML, lifecycle, uninstall, and reactivation. Sync integration verifies actual queue/options SQL, stored scheduler arguments, batch boundaries, bytes/hashes, duplicate/old callbacks, conditional writes, and real role/nonce behavior. The sync script restores plugin state and removes only uploads it created.
 
 The [audit report](AUDIT.md) records results and practical boundaries. Mocked provider tests do not establish actual account permissions, propagation, or CDN delivery. `.distignore` excludes `tests/` and `.agents/` from release archives.
+
+The [provider follow-up](PROVIDER-WORKFLOWS.md) documents the connection repairs and stronger native AJAX/SDK checks. The separate native Bunny integration fixture must contain `smartsync-provider-workflows/fresh/smartsync-wordpress-audit-fixture/wordpress/`; run `tests/integration/providers.php` through WP-CLI there, after the core and sync checks. It replaces outbound HTTP, uses the actual storage model/registered handlers and executes persisted actions through the real Action Scheduler runner. Keep it separate from a browser fixture while tests mutate plugin state.
+
+The current [second-audit issue register](audit/ISSUES.md) records every confirmed finding, its trigger/cause, repair status and regression evidence. `tests/integration/core_audit2.php` adds six actual WordPress/GD groups, and `tests/integration/sync_audit2.php` adds five actual option/cache/SQL/cancellation groups. Run these serially with the other scripts against the disposable fixture. They are not suitable for a user site.
+
+Optional named-function execution evidence uses Xdebug 3 branch coverage, enabled only in a temporary CLI configuration. Set `xdebug.mode=coverage`, `xdebug.max_nesting_level=1024`, and `auto_prepend_file` to this checkout's `tests/coverage-prepend.php`; set `SMARTSYNC_COVERAGE_DIR` to an empty temporary output directory. Run the PHP suite, Node suite (its PHP render children inherit the configuration), and native integrations, then run `php tests/coverage-report.php COVERAGE_DIRECTORY`. The collector records source SHA-256 at process start, and the report excludes stale or unhashed file captures. No credentials or complete command arguments are recorded. Restore shell-local environment overrides afterward; do not change a site's PHP configuration or ship raw coverage. The generated [inventory](audit/function-coverage.md) measures named function entry, including private/static/lifecycle methods, rather than complete statement/branch/path correctness. JavaScript's separate consistent-source V8 evidence includes callbacks and script wrappers in [its execution map](audit/admin-function-execution.json).
+
+On Windows, `./tests/build-plugin.ps1` packages the current source and installed production Composer dependencies into `dist/smartsync-<version>.zip`. Install root dependencies first. The script refuses to overwrite an existing archive; use `-OutputPath` for another destination. Release archives omit tests, the project skill, Git/editor files and local logs. Versioned ZIPs are ignored by Git.
 
 ## Disposable MySQL multisite
 

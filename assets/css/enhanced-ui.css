@@ -26,6 +26,12 @@
     max-width: 100%;
 }
 
+/* WordPress hides .spinner until .is-active; this indicator owns its active state. */
+.smartsync-wrap .smartsync-background-indicator .spinner {
+    visibility: visible;
+    float: none;
+}
+
 
 .smartsync-wrap .mt-5{
     margin-top: 5px;

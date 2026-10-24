@@ -15,6 +15,9 @@ jQuery(function ($) {
     let starting = false;
     let stopping = false;
     let running = false;
+    let statusKnown = false;
+    let pageActive = true;
+    let lastStatusError = '';
     let lastStatus = '';
     buttons.each(function () {
         $(this).data('smartsync-label', $(this).contents().clone()).prop('disabled', true);
@@ -52,7 +55,7 @@ jQuery(function ($) {
             const button = $(this);
             const active = isRunning && button.data('type') === type && button.data('direction') === direction;
             button.empty().append(active ? document.createTextNode(text('syncing', 'Syncing...')) : button.data('smartsync-label').clone());
-            button.prop('disabled', isRunning || starting || stopping);
+            button.prop('disabled', !statusKnown || isRunning || starting || stopping);
         });
         $(document).trigger('smartsync:running', [isRunning]);
     }
@@ -63,15 +66,26 @@ jQuery(function ($) {
     }
 
     function checkSyncStatus() {
+        if (!pageActive) return;
         window.clearTimeout(pollingTimer);
         const token = generation;
+        function retryStatus(response) {
+            statusKnown = false;
+            const message = errorMessage(response, text('status_error', 'Could not read sync status.'));
+            if (message !== lastStatusError) appendLog(message, true);
+            lastStatusError = message;
+            // An unavailable status endpoint does not establish that the server stopped.
+            setRunningState(running, activeType, activeDirection);
+            pollingTimer = window.setTimeout(checkSyncStatus, 5000);
+        }
         request('check_sync_status').done(function (response) {
             if (token !== generation) return;
-            if (!response || !response.success || !response.data) {
-                appendLog(errorMessage(response, text('status_error', 'Could not read sync status.')), true);
-                setRunningState(false);
+            if (!response || !response.success || !response.data || !['idle', 'processing', 'completed', 'failed'].includes(response.data.status)) {
+                retryStatus(response);
                 return;
             }
+            statusKnown = true;
+            lastStatusError = '';
             const data = response.data;
             const status = data.status;
             setRunningState(status === 'processing', data.type, data.direction);
@@ -93,11 +107,19 @@ jQuery(function ($) {
                 });
             }
             lastStatus = status;
-        }).fail(function () {
+        }).fail(function (xhr) {
             if (token !== generation) return;
-            appendLog(text('status_error', 'Could not read sync status.'), true);
-            setRunningState(false);
+            retryStatus(xhr.responseJSON);
         });
+    }
+
+    function recoverStartFailure(response) {
+        starting = false;
+        statusKnown = false;
+        setRunningState(false);
+        appendLog(errorMessage(response, text('failed_to_start_sync')), true);
+        // A failed/lost response may follow a successful start or an existing run's 409.
+        checkSyncStatus();
     }
 
     buttons.on('click', function (event) {
@@ -126,14 +148,11 @@ jQuery(function ($) {
                 appendLog(text('starting_sync_of') + ': ' + ((response.data && response.data.total_files) || 0) + ' ' + text('files'));
                 checkSyncStatus();
             } else {
-                setRunningState(false);
-                appendLog(errorMessage(response, text('failed_to_start_sync')), true);
+                recoverStartFailure(response);
             }
-        }).fail(function () {
+        }).fail(function (xhr) {
             if (token !== generation) return;
-            starting = false;
-            setRunningState(false);
-            appendLog(text('failed_to_start_sync'), true);
+            recoverStartFailure(xhr.responseJSON);
         });
     });
 
@@ -141,12 +160,16 @@ jQuery(function ($) {
         if (stopping) return;
         if (!window.confirm(text('confirm_stop_processes'))) return;
         stopping = true;
+        let token = generation;
         buttons.prop('disabled', true);
         const button = $(this).prop('disabled', true);
         request('stop_all_processes').done(function (response) {
+            if (token !== generation) return;
             if (response && response.success) {
                 cancelPolling();
+                token = generation;
                 starting = false;
+                statusKnown = true;
                 setRunningState(false);
                 lastStatus = 'idle';
                 $(document).trigger('smartsync:status', [{ status: 'idle', processed_files: 0, total_files: 0 }]);
@@ -154,9 +177,10 @@ jQuery(function ($) {
             } else {
                 appendLog(errorMessage(response, text('failed_to_stop_processes')), true);
             }
-        }).fail(function () {
-            appendLog(text('failed_to_stop_processes'), true);
+        }).fail(function (xhr) {
+            if (token === generation) appendLog(errorMessage(xhr.responseJSON, text('failed_to_stop_processes')), true);
         }).always(function () {
+            if (token !== generation) return;
             stopping = false;
             button.prop('disabled', false);
             setRunningState(running, activeType, activeDirection);
@@ -173,9 +197,9 @@ jQuery(function ($) {
                 element.prop('checked', !newState);
                 appendLog(errorMessage(response, failureText), true);
             }
-        }).fail(function () {
+        }).fail(function (xhr) {
             element.prop('checked', !newState);
-            appendLog(failureText, true);
+            appendLog(errorMessage(xhr.responseJSON, failureText), true);
         }).always(function () { element.prop('disabled', false); });
     }
 
@@ -193,8 +217,8 @@ jQuery(function ($) {
         const button = $(this).prop('disabled', true);
         request('clear_cloudfront_cache').done(function (response) {
             appendLog(response && response.success ? text('cache_cleared') : errorMessage(response, text('failed_to_clear_cache')), !(response && response.success));
-        }).fail(function () {
-            appendLog(text('failed_to_clear_cache'), true);
+        }).fail(function (xhr) {
+            appendLog(errorMessage(xhr.responseJSON, text('failed_to_clear_cache')), true);
         }).always(function () { button.prop('disabled', false); });
     });
 
@@ -211,12 +235,25 @@ jQuery(function ($) {
                 fields.text(text('error'));
                 appendLog(errorMessage(response, text('failed_to_fetch_analytics')), true);
             }
-        }).fail(function () {
+        }).fail(function (xhr) {
             fields.text(text('error'));
-            appendLog(text('failed_to_fetch_analytics'), true);
+            appendLog(errorMessage(xhr.responseJSON, text('failed_to_fetch_analytics')), true);
         }).always(function () { button.prop('disabled', false); });
     });
 
-    $(window).on('pagehide', cancelPolling);
+    $(window).on('pagehide', function () {
+        pageActive = false;
+        cancelPolling();
+    });
+    $(window).on('pageshow', function (event) {
+        if (!(event.originalEvent && event.originalEvent.persisted)) return;
+        pageActive = true;
+        starting = stopping = false;
+        statusKnown = false;
+        $('#stop-all-processes').prop('disabled', false);
+        cancelPolling();
+        setRunningState(running, activeType, activeDirection);
+        checkSyncStatus();
+    });
     checkSyncStatus();
 });

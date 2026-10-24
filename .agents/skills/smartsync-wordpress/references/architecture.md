@@ -14,6 +14,7 @@
 | File/URL helpers | `src/Helpers/SMARL_Helper.php` | Extension selection, contained paths, sorted scans, durable SQL queue, coordination lock |
 | CloudFront payloads | `src/Helpers/SMARL_AwsHelper.php` | OAC/distribution configuration and unique caller references |
 | Provider services | `src/Services/` | Google credential/storage support; separate Wasabi helper |
+| Safe provider errors | `src/Exceptions/SMARL_ProviderException.php` | Deliberately credential-free operational errors that configuration AJAX may show |
 | Admin rendering/behavior | `src/Views/`, `assets/js/`, `assets/css/` | Restricted admin pages and directly loaded scripts/styles; no Node build pipeline |
 | Tests | `tests/` | Isolated PHP/Node regressions, disposable WordPress integration and browser smoke |
 
@@ -22,6 +23,8 @@
 The bootstrap checks PHP and bundled dependencies before loading Composer and Action Scheduler. Missing requirements produce an administrator notice and an activation error instead of an unconditional missing-file fatal. It constructs `SMARL_SmartSync` and calls `initializeHooks()`, `initializeActions()`, `initializeFilters()` and `initializeViews()`.
 
 The core handles `switch_blog` by loading the current blog's cloud configuration and refreshing both existing registered AJAX handler objects through `setConfiguration()`. It saves/restores pending attachment work, cleanup state and per-request delivery/deletion tracking separately for each blog. Shutdown flushes queued blogs with `switch_to_blog()`/`restore_current_blog()` in `finally`; never reuse one site's provider, progress or attachment ID state in another site context. Asset filters remain registered and check the current configuration at execution time.
+
+The runtime AJAX handler initializes its progress object without loading it during construction or configuration switches. Progress-reading operations load it after authorization. Preserve this lazy recovery: translating an interrupted legacy-run diagnostic during early bootstrap triggers WordPress 6.7+ just-in-time translation notices when a language pack is installed.
 
 Activation initializes settings and calls `smarl_file_sync_queue_create_table()`. `smarl_maybe_upgrade_schema()` runs on `plugins_loaded` and uses `smarl_db_version` to apply schema changes through `dbDelta()` on existing installs. Queue schema version 2 has:
 
@@ -50,7 +53,7 @@ The explicit `FIELDS` and `BOOLEAN_FIELDS` maps are shared by `fromArray()`/`toA
 | `useCloudFront`, `urlType`, `serviceProvider` | `use_cloudfront`, `url_type`, `service_provider` |
 | `useCdnForMedia`, `useCdnForAssets` | `use_cdn_for_media`, `use_cdn_for_assets` |
 | `canEnableMediaCDN`, `canEnableAssetCDN`, `mediaAutoDelete` | Same camelCase names |
-| `googleServicePath`, `cloudflareEndpoint`, `cloudflareUrl`, `bunnyStoragePassword` | Same camelCase names |
+| `googleServicePath`, `cloudflareEndpoint`, `cloudflareUrl`, `bunnyStoragePassword`, `bunnyStorageEndpoint` | Same camelCase names |
 
 Bunny's old `apiKey|storagePassword` secret is read compatibly into separate fields. Provider-neutral APIs are `uploadObject(key,path)`, `downloadObject(key,destination)`, `deleteObject(key)`, `listObjects()` returning `key`/`size` entries, and `getPublicBaseUrl()` returning a normalized URL including any bucket prefix. `putS3Object()` is a compatibility wrapper. Avoid routing Google/Bunny through nullable `getS3Client()`.
 
@@ -68,6 +71,6 @@ Important fields include `runId`, `batchNumber`, `cloudFingerprint`, direction/t
 
 ## Dependencies and compatibility
 
-Composer maps `SmartSyncS3\` to `src/`. Runtime metadata agrees on PHP 8.1+, WordPress 6.5+ and plugin/asset/stable version 1.7.1. The WordPress minimum reflects bundled Action Scheduler's declared minimum. Composer pins `config.platform.php` to 8.1.0 so resolution on a newer development runtime retains that floor. Use the lockfile for reproducible installs, and recheck platform requirements/security advisories when dependencies change.
+Composer maps `SmartSyncS3\` to `src/`. Runtime metadata agrees on PHP 8.1+, WordPress 6.5+ and plugin/asset/stable version 1.7.3. The WordPress minimum reflects bundled Action Scheduler's declared minimum; it is not an upper version limit. The readme explicitly records testing through WordPress 7.1.3, verified as the latest stable release on 24 October 2026. Recheck WordPress.org's stable version API and run the native suites before updating that claim. `.github/workflows/wordpress-compatibility.yml` tests the declared minimum and WP-CLI's rolling latest stable version. Composer pins `config.platform.php` to 8.1.0 so resolution on a newer development runtime retains that floor. Use the lockfile for reproducible installs, and recheck platform requirements/security advisories when dependencies change.
 
 Do not edit `vendor/` directly. There is no plugin JS build pipeline. `Documentation/assets/` is a separate bundled documentation UI, not the WordPress admin application.

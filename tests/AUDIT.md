@@ -1,6 +1,10 @@
 # SmartSync audit and regression results
 
+Current status: [the second-audit register](audit/ISSUES.md) records 43 further findings, final verification and the local 1.7.3 package. This document preserves the earlier audit capture.
+
 Audit date: 23 October 2026. Changes apply directly to this checkout. Plugin, asset and stable versions are aligned at 1.7.1; queue schema version is 2. The project skill is maintained in `.agents/skills/smartsync-wordpress/`, with no duplicate in the user-level skills directory.
+
+The [24 October provider follow-up](PROVIDER-WORKFLOWS.md) records additional connection failures found after this audit, their repairs in 1.7.2, native AJAX/SDK checks and release verification. The results below describe the earlier audit and do not replace that follow-up.
 
 The audit reviewed maintained PHP, admin JavaScript/CSS/views, bootstrap/uninstall behavior, persisted state, provider protocols and dependency metadata. Failures found during review and execution were repaired and covered by regression tests. This is a broad local verification, not a claim that every possible environment or live cloud configuration has been proven correct.
 
