@@ -1,0 +1,4 @@
+interface:
+  display_name: "SmartSync WordPress"
+  short_description: "Maintain SmartSync sync, storage, and admin workflows"
+  default_prompt: "Use $smartsync-wordpress to make the requested change in this SmartSync plugin and verify the affected workflow."

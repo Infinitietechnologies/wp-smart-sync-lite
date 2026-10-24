@@ -1,0 +1,23 @@
+{
+    "name": "infinitietech/smartsync",
+    "description": "WordPress media offloading and CDN synchronization.",
+    "type": "wordpress-plugin",
+    "license": "GPL-2.0-or-later",
+    "require": {
+        "php": ">=8.1",
+        "ext-openssl": "*",
+        "aws/aws-sdk-php": "^3.371.4",
+        "woocommerce/action-scheduler": "^3.9.2",
+        "google/cloud-storage": "^1.51"
+    },
+    "autoload": {
+        "psr-4": {
+            "SmartSyncS3\\": "src/"
+        }
+    },
+    "config": {
+        "platform": {
+            "php": "8.1.0"
+        }
+    }
+}

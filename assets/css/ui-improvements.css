@@ -1,0 +1,663 @@
+/* SmartSync UI Improvements CSS */
+
+/* 1. Breadcrumb Navigation */
+.smartsync-breadcrumbs {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+    font-size: 14px;
+    color: #555;
+    background: #f9f9f9;
+    padding: 10px 15px;
+    border-radius: 5px;
+    border: 1px solid #eee;
+}
+
+.smartsync-breadcrumbs a {
+    color: #0073aa;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.smartsync-breadcrumbs a:hover {
+    color: #005f8d;
+    text-decoration: underline;
+}
+
+.smartsync-breadcrumbs .separator {
+    margin: 0 8px;
+    color: #ccc;
+}
+
+/* 2. Contextual Actions */
+.smartsync-contextual-actions {
+    display: none; /* Hidden by default, shown via JS when needed */
+    margin: 15px 0;
+    padding: 15px;
+    background: #f0f8ff;
+    border: 1px solid #cce5ff;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.smartsync-contextual-actions.active {
+    display: block;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+.smartsync-contextual-actions h4 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    color: #0073aa;
+}
+
+.smartsync-contextual-actions .action-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+/* 3. Guided Setup Flow */
+.smartsync-guided-setup .advanced-options {
+    display: none;
+    margin-top: 15px;
+    padding: 15px;
+    background: #f9f9f9;
+    border: 1px solid #eee;
+    border-radius: 5px;
+}
+
+.smartsync-guided-setup .advanced-toggle {
+    display: flex;
+    align-items: center;
+    margin: 15px 0;
+    cursor: pointer;
+    color: #0073aa;
+    font-weight: 500;
+}
+
+.smartsync-guided-setup .advanced-toggle:hover {
+    color: #005f8d;
+}
+
+.smartsync-guided-setup .advanced-toggle .dashicons {
+    margin-right: 5px;
+    transition: transform 0.3s;
+}
+
+.smartsync-guided-setup .advanced-toggle.open .dashicons {
+    transform: rotate(90deg);
+}
+
+/* 4. Consistent Styling */
+.smartsync-wrap .button,
+.smartsync-wrap .primary-btn,
+.smartsync-wrap .secondary-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 16px;
+    border-radius: 4px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+    height: auto;
+    line-height: 1.5;
+}
+
+.smartsync-wrap .primary-btn {
+    background: #0073aa;
+    color: white;
+    border: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.smartsync-wrap .primary-btn:hover {
+    background: #005f8d;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.smartsync-wrap .secondary-btn {
+    background: #f7f7f7;
+    color: #333;
+    border: 1px solid #ddd;
+}
+
+.smartsync-wrap .secondary-btn:hover {
+    background: #eaeaea;
+    transform: translateY(-2px);
+}
+
+.smartsync-wrap .button-icon {
+    margin-right: 8px;
+}
+
+/* 5. Modern Form Elements */
+.smartsync-wrap input[type="text"],
+.smartsync-wrap input[type="password"],
+.smartsync-wrap input[type="email"],
+.smartsync-wrap select,
+.smartsync-wrap textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: #fff;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
+    transition: border-color 0.3s, box-shadow 0.3s;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.smartsync-wrap input[type="text"]:focus,
+.smartsync-wrap input[type="password"]:focus,
+.smartsync-wrap input[type="email"]:focus,
+.smartsync-wrap select:focus,
+.smartsync-wrap textarea:focus {
+    border-color: #0073aa;
+    box-shadow: 0 0 0 1px #0073aa;
+    outline: none;
+}
+
+.smartsync-wrap label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #333;
+}
+
+.smartsync-wrap .form-group {
+    margin-bottom: 20px;
+}
+
+/* 6. Responsive Design */
+@media (max-width: 782px) {
+    .smartsync-wrap .settings-container {
+        flex-direction: column;
+    }
+
+    .smartsync-wrap .settings-section {
+        width: 100%;
+        margin-bottom: 20px;
+    }
+
+    .smartsync-wrap .tabs-container {
+        flex-wrap: wrap;
+    }
+
+    .smartsync-wrap .tab-button {
+        flex: 1 0 auto;
+        margin-bottom: 5px;
+    }
+
+    .smartsync-wrap .stepper {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .smartsync-wrap .stepper::before {
+        display: none;
+    }
+
+    .smartsync-wrap .step {
+        display: flex;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+
+    .smartsync-wrap .step-label {
+        margin-top: 0;
+        margin-left: 10px;
+    }
+}
+
+/* 7. Visual Hierarchy */
+.smartsync-wrap h1 {
+    font-size: 24px;
+    font-weight: 600;
+    color: #23282d;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.smartsync-wrap h2 {
+    font-size: 20px;
+    font-weight: 600;
+    color: #23282d;
+    margin: 25px 0 15px;
+}
+
+.smartsync-wrap h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: #23282d;
+    margin: 20px 0 10px;
+}
+
+.smartsync-wrap .section-title {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.smartsync-wrap .section-title .dashicons {
+    margin-right: 8px;
+    color: #0073aa;
+}
+
+/* 8. Progress Visualization */
+.smartsync-progress-container {
+    margin: 15px 0;
+    background: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 15px;
+}
+
+.smartsync-progress-bar {
+    height: 20px;
+    background-color: #f0f0f0;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 10px;
+    position: relative;
+}
+
+.smartsync-progress-bar-inner {
+    height: 100%;
+    background-color: #0073aa;
+    width: 0%;
+    transition: width 0.5s ease-in-out;
+    border-radius: 10px;
+}
+
+.smartsync-progress-text {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+    color: #555;
+}
+
+.smartsync-progress-stats {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+}
+
+.smartsync-progress-stat {
+    text-align: center;
+    flex: 1;
+}
+
+.smartsync-progress-stat-value {
+    font-size: 18px;
+    font-weight: 600;
+    color: #0073aa;
+}
+
+.smartsync-progress-stat-label {
+    font-size: 12px;
+    color: #777;
+}
+
+/* 9. File Transfer Animation */
+.smartsync-file-transfer {
+    position: relative;
+    height: 60px;
+    margin: 15px 0;
+    overflow: hidden;
+    background: #f9f9f9;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+}
+
+.smartsync-file {
+    position: absolute;
+    width: 30px;
+    height: 40px;
+    background-color: #0073aa;
+    border-radius: 3px;
+    opacity: 0;
+    top: 10px;
+    left: 10px;
+    animation: fileTransfer 3s infinite;
+}
+
+.smartsync-file::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 0;
+    height: 0;
+    border-top: 8px solid white;
+    border-left: 8px solid transparent;
+}
+
+.smartsync-cloud {
+    position: absolute;
+    right: 20px;
+    top: 15px;
+    width: 40px;
+    height: 30px;
+    background-color: #f0f0f0;
+    border-radius: 15px;
+}
+
+.smartsync-cloud::before {
+    content: '';
+    position: absolute;
+    top: -10px;
+    left: 5px;
+    width: 20px;
+    height: 20px;
+    background-color: #f0f0f0;
+    border-radius: 50%;
+}
+
+.smartsync-cloud::after {
+    content: '';
+    position: absolute;
+    top: -15px;
+    right: 10px;
+    width: 25px;
+    height: 25px;
+    background-color: #f0f0f0;
+    border-radius: 50%;
+}
+
+@keyframes fileTransfer {
+    0% {
+        opacity: 1;
+        left: 10px;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 1;
+        left: calc(100% - 80px);
+        transform: scale(0.8);
+    }
+    60% {
+        opacity: 0;
+        left: calc(100% - 60px);
+        transform: scale(0.5);
+    }
+    61% {
+        opacity: 0;
+        left: 10px;
+        transform: scale(1);
+    }
+    100% {
+        opacity: 1;
+        left: 10px;
+        transform: scale(1);
+    }
+}
+
+/* 10. Background Processing Indicator */
+.smartsync-background-indicator {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: #0073aa;
+    color: white;
+    padding: 10px 15px;
+    border-radius: 5px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    display: none;
+    z-index: 9999;
+    animation: pulse 2s infinite;
+}
+
+.smartsync-background-indicator.active {
+    display: flex;
+    align-items: center;
+}
+
+.smartsync-background-indicator .spinner {
+    margin-right: 10px;
+    background-color: white;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(0, 115, 170, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(0, 115, 170, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(0, 115, 170, 0);
+    }
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* 11. Wizard Progress Indicator */
+.smartsync-wrap .wizard-progress {
+    margin: 20px 0;
+    position: relative;
+}
+
+.smartsync-wrap .wizard-progress-bar {
+    height: 8px;
+    background-color: #f0f0f0;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 15px;
+}
+
+.smartsync-wrap .wizard-progress-bar-inner {
+    height: 100%;
+    background-color: #0073aa;
+    width: 0%;
+    transition: width 0.5s ease-in-out;
+}
+
+.smartsync-wrap .wizard-progress-steps {
+    display: flex;
+    justify-content: space-between;
+    position: relative;
+}
+
+.smartsync-wrap .wizard-progress-step {
+    text-align: center;
+    flex: 1;
+    position: relative;
+}
+
+.smartsync-wrap .wizard-progress-step-number {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background-color: #f0f0f0;
+    color: #555;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 5px;
+    font-weight: 600;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.smartsync-wrap .wizard-progress-step.active .wizard-progress-step-number {
+    background-color: #0073aa;
+    color: white;
+}
+
+.smartsync-wrap .wizard-progress-step.completed .wizard-progress-step-number {
+    background-color: #28a745;
+    color: white;
+}
+
+.smartsync-wrap .wizard-progress-step-label {
+    font-size: 12px;
+    color: #555;
+    transition: color 0.3s;
+}
+
+.smartsync-wrap .wizard-progress-step.active .wizard-progress-step-label {
+    color: #0073aa;
+    font-weight: 600;
+}
+
+.smartsync-wrap .wizard-progress-step.completed .wizard-progress-step-label {
+    color: #28a745;
+}
+
+/* 12. Contextual Help Tooltips */
+.smartsync-wrap .help-tooltip {
+    display: inline-block;
+    position: relative;
+    margin-left: 5px;
+    cursor: help;
+}
+
+.smartsync-wrap .help-tooltip-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background-color: #0073aa;
+    color: white;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.smartsync-wrap .help-tooltip-content {
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 200px;
+    background-color: #333;
+    color: white;
+    padding: 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    line-height: 1.4;
+    z-index: 100;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s, visibility 0.3s;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.smartsync-wrap .help-tooltip-content::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 5px;
+    border-style: solid;
+    border-color: #333 transparent transparent transparent;
+}
+
+.smartsync-wrap .help-tooltip:hover .help-tooltip-content {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* 13. Visual Confirmation */
+.smartsync-wrap .visual-confirmation {
+    display: none;
+    margin: 15px 0;
+    padding: 15px;
+    border-radius: 5px;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+.smartsync-wrap .visual-confirmation.success {
+    display: flex;
+    align-items: center;
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+    color: #155724;
+}
+
+.smartsync-wrap .visual-confirmation.error {
+    display: flex;
+    align-items: center;
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    color: #721c24;
+}
+
+.smartsync-wrap .visual-confirmation.info {
+    display: flex;
+    align-items: center;
+    background-color: #d1ecf1;
+    border: 1px solid #bee5eb;
+    color: #0c5460;
+}
+
+.smartsync-wrap .visual-confirmation-icon {
+    margin-right: 10px;
+    font-size: 20px;
+}
+
+.smartsync-wrap .visual-confirmation-message {
+    flex: 1;
+}
+
+/* Contextual descriptions for buttons */
+.smartsync-contextual-description {
+    margin-bottom: 15px;
+    padding: 10px 15px;
+    background-color: #f8f9fa;
+    border-left: 4px solid #0073aa;
+    border-radius: 3px;
+}
+
+.smartsync-contextual-description p {
+    margin: 0;
+    color: #555;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+/* Enhanced button styles with icons */
+.smartsync-wrap .primary-btn .button-icon,
+.smartsync-wrap .secondary-btn .button-icon {
+    margin-right: 8px;
+    font-size: 16px;
+    line-height: 1;
+    vertical-align: text-bottom;
+}
+
+/* Input field descriptions */
+.smartsync-input-description {
+    display: block;
+    margin-top: 5px;
+    color: #666;
+    font-size: 13px;
+    font-style: italic;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

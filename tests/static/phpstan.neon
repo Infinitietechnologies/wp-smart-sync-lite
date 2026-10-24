@@ -1,0 +1,14 @@
+includes:
+    - vendor/szepeviktor/phpstan-wordpress/extension.neon
+
+parameters:
+    level: 5
+    phpVersion: 80100
+    bootstrapFiles:
+        - bootstrap.php
+    scanFiles:
+        - ../../aws-s3-smartsync-wp.php
+        - ../../vendor/woocommerce/action-scheduler/functions.php
+    paths:
+        - ../../src
+        - ../../uninstall.php

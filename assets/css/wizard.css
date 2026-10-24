@@ -1,0 +1,660 @@
+/* Stepper Navigation */
+
+.smartsync-wrap .mb-1{
+    margin-bottom: 1vh;
+}
+
+.smartsync-wrap .mt-2{
+    margin-top: 3px !important;
+}
+
+
+.smartsync-wrap .wizard-step {
+    margin: 20px 0;
+    padding: 20px;
+    border: 1px solid #ddd;
+    background: #f9f9f9;
+    border-radius: 8px;
+}
+
+.smartsync-wrap .wizard-step h2 {
+    margin-bottom: 10px;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.smartsync-wrap .d-flex {
+    display: flex;
+
+}
+.smartsync-wrap .align-center{
+    align-items: center;
+}
+.smartsync-wrap .stop-button {
+    background: #0073aa;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: background 0.3s, transform 0.2s;
+    padding: 8px;
+}
+.smartsync-wrap .stop-button:hover {
+    background: #005f8d;
+    transform: translateY(-2px);
+}
+.smartsync-wrap .justify-content-space-between{
+    justify-content: space-between;
+}
+
+/*********** General Styling ***********/
+.smartsync-wrap .aws-settings {
+    font-family: Arial, sans-serif;
+    color: #333;
+    margin: 20px auto;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+}
+
+.smartsync-wrap .page-title {
+    font-size: 24px;
+    color: #0073aa;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.smartsync-wrap .page-title:after {
+    content: '';
+    flex-grow: 1;
+    margin-left: 10px;
+    height: 1px;
+    background: #ddd;
+}
+
+/*********** Tabs ***********/
+.smartsync-wrap .tabs-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    border-bottom: 2px solid #ddd;
+    margin-bottom: 20px;
+}
+
+.smartsync-wrap .tab-button {
+    padding: 10px 20px;
+    cursor: pointer;
+    background: #f7f7f7;
+    border: none;
+    font-weight: bold;
+    color: #0073aa;
+    transition: background 0.3s, color 0.3s;
+}
+
+.smartsync-wrap .tab-button:hover {
+    background: #eaeaea;
+    color: #005f8d;
+}
+
+.smartsync-wrap .tab-button.active {
+    background: #0073aa;
+    color: #fff;
+    border-radius: 5px 5px 0 0;
+}
+
+.smartsync-wrap .tab-indicator {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 3px;
+    background: #0073aa;
+    transition: left 0.3s, width 0.3s;
+}
+
+.smartsync-wrap .tabs-content {
+    border: 1px solid #ddd;
+    padding: 20px;
+    border-radius: 0 5px 5px 5px;
+    background: #fff;
+}
+
+.smartsync-wrap .tab-panel {
+    display: none;
+}
+
+.smartsync-wrap .tab-panel.active {
+    display: block;
+}
+
+/*********** Settings Sections ***********/
+.smartsync-wrap .settings-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.smartsync-wrap .settings-section {
+    flex: 1;
+    background: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    min-width: 300px;
+}
+
+.smartsync-wrap .settings-section h2 {
+    font-size: 18px;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.smartsync-wrap .settings-table {
+    width: 100%;
+    border-spacing: 0;
+    margin-bottom: 20px;
+}
+
+.smartsync-wrap .settings-table th {
+    text-align: left;
+    width: 40%;
+    padding: 5px 0;
+}
+
+.smartsync-wrap .settings-table td {
+    padding: 5px 0;
+}
+
+/*********** Buttons ***********/
+.smartsync-wrap .primary-btn {
+    background: #0073aa;
+    color: #fff;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: background 0.3s, transform 0.2s;
+}
+
+.smartsync-wrap .primary-btn:hover {
+    background: #005f8d;
+    transform: translateY(-2px);
+}
+
+.smartsync-wrap .secondary-btn {
+    background: #f7f7f7;
+    color: #333;
+    border: 1px solid #ddd;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: background 0.3s;
+}
+
+.smartsync-wrap .secondary-btn:hover {
+    background: #eaeaea;
+}
+
+/*********** Analytics ***********/
+.smartsync-wrap .analytics-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.smartsync-wrap .analytics-list li {
+    margin-bottom: 10px;
+}
+
+/*********** Logs ***********/
+.smartsync-wrap .sync-log {
+    height: 150px;
+    overflow-y: auto;
+    background: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 10px;
+    font-family: monospace;
+    font-size: 14px;
+}
+
+.smartsync-wrap .sync-log p {
+    margin: 0;
+    padding: 5px 0;
+}
+
+.smartsync-wrap .sync-log p.error {
+    color: red;
+}
+
+.smartsync-wrap .switch{
+    --switch-width: 50px;
+    --switch-height: calc(var(--switch-width) / 2);
+    --switch-border-radius: 999vw; /* this will also adjust the radius on the toggle */
+    --switch-clr-border: rgba(255 255 255 / .25);
+    --switch-clr-bg: #0073aa;
+    --switch-clr-bg-on: green;
+    --switch-inset: 2px;
+    --switch-duration: 300ms;
+
+    --toggle-size: calc(var(--switch-height) - var(--switch-inset) * 3);
+    --toggle-gap: calc(var(--toggle-size) * 1.5);
+    --toggle-bg: #404040;
+    --toggle-bg-on: #F3F4F6;
+
+    --led-size: 8px;
+    --led-color-off: rgba(255 255 255 / .15);
+    --led-color-on: rgb(5, 175, 119);
+    --led-color-loading: rgb(234 179 8);
+    --led-duration: 3s;
+    --led-delay: 500ms;
+    --led-blur: 12px;
+    --led-blur-distance: -.5rem;
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    width: fit-content;
+}
+
+.smartsync-wrap .switch label{
+    position: relative;
+    cursor: pointer;
+    overflow: hidden;
+    width: var(--switch-width);
+    height: var(--switch-height);
+    border-radius: var(--switch-border-radius);
+    border: 1px solid var(--switch-clr-border);
+    outline: 1px dashed transparent;
+    outline-offset: 4px;
+    color: var(--switch-clr-txt);
+    background-color: var(--switch-clr-bg);
+    isolation: isolate;
+    transition-property: background-color;
+    transition-duration: var(--switch-duration);
+    transition-timing-function: ease-in-out;
+    transition-delay: var(--switch-delay,0ms);
+}
+.smartsync-wrap .switch > .icon{
+    display: grid;
+    grid-template-areas: "stack";
+}
+
+.smartsync-wrap .switch > .icon > svg{
+    grid-area: stack;
+    scale: var(--icon-on,0);
+    transition: scale 150ms ease-in-out var(--icon-delay,0ms);
+}
+.smartsync-wrap .switch > .icon > svg:last-of-type{
+    scale: var(--icon-off,1);
+}
+
+.smartsync-wrap .switch input[type="checkbox"] {
+    position: absolute;
+    pointer-events: none;
+    appearance: none;
+    border: none;
+    outline: none;
+    border-radius: inherit;
+    background-color: var(--toggle-bg);
+    top: 6.5px;
+    left: var(--toggle-x,var(--switch-inset));
+    width: var(--toggle-size);
+    height: var(--toggle-size);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--toggle-gap);
+
+    transition-property: left, background-color;
+    transition-duration: var(--switch-duration);
+    transition-timing-function: ease-in-out;
+}
+.smartsync-wrap .switch input[type="checkbox"]::before,
+.smartsync-wrap .switch input[type="checkbox"]::after{
+    position: relative;
+    color: white;
+    transition: scale var(--switch-duration);
+
+}
+.smartsync-wrap .switch input[type="checkbox"]::before{
+    content: attr(data-on);
+    scale: var(--label-scale-on, .75);
+    top: 12px;
+}
+.smartsync-wrap .switch input[type="checkbox"]::after{
+    content: attr(data-off);
+    scale: var(--label-scale-off, 1);
+}
+
+.smartsync-wrap .switch > .led{
+    position: relative;
+    width: var(--led-size);
+    height: var(--led-size);
+    display: block;
+    border: 1px solid rgba(255 255 255 / .25);
+    border-radius: 50%;
+    background-color: var(--led-color-off) ;
+    transition: background-color 50ms;
+    animation: var(--led-animation,"")
+}
+.smartsync-wrap .switch > .led:before{
+    content: '';
+    position: absolute;
+    inset: var(--led-blur-distance);
+    z-index: -1;
+    border-radius: inherit;
+    filter: blur(var(--led-blur));
+    opacity: .75;
+    animation: var(--led-animation,"")
+}
+.smartsync-wrap .switch:has(input[type="checkbox"]:focus-visible) label{
+    outline-color: white;
+}
+/* switch "on" */
+.smartsync-wrap .switch:has(input[type="checkbox"]:checked){
+    --switch-clr-bg: var(--switch-clr-bg-on);
+    --switch-delay: 250ms; /* slight delay on background color change */
+    --toggle-x: calc(50% + var(--switch-inset));
+    --toggle-clr-bg: green;
+    --toggle-bg: var(--toggle-bg-on);
+    --led-animation: toggle var(--led-duration) linear forwards var(--led-delay);
+    --icon-on: 1;
+    --icon-off: 0;
+    --icon-delay: 250ms;
+    --label-scale-off: .75;
+    --label-scale-on: 1;
+}
+@keyframes toggle{
+    0%,10%,20%,30%,40%,50%,60%,70%,80%{
+        background-color: var(--led-color-off);
+    }
+    5%,15%,25%,35%,45%,55%,65%,75%,85%{
+        background-color: var(--led-color-loading);
+    }
+    100%{
+        background-color: var(--led-color-on);
+    }
+}
+.smartsync-wrap input[type=checkbox].switch-input:checked::before {
+    margin: 1.2rem 0 0 -.25rem;
+}
+
+.smartsync-wrap .aws-settings {
+    font-family: Arial, sans-serif;
+    color: #333;
+    margin: 20px auto;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+}
+
+.smartsync-wrap .page-title {
+    font-size: 24px;
+    color: #0073aa;
+    margin-bottom: 20px;
+}
+
+/*********** Tabs ***********/
+.smartsync-wrap .tabs-container {
+    display: flex;
+    border-bottom: 1px solid #ddd;
+    margin-bottom: 20px;
+}
+
+.smartsync-wrap .tab-button {
+    padding: 10px 20px;
+    cursor: pointer;
+    background: #f7f7f7;
+    border: 1px solid #ddd;
+    border-bottom: none;
+    border-radius: 5px 5px 0 0;
+    margin-right: 5px;
+    font-weight: bold;
+}
+
+.smartsync-wrap .tab-button.active {
+    background: #fff;
+    color: #0073aa;
+    border-color: #ddd #ddd #fff;
+}
+
+.smartsync-wrap .tabs-content {
+    border: 1px solid #ddd;
+    padding: 20px;
+    border-radius: 0 5px 5px 5px;
+    background: #fff;
+}
+
+.smartsync-wrap .tab-panel {
+    display: none;
+}
+
+.smartsync-wrap .tab-panel.active {
+    display: block;
+}
+
+/*********** Settings Sections ***********/
+.smartsync-wrap .settings-container {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.smartsync-wrap .settings-section {
+    flex: 1;
+    background: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+}
+
+.smartsync-wrap .settings-section h2 {
+    font-size: 18px;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.smartsync-wrap .settings-table {
+    width: 100%;
+    border-spacing: 0;
+    margin-bottom: 20px;
+}
+
+.smartsync-wrap .settings-table th {
+    text-align: left;
+    width: 40%;
+    padding: 5px 0;
+}
+
+.smartsync-wrap .settings-table td {
+    padding: 5px 0;
+}
+
+/*********** Buttons ***********/
+.smartsync-wrap .primary-btn {
+    background: #0073aa;
+    color: #fff;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.smartsync-wrap .primary-btn:hover {
+    background: #005f8d;
+}
+
+.smartsync-wrap .secondary-btn {
+    background: #f7f7f7;
+    color: #333;
+    border: 1px solid #ddd;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.smartsync-wrap .secondary-btn:hover {
+    background: #eaeaea;
+}
+
+/*********** Analytics ***********/
+.smartsync-wrap .analytics-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.smartsync-wrap .analytics-list li {
+    margin-bottom: 10px;
+}
+
+/*********** Logs ***********/
+.smartsync-wrap .sync-log {
+    height: 150px;
+    overflow-y: auto;
+    background: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 10px;
+    font-family: monospace;
+    font-size: 14px;
+}
+
+.smartsync-wrap .sync-log p {
+    margin: 0;
+    padding: 5px 0;
+}
+
+.smartsync-wrap .sync-log p.error {
+    color: red;
+}
+.smartsync-wrap .d-none{
+    display: none;
+}
+
+
+
+/* Improved Stepper */
+.smartsync-wrap .stepper {
+    display: flex;
+    justify-content: space-between;
+    padding: 0;
+    margin: 20px auto;
+    list-style: none;
+    max-width: 700px;
+    position: relative;
+}
+
+.smartsync-wrap .stepper::before {
+    content: '';
+    position: absolute;
+    top: 30%;
+    left: 5%;
+    right: 5%;
+    height: 4px;
+    background-color: #ddd;
+    z-index: 0;
+    transform: translateY(-50%);
+}
+
+.smartsync-wrap .step {
+    text-align: center;
+    position: relative;
+    z-index: 1;
+}
+
+.smartsync-wrap .step-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #ddd;
+    color: #fff;
+    font-weight: bold;
+    font-size: 16px;
+    transition: background-color 0.3s, transform 0.3s;
+}
+
+.smartsync-wrap .step-label {
+    margin-top: 10px;
+    font-size: 14px;
+    font-weight: bold;
+    color: #555;
+    transition: color 0.3s;
+}
+
+.smartsync-wrap .step.active .step-icon {
+    background-color: #0073aa;
+    transform: scale(1.1);
+}
+
+.smartsync-wrap .step.active .step-label {
+    color: #0073aa;
+}
+
+.smartsync-wrap .step.completed .step-icon {
+    background-color: #28a745;
+}
+
+.smartsync-wrap .step.completed .step-label {
+    color: #28a745;
+}
+.smartsync-wrap .mb-15{
+    margin-bottom: 15px;
+}
+/*modal code start*/
+/* The Modal (background) */
+.smartsync-wrap .bmp-modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgb(0,0,0);
+    background-color: rgba(0,0,0,0.4);
+    padding-top: 60px;
+}
+
+/* Modal Content */
+.smartsync-wrap .bmp-modal-content {
+    background-color: #fefefe;
+    margin: 5% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 50%;
+    max-width: 600px; /* Ensure the modal is not too wide */
+    position: relative; /* Added to ensure proper positioning */
+    z-index: 1001; /* Ensure modal content is above the background */
+}
+
+/* The Close Button */
+.smartsync-wrap .bmp-close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.smartsync-wrap .bmp-close:hover,
+.smartsync-wrap .bmp-close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+/*modal code end*/

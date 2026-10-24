@@ -1,0 +1,15 @@
+includes:
+    - vendor/szepeviktor/phpstan-wordpress/extension.neon
+
+parameters:
+    level: 5
+    # The entrypoint must also reject PHP 8.0 gracefully before loading dependencies.
+    phpVersion:
+        min: 80000
+        max: 80399
+    bootstrapFiles:
+        - bootstrap.php
+    scanFiles:
+        - ../../vendor/woocommerce/action-scheduler/functions.php
+    paths:
+        - ../../aws-s3-smartsync-wp.php

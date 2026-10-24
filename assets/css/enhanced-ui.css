@@ -1,0 +1,376 @@
+/* SmartSync Enhanced UI CSS */
+
+/* Improved Typography */
+.smartsync-wrap {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+    line-height: 1.6;
+    color: #333;
+}
+
+.smartsync-wrap,
+.smartsync-wrap * {
+    box-sizing: border-box;
+}
+
+.smartsync-wrap .settings-section,
+.smartsync-wrap .smartsync-progress-stat {
+    min-width: 0;
+}
+
+.smartsync-wrap .smartsync-breadcrumbs {
+    flex-wrap: wrap;
+    row-gap: 4px;
+}
+
+.smartsync-wrap .smartsync-breadcrumbs > * {
+    max-width: 100%;
+}
+
+
+.smartsync-wrap .mt-5{
+    margin-top: 5px;
+}
+
+/* Keep native hidden state authoritative over component display rules. */
+.smartsync-wrap [hidden] {
+    display: none !important;
+}
+
+.smartsync-wrap a.primary-btn {
+    text-decoration: none;
+}
+
+.smartsync-wrap button:disabled {
+    cursor: not-allowed;
+    opacity: 0.65;
+}
+
+.smartsync-wrap button:focus-visible,
+.smartsync-wrap a:focus-visible,
+.smartsync-wrap input:focus-visible,
+.smartsync-wrap select:focus-visible {
+    outline: 2px solid #2271b1;
+    outline-offset: 3px;
+}
+
+.smartsync-wrap input[type="url"],
+.smartsync-wrap input[type="text"],
+.smartsync-wrap input[type="password"],
+.smartsync-wrap input[type="file"],
+.smartsync-wrap select {
+    max-width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+}
+
+.smartsync-wrap #records,
+.smartsync-wrap #wizard-message,
+.smartsync-wrap #domain-message,
+.smartsync-wrap .settings-table td,
+.smartsync-wrap .sync-log p {
+    overflow-wrap: anywhere;
+}
+
+@media (max-width: 600px) {
+    .smartsync-wrap .smartsync-background-indicator {
+        position: static;
+        max-width: 100%;
+        margin: 10px 0;
+    }
+
+    .smartsync-wrap .smartsync-progress-text,
+    .smartsync-wrap .smartsync-progress-stats {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    .smartsync-wrap .d-flex {
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .smartsync-wrap .tabs-container {
+        flex-wrap: wrap;
+    }
+
+    .smartsync-wrap .settings-container {
+        display: block;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .smartsync-wrap *,
+    .smartsync-wrap *::before,
+    .smartsync-wrap *::after {
+        animation: none !important;
+        transition: none !important;
+    }
+}
+.smartsync-wrap h1, 
+.smartsync-wrap h2, 
+.smartsync-wrap h3, 
+.smartsync-wrap h4 {
+    font-weight: 600;
+    line-height: 1.3;
+    margin-bottom: 0.8em;
+    color: #23282d;
+}
+
+.smartsync-wrap h1 {
+    font-size: 26px;
+    letter-spacing: -0.5px;
+}
+
+.smartsync-wrap h2 {
+    font-size: 22px;
+    letter-spacing: -0.3px;
+}
+
+.smartsync-wrap h3 {
+    font-size: 18px;
+    letter-spacing: -0.2px;
+}
+
+.smartsync-wrap p, 
+.smartsync-wrap li, 
+.smartsync-wrap label {
+    font-size: 14px;
+    line-height: 1.6;
+    margin-bottom: 1em;
+}
+
+.smartsync-wrap .description {
+    font-size: 13px;
+    font-style: italic;
+    color: #666;
+    line-height: 1.5;
+    margin-top: 5px;
+}
+
+.smartsync-wrap .smartsync-input-description {
+    font-size: 13px;
+    color: #666;
+    line-height: 1.5;
+    margin-top: 5px;
+}
+
+/* Enhanced Logs Section */
+.smartsync-wrap .sync-log {
+    height: 250px;
+    overflow-y: auto;
+    background: #f8f9fa;
+    border: 1px solid #e2e4e7;
+    border-radius: 6px;
+    padding: 15px;
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+    font-size: 13px;
+    line-height: 1.6;
+    color: #333;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+}
+
+.smartsync-wrap .sync-log:hover {
+    border-color: #0073aa;
+}
+
+.smartsync-wrap .sync-log p {
+    margin: 0;
+    padding: 6px 0;
+    border-bottom: 1px dashed rgba(0, 0, 0, 0.05);
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.smartsync-wrap .sync-log p:last-child {
+    border-bottom: none;
+}
+
+.smartsync-wrap .sync-log p.error {
+    color: #d63638;
+    background-color: rgba(214, 54, 56, 0.05);
+    padding: 8px 10px;
+    border-radius: 4px;
+    border-left: 3px solid #d63638;
+    margin-bottom: 5px;
+}
+
+.smartsync-wrap .sync-log p.success {
+    color: #00a32a;
+    background-color: rgba(0, 163, 42, 0.05);
+    padding: 8px 10px;
+    border-radius: 4px;
+    border-left: 3px solid #00a32a;
+    margin-bottom: 5px;
+}
+
+.smartsync-wrap .sync-log p.warning {
+    color: #dba617;
+    background-color: rgba(219, 166, 23, 0.05);
+    padding: 8px 10px;
+    border-radius: 4px;
+    border-left: 3px solid #dba617;
+    margin-bottom: 5px;
+}
+
+.smartsync-wrap .sync-log p.info {
+    color: #0073aa;
+    background-color: rgba(0, 115, 170, 0.05);
+    padding: 8px 10px;
+    border-radius: 4px;
+    border-left: 3px solid #0073aa;
+    margin-bottom: 5px;
+}
+
+/* Log timestamp styling */
+.smartsync-wrap .sync-log .log-timestamp {
+    color: #666;
+    font-size: 11px;
+    margin-right: 8px;
+}
+
+/* Log progress styling */
+.smartsync-wrap .sync-log .log-progress {
+    font-weight: 600;
+    color: #0073aa;
+}
+
+/* Enhanced Settings Section */
+.smartsync-wrap .settings-section {
+    background: #fff;
+    border: 1px solid #e2e4e7;
+    border-radius: 6px;
+    padding: 20px;
+    margin-bottom: 20px;
+
+    margin-top: 15px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+}
+
+.smartsync-wrap .settings-section:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.smartsync-wrap .section-title {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.smartsync-wrap .section-title .dashicons {
+    font-size: 20px;
+    width: 30px;
+    height: 30px;
+    margin-right: 10px;
+    color: #0073aa;
+    background: rgba(0, 115, 170, 0.1);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 5px;
+}
+
+.smartsync-wrap .section-title h2,
+.smartsync-wrap .section-title h3 {
+    margin: 0;
+    padding: 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: #23282d;
+}
+
+/* Enhanced Tables */
+.smartsync-wrap .settings-table {
+    width: 100%;
+    border-spacing: 0;
+    margin-bottom: 20px;
+    border-collapse: separate;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.smartsync-wrap .settings-table th,
+.smartsync-wrap .settings-table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+}
+
+.smartsync-wrap .settings-table th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+    color: #23282d;
+    width: 40%;
+}
+
+.smartsync-wrap .settings-table tr:last-child th,
+.smartsync-wrap .settings-table tr:last-child td {
+    border-bottom: none;
+}
+
+/* Enhanced Analytics List */
+.smartsync-wrap .analytics-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 20px 0;
+}
+
+.smartsync-wrap .analytics-list li {
+    padding: 10px 0;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.smartsync-wrap .analytics-list li:last-child {
+    border-bottom: none;
+}
+
+.smartsync-wrap .analytics-list li strong {
+    font-weight: 600;
+    color: #23282d;
+}
+
+/* Enhanced Contextual Description */
+.smartsync-wrap .smartsync-contextual-description {
+    background-color: #f8f9fa;
+    border-left: 4px solid #0073aa;
+    padding: 12px 15px;
+    margin-bottom: 20px;
+    border-radius: 0 4px 4px 0;
+}
+
+.smartsync-wrap .smartsync-contextual-description p {
+    margin: 0;
+    color: #555;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+/* Responsive Improvements */
+@media (max-width: 782px) {
+    .smartsync-wrap .settings-table th,
+    .smartsync-wrap .settings-table td {
+        padding: 10px;
+    }
+    
+    .smartsync-wrap .sync-log {
+        height: 200px;
+    }
+    
+    .smartsync-wrap h1 {
+        font-size: 22px;
+    }
+    
+    .smartsync-wrap h2 {
+        font-size: 18px;
+    }
+    
+    .smartsync-wrap h3 {
+        font-size: 16px;
+    }
+}

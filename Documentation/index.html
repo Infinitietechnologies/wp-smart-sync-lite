@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>SmartSync WP Documentation</title>
+
+    <!-- Meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="SmartSync WP Documentation">
+    <meta name="author" content="Infinitie Technologies">
+    <link rel="shortcut icon" href="favicon.ico">
+
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700&display=swap" rel="stylesheet">
+
+    <!-- FontAwesome JS-->
+    <script defer src="assets/fontawesome/js/all.min.js"></script>
+
+    <!-- Plugins CSS -->
+    <link rel="stylesheet" href="assets/plugins/simplelightbox/simple-lightbox.min.css">
+
+    <!-- Theme CSS -->
+    <link id="theme-style" rel="stylesheet" href="assets/css/theme.css">
+    <style>
+        .navbar-brand {
+            width: 300px;
+            display: block;
+            height: 58px;
+            overflow: hidden;
+        }
+
+        .navbar-brand img {
+            max-height: 100% !important;
+            max-width: 100% !important;
+        }
+    </style>
+</head>
+
+<body class="docs-page">
+<header class="header fixed-top">
+    <div class="branding docs-branding">
+        <div class="container-fluid position-relative py-2">
+            <div class="docs-logo-wrapper">
+                <button id="docs-sidebar-toggler" class="docs-sidebar-toggler docs-sidebar-visible me-2 d-xl-none"
+                        type="button" aria-label="Toggle documentation navigation" aria-controls="docs-sidebar" aria-expanded="false">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+                <div class="site-logo"><a class="navbar-brand" href="#"><img class="logo-icon me-2"
+                                                                             src="assets/images/logo.svg"
+                                                                             alt="logo"></a></div>
+            </div><!--//docs-logo-wrapper-->
+            <div class="docs-top-utilities d-flex justify-content-end align-items-center">
+                <!--	                <div class="top-search-box d-none d-lg-flex">-->
+                <!--		                <form class="search-form">-->
+                <!--				            <input type="text" placeholder="Search the docs..." name="search" class="form-control search-input">-->
+                <!--				            <button type="submit" class="btn search-btn" value="Search"><i class="fas fa-search"></i></button>-->
+                <!--				        </form>-->
+                <!--	                </div>-->
+
+
+                <!--		            <a href="https://themes.3rdwavemedia.com/bootstrap-templates/startup/coderdocs-free-bootstrap-5-documentation-template-for-software-projects/" class="btn btn-primary d-none d-lg-flex">Download</a>-->
+            </div><!--//docs-top-utilities-->
+        </div><!--//container-->
+    </div><!--//branding-->
+</header><!--//header-->
+
+
+<div class="docs-wrapper">
+    <div id="docs-sidebar" class="docs-sidebar">
+        <nav id="docs-nav" class="docs-nav navbar">
+            <ul class="section-items list-unstyled nav flex-column pb-3">
+                <li class="nav-item section-title"><a class="nav-link scrollto active" href="#installation"><span
+                        class="theme-icon-holder me-2"><i class="fas fa-star"></i></span>Documentation</a></li>
+                <li class="nav-item"><a class="nav-link scrollto" href="#installation">Installation</a></li>
+                <li class="nav-item">
+                    <a class="nav-link scrollto" href="#generate-keys">How to Generate Keys</a>
+                    <ul class="list-unstyled ps-3">
+                        <li class="nav-item"><a class="nav-link scrollto" href="#aws-key">AWS</a></li>
+                        <li class="nav-item"><a class="nav-link scrollto" href="#digitalocean-key">DigitalOcean</a></li>
+                        <li class="nav-item"><a class="nav-link scrollto" href="#google-key">Google</a></li>
+                        <li class="nav-item"><a class="nav-link scrollto" href="#bunny-key">Bunny CDN</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item"><a class="nav-link scrollto" href="#features">How to Configure</a></li>
+                <li class="nav-item"><a class="nav-link scrollto" href="#settings">Settings</a></li>
+                <li class="nav-item"><a class="nav-link scrollto" href="#custom-url">Custom URL Configuration</a></li>
+            </ul>
+        </nav><!--//docs-nav-->
+    </div><!--//docs-sidebar-->
+
+    <div class="docs-content">
+        <div class="container">
+            <!-- Key Features Section -->
+
+            <article class="docs-article" id="installation">
+                <header class="docs-header">
+                    <h1 class="docs-heading">Installation</h1>
+                </header>
+                <section class="docs-section">
+                    <p><strong>Requirements:</strong> WordPress 6.5 or later and PHP 8.1 or later.
+                        A source checkout needs its Composer dependencies installed with <code>composer install</code>
+                        using the included lockfile. The account configuring SmartSync needs permission to manage WordPress settings.</p>
+                    <p>Examples and screenshots may show an earlier interface. Follow the current field labels and
+                        your provider's current console when they differ.</p>
+                    <iframe width="100%" height="600"
+                            src="https://www.youtube.com/embed/nSEMRQ9peAA?si=6MGqc7iWjw-Pf0ow"
+                            title="YouTube video player" frameborder="0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                            referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                    <h3>Step 1: Download the Plugin</h3>
+                    <ol>
+                        <li><strong>Download the Plugin File:</strong> Download the plugin's <code>.zip</code> file from
+                            the official source.
+                            <!-- Screenshot Placeholder -->
+                            <!--								<img src="assets/images/screenshots/download-plugin.png" alt="Download Plugin Button" class="img-fluid mt-3">-->
+                        </li>
+                    </ol>
+
+                    <h3>Step 2: Access the WordPress Admin Panel</h3>
+                    <ol>
+                        <li><strong>Log in to WordPress Admin:</strong> Open your WordPress admin dashboard by visiting
+                            <code>yourdomain.com/wp-admin</code>.
+                            <!-- Screenshot Placeholder -->
+                            <img src="assets/images/01.webp" alt="WordPress Login Page" class="img-fluid mt-3">
+                        </li>
+                        <li>Navigate to <strong>Plugins > Add New</strong> in the sidebar menu.
+                            <!-- Screenshot Placeholder -->
+                            <img src="assets/images/02.webp" alt="Plugins Add New Menu" class="img-fluid mt-3">
+                        </li>
+                    </ol>
+
+                    <h3>Step 3: Upload the Plugin</h3>
+                    <ol>
+                        <li>Click on the <strong>Upload Plugin</strong> button at the top of the Add Plugins page.
+                            <!-- Screenshot Placeholder -->
+                            <img src="assets/images/03.webp" alt="Upload Plugin Button" class="img-fluid mt-3">
+                        </li>
+                        <li>Select the downloaded <code>.zip</code> file by clicking the <strong>Choose File</strong>
+                            button.
+                            <!-- Screenshot Placeholder -->
+                            <img src="assets/images/04.webp" alt="Choose File Dialog" class="img-fluid mt-3">
+                        </li>
+                        <li>After selecting the file, click the <strong>Install Now</strong> button to start the
+                            installation process.
+                            <!-- Screenshot Placeholder -->
+                            <img src="assets/images/05.webp" alt="Install Now Button" class="img-fluid mt-3">
+                        </li>
+                    </ol>
+
+                    <h3>Step 4: Activate the Plugin</h3>
+                    <ol>
+                        <li>Once the installation is complete, click the <strong>Activate Plugin</strong> button to
+                            enable the plugin.
+                            <!-- Screenshot Placeholder -->
+                            <img src="assets/images/06.webp" alt="Activate Plugin Button" class="img-fluid mt-3">
+                        </li>
+                        <li>After activation, a new menu named <strong>SmartSync</strong> will appear in the WordPress
+                            admin sidebar.
+                            <!-- Screenshot Placeholder -->
+                            <img src="assets/images/07.webp" alt="SmartSync Menu in Admin Panel" class="img-fluid mt-3">
+                        </li>
+                    </ol>
+                </section>
+            </article>
+
+
+            <!-- Generate Keys Section -->
+            <article class="docs-article" id="generate-keys">
+                <header class="docs-header">
+                    <h1 class="docs-heading">How to Generate Keys</h1>
+                </header>
+                <section class="docs-section">
+                    <!-- AWS IAM Key Generation -->
+                    <h3 id="aws-key">AWS IAM Key</h3>
+                    <ol>
+                        <li>
+                            <strong>Log in to the AWS Management Console:</strong> Visit <a
+                                href="https://aws.amazon.com/console/" target="_blank">AWS Console</a> and log in with
+                            your credentials.
+                            <!-- Screenshot Placeholder -->
+                            <img src="assets/images/08.webp" alt="AWS Management Console Login" class="img-fluid mt-3">
+                        </li>
+                        <li>
+                            Navigate to <strong>Security Credentials</strong> in the AWS Console.
+                            <!-- Screenshot Placeholder -->
+                            <img src="assets/images/10.webp" alt="IAM Users Section" class="img-fluid mt-3">
+                        </li>
+
+                        <li>
+                            Go to the <strong>Security Credentials</strong> tab and click <strong>Create Access
+                            Key</strong>.
+                            <!-- Screenshot Placeholder -->
+                            <img src="assets/images/11.webp" alt="Create Access Key" class="img-fluid mt-3">
+                        </li>
+                        <li>
+                            Securely save the generated Access Key ID and Secret Access Key. You won’t be able to view
+                            the secret key again after closing this window.
+                            <!-- Screenshot Placeholder -->
+                            <img src="assets/images/12.webp" alt="Access Key and Secret Key" class="img-fluid mt-3">
+                        </li>
+                    </ol>
+
+                    <!-- DigitalOcean Key Generation -->
+                    <h3 id="digitalocean-key">DigitalOcean Bucket Key</h3>
+                    <ol>
+                        <li>
+                            <strong>Log in to DigitalOcean:</strong> Visit <a
+                                href="https://cloud.digitalocean.com/login" target="_blank">DigitalOcean Cloud</a> and
+                            log in with your account.
+                            <!-- Screenshot Placeholder -->
+                            <img src="assets/images/13.webp" alt="DigitalOcean Login Page" class="img-fluid mt-3">
+                        </li>
+                        <li>
+                            Navigate to <strong>Spaces Object Storage > Access Keys</strong> from the left-hand menu.
+                            <!-- Screenshot Placeholder -->
+                            <img src="assets/images/14.webp" alt="Spaces Access Keys in DigitalOcean"
+                                 class="img-fluid mt-3">
+                        </li>
+                        <li>
+                            Click <strong>Generate New Key</strong> and provide a descriptive name for the key.
+                            <!-- Screenshot Placeholder -->
+                            <img src="assets/images/15.png" alt="Generate New Key" class="img-fluid mt-3">
+                        </li>
+                        <li>
+                            Securely save the Access Key and Secret Key displayed. Like AWS, you won’t be able to view
+                            the secret key again.
+                            <!-- Screenshot Placeholder -->
+                            <img src="assets/images/16.webp" alt="Access Key and Secret Key in DigitalOcean"
+                                 class="img-fluid mt-3">
+                        </li>
+                    </ol>
+                    
+                    <!-- Google Service Account Key Generation -->
+                    <h3 id="google-key">Google Service Account Key (JSON)</h3>
+                    <ol>
+                        <li><strong>Log in to Google Cloud Console:</strong> Visit <a
+                                href="https://console.cloud.google.com/" target="_blank">Google Cloud Console</a> and
+                            log in with your Google account. <!-- Screenshot Placeholder --> <img
+                                    src="assets/images/gcp-1.webp" alt="Google Cloud Login Page" class="img-fluid mt-3">
+                        </li>
+                        <li> From the top navigation bar, select or create a project where you want to create the
+                            service account. <!-- Screenshot Placeholder --> <img
+                                    src="assets/images/gcp-2.webp" alt="Select or Create Project"
+                                    class="img-fluid mt-3"></li>
+                        <li> Navigate to <strong>IAM & Admin > Service Accounts</strong> from the left-hand menu.
+                            <!-- Screenshot Placeholder --> <img src="assets/images/gcp-3.webp"
+                                                                 alt="Service Accounts Menu" class="img-fluid mt-3">
+                        </li>
+                        <li> Click <strong>+ Create Service Account</strong> at the top.</li>
+
+                        <li> Enter a name and ID for your service account, then click <strong>Create and
+                            Continue</strong>. <!-- Screenshot Placeholder --> <img
+                                src="assets/images/gcp-4.webp" alt="Service Account Details"
+                                class="img-fluid mt-3"></li>
+                        <li> Grant the service account the storage permissions needed for the operations you plan to use,
+                            including bucket creation and public bucket IAM changes if configuring those through SmartSync.</li>
+                        <li> Click <strong>Done</strong> to finish creating the service account. You will be taken back
+                            to the list of service accounts.
+                        </li>
+                        <li> In the list, find your newly created service account, click the 3-dot menu on the right,
+                            and select <strong>Manage keys</strong>. <!-- Screenshot Placeholder --> <img
+                                    src="assets/images/gcp-5.webp" alt="Manage Keys" class="img-fluid mt-3">
+                        </li>
+                        <li> Under the <strong>Keys</strong> section, click <strong>Add Key > Create new key</strong>,
+                            select <strong>JSON</strong> as the key type, then click <strong>Create</strong>.
+                            <!-- Screenshot Placeholder --> <img src="assets/images/gcp-6.webp"
+                                                                 alt="Create JSON Key" class="img-fluid mt-3"></li>
+                        <li> Your browser will download a `.json` file containing your credentials. Store it securely —
+                            this is your service account key and should be treated like a password.
+                        </li>
+                    </ol>
+
+                    <!-- Bunny CDN API Key Generation -->
+                    <h3 id="bunny-key">Bunny CDN API Key</h3>
+                    <ol>
+                        <li>
+                            <strong>Log in to Bunny CDN:</strong> Visit <a
+                                href="https://bunny.net/" target="_blank">Bunny.net</a> and log in with your account credentials.
+                            <!-- Screenshot Placeholder -->
+                            <img src="assets/images/b1.png" alt="Bunny CDN Login Page" class="img-fluid mt-3">
+                        </li>
+                        <li>
+                            <strong>Navigate to Storage:</strong> From the dashboard, click on <strong>Storage</strong> in the left sidebar menu.
+                            <!-- Screenshot Placeholder -->
+                            <img src="assets/images/b2.png" alt="Bunny CDN Storage Menu" class="img-fluid mt-3">
+                        </li>
+                        <li>
+                            <strong>Create Storage Zone:</strong> Click the <strong>Add Storage Zone</strong> button and provide a name for your storage zone. Select your preferred region and click <strong>Add Storage Zone</strong>.
+                            <!-- Screenshot Placeholder -->
+                            <img src="assets/images/b3.png" alt="Create Storage Zone" class="img-fluid mt-3">
+                        </li>
+                        <li>
+                            <strong>Add Pull Zone:</strong> After creating the storage zone, navigate to the storage zone details and click on <strong>Connect Pull Zone</strong> or create a new Pull Zone. This will enable CDN delivery for your files.
+                            <!-- Screenshot Placeholder -->
+                        </li>
+                        <li>
+                            <strong>Access Account Settings:</strong> Click on your account name in the top-right corner and select <strong>Account Settings</strong> from the dropdown menu.
+                            <!-- Screenshot Placeholder -->
+                            <img src="assets/images/b5.png" alt="Account Settings Menu" class="img-fluid mt-3">
+                        </li>
+                        <li>
+                            <strong>Get API Key:</strong> In the Account Settings page, scroll down to find the <strong>API</strong> section. Click on <strong>Show</strong> next to the API Key field to reveal your API key, then copy it.
+                            <!-- Screenshot Placeholder -->
+                            <img src="assets/images/b6.png" alt="Copy API Key" class="img-fluid mt-3">
+                        </li>
+                        <li>
+                            Securely save your API Key. This key will be used to authenticate your WordPress plugin with Bunny CDN.
+                        </li>
+                    </ol>
+
+                </section>
+            </article>
+
+
+            <!-- Features Section -->
+            <article class="docs-article" id="features">
+                <header class="docs-header">
+                    <h1 class="docs-heading">How to Configure</h1>
+                </header>
+                <section class="docs-section">
+
+                    <!-- AWS Configuration -->
+                    <h3>AWS Configuration</h3>
+                    <p>The plugin provides a wizard to simplify the AWS configuration process. Follow the steps
+                        below:</p>
+                    <ol>
+                        <li>
+                            <strong>Select Cloud Config:</strong>
+                            On the menu of SmartSync Settings, select <strong>Cloudconfig</strong> .
+                            <!-- Screenshot Placeholder -->
+                            <img src="assets/images/17.webp" alt="AWS Select Provider" class="img-fluid mt-3">
+                        </li>
+                        <li>
+                            <strong>Select AWS as the Provider:</strong>
+                            On the first wizard page, select <strong>AWS</strong> as the provider. Enter your <strong>IAM
+                            Access Key</strong> and <strong>Secret Key</strong>.
+                            <!-- Screenshot Placeholder -->
+                            <img src="assets/images/18.webp" alt="AWS Select Provider" class="img-fluid mt-3">
+                        </li>
+                        <li>
+                            <strong>Choose a Bucket:</strong>
+                            On the second page, select whether to use an existing bucket or create a new one:
+                            <ul>
+                                <li>If using an existing bucket, select it from the dropdown.</li>
+                                <li>If creating a new bucket, enter the bucket name in the input field.</li>
+                            </ul>
+                            <!-- Screenshot Placeholder -->
+                            <img src="assets/images/19.webp" alt="AWS Bucket Selection" class="img-fluid mt-3">
+                        </li>
+                        <li>
+                            <strong>Enable CloudFront (Optional):</strong>
+                            On the third page, decide whether to use CloudFront for content delivery. If enabled, the
+                            plugin will configure it for you.
+                            <!-- Screenshot Placeholder -->
+                            <img src="assets/images/20.webp" alt="AWS CloudFront Option" class="img-fluid mt-3">
+                        </li>
+                        <li>
+                            <strong>Finish Setup:</strong>
+                            Complete the setup on the final page, which displays a confirmation message indicating that
+                            the configuration is successful.
+                            <!-- Screenshot Placeholder -->
+                        </li>
+                    </ol>
+
+                    <!-- DigitalOcean Configuration -->
+                    <h3>DigitalOcean Configuration</h3>
+                    <p>The plugin also supports DigitalOcean Spaces. Follow the steps below to configure:</p>
+                    <ol>
+                        <li>
+                            <strong>Select DigitalOcean as the Provider:</strong>
+                            On the first wizard page, select <strong>DigitalOcean</strong> as the provider. Enter your
+                            <strong>Access Key</strong> and <strong>Secret Key</strong>.
+                            <!-- Screenshot Placeholder -->
+                            <img src="assets/images/21.webp" alt="DigitalOcean Select Provider" class="img-fluid mt-3">
+                        </li>
+                        <li>
+                            <strong>Choose a Bucket:</strong>
+                            On the second page, select whether to use an existing bucket or create a new one:
+                            <ul>
+                                <li>If using an existing bucket, select it from the dropdown.</li>
+                                <li>If creating a new bucket, enter the bucket name in the input field.</li>
+                            </ul>
+                            <!-- Screenshot Placeholder -->
+                            <img src="assets/images/22.webp" alt="DigitalOcean Bucket Selection" class="img-fluid mt-3">
+                        </li>
+                        <li>
+                            <strong>Finish Setup:</strong>
+                            Complete the setup on the final page, which displays a confirmation message indicating that
+                            the configuration is successful.
+                            <!-- Screenshot Placeholder -->
+                            <img src="assets/images/23.webp" alt="DigitalOcean Setup Complete" class="img-fluid mt-3">
+                        </li>
+                    </ol>
+
+                    <!-- Bunny CDN Configuration -->
+                    <h3>Google Cloud Storage Configuration</h3>
+                    <p>Select <strong>Google Cloud</strong> and upload a service-account JSON file, or reuse the saved
+                        account when offered. Select an existing bucket or create a new one. New buckets use the
+                        <strong>US</strong> location; existing buckets retain the location returned by Google.
+                        SmartSync configures public bucket IAM for public delivery, so the account must permit that operation.</p>
+
+                    <h3>Cloudflare R2 Configuration</h3>
+                    <p>Select <strong>Cloudflare</strong>, enter the access key and secret, the R2 account storage endpoint,
+                        and the public CDN URL. The storage API endpoint and public URL are separate fields. Choose or create
+                        a bucket; SmartSync uses the <strong>auto</strong> storage region. CloudFront setup is only available for AWS.</p>
+
+                    <h3>Wasabi Configuration</h3>
+                    <p>Select <strong>Wasabi</strong>, enter the access key, secret, and bucket region before loading buckets.
+                        Choose an existing bucket or enter a new name in that region, then finish configuration.</p>
+
+                    <h3>Bunny CDN Configuration</h3>
+                    <p>Configure Bunny CDN to use its powerful edge storage and CDN capabilities for your WordPress media. Follow the steps below:</p>
+                    <ol>
+                        <li>
+                            <strong>Access WordPress Admin:</strong>
+                            Log in to your WordPress admin dashboard and navigate to the <strong>SmartSync</strong> menu.
+                            <!-- Screenshot Placeholder -->
+                            <!-- <img src="assets/images/bunny-07.webp" alt="SmartSync Menu" class="img-fluid mt-3"> -->
+                        </li>
+                        <li>
+                            <strong>Go to SmartSync Cloud Config:</strong>
+                            Click on <strong>Cloud Config</strong> in the SmartSync menu to access the configuration wizard.
+                            <!-- Screenshot Placeholder -->
+                            <!-- <img src="assets/images/bunny-08.webp" alt="SmartSync Cloud Config" class="img-fluid mt-3"> -->
+                        </li>
+                        <li>
+                            <strong>Select Bunny CDN as the Provider:</strong>
+                            On the first wizard page, select <strong>Bunny CDN</strong> as your cloud storage provider. Enter the <strong>API Key</strong> that you copied from your Bunny CDN account settings.
+                            <!-- Screenshot Placeholder -->
+                            <!-- <img src="assets/images/bunny-09.webp" alt="Select Bunny CDN and Enter API Key" class="img-fluid mt-3"> -->
+                        </li>
+                        <li>
+                            <strong>Select Storage Zone (Bucket):</strong>
+                            After authenticating with your API key, a dropdown will appear showing all available storage zones in your Bunny CDN account. Select the storage zone (bucket) you want to use for your WordPress media.
+                            <!-- Screenshot Placeholder -->
+                            <!-- <img src="assets/images/bunny-10.webp" alt="Select Storage Zone" class="img-fluid mt-3"> -->
+                        </li>
+                        <li>
+                            <strong>Select Pull Zone:</strong>
+                            Choose the Pull Zone that is connected to your selected storage zone. The Pull Zone is the CDN endpoint that will deliver your content globally.
+                            <!-- Screenshot Placeholder -->
+                            <!-- <img src="assets/images/bunny-11.webp" alt="Select Pull Zone" class="img-fluid mt-3"> -->
+                        </li>
+                        <li>
+                            <strong>Complete Setup:</strong>
+                            Click the <strong>Save Configuration</strong> button to finalize the setup. A confirmation message will appear indicating that Bunny CDN has been successfully configured.
+                            <!-- Screenshot Placeholder -->
+                            <!-- <img src="assets/images/bunny-12.webp" alt="Bunny CDN Configuration Complete" class="img-fluid mt-3"> -->
+                        </li>
+                        <li>
+                            <strong>You're Done!</strong> Your WordPress site is now configured to use Bunny CDN for media storage and delivery. You can start syncing your media files to Bunny CDN from the Settings page.
+                        </li>
+                    </ol>
+                </section>
+            </article>
+
+
+            <!-- Settings Section -->
+            <article class="docs-article" id="settings">
+                <header class="docs-header">
+                    <h1 class="docs-heading">Settings</h1>
+                </header>
+                <section class="docs-section">
+                    <p>The <strong>SmartSync</strong> settings page provides three tabs for managing your cloud storage
+                        configuration and syncing options. Below is an overview of each tab and its features.</p>
+
+                    <!-- General Tab -->
+                    <h3>1. General Tab</h3>
+                    <p>This tab contains tools for fetching analytics and clearing CloudFront cache (AWS only).</p>
+                    <ul>
+                        <li>
+                            <strong>Fetch Analytics:</strong> Click this button to view:
+                            <ul>
+                                <li>Total storage used (in MB or GB).</li>
+                                <li>Number of files in the cloud.</li>
+                                <li>Storage counts and sizes; billing cost is shown as unavailable because SmartSync does not query provider billing.</li>
+                            </ul>
+                            <!-- Screenshot Placeholder -->
+                            <img src="assets/images/24.webp" alt="Fetch Analytics Button" class="img-fluid mt-3">
+                        </li>
+                        <li>
+                            <strong>Clear CloudFront Cache:</strong> Available only for AWS configurations. Click this
+                            button to request invalidation of the configured CloudFront distribution.
+                            <!-- Screenshot Placeholder -->
+                            <img src="assets/images/25.webp" alt="Clear CloudFront Cache Button" class="img-fluid mt-3">
+                        </li>
+                    </ul>
+
+                    <!-- Media Tab -->
+                    <h3>2. Media Tab</h3>
+                    <p>Manage your media files and cloud sync settings in this tab.</p>
+                    <ul>
+                        <li>
+                            <strong>Use Cloud URL:</strong> Enable this switch to serve media files directly from the
+                            cloud instead of the site URL. This option is only available after syncing media to the
+                            cloud.
+                            <!-- Screenshot Placeholder -->
+                            <img src="assets/images/26.webp" alt="Use Cloud URL for Media" class="img-fluid mt-3">
+                        </li>
+                        <li>
+                            <strong>Automatically Delete Local Media After Upload:</strong> Enable this switch to
+                            remove local copies only after every file for an attachment uploads successfully and media CDN
+                            delivery is enabled with a valid URL. Failed uploads retain every local copy. This local cleanup
+                            keeps the cloud objects; deleting the attachment itself also deletes its tracked cloud objects.
+                            <!-- Screenshot Placeholder -->
+                            <img src="assets/images/27.webp" alt="Automatically Delete Local Media"
+                                 class="img-fluid mt-3">
+                        </li>
+                        <li>
+                            <strong>Sync Local to Cloud Media:</strong> Click this button to upload all local media
+                            files to the cloud.
+                            <!-- Screenshot Placeholder -->
+                            <img src="assets/images/28.webp" alt="Sync Local to Cloud Media" class="img-fluid mt-3">
+                        </li>
+                        <li>
+                            <strong>Sync Cloud to Local Media:</strong> Click this button to download all media files
+                            from the cloud to your local storage. Restore locally removed files before disabling media CDN,
+                            changing storage targets, or uninstalling SmartSync.
+                            <!-- Screenshot Placeholder -->
+                            <img src="assets/images/29.webp" alt="Sync Cloud to Local Media" class="img-fluid mt-3">
+                        </li>
+                    </ul>
+
+                    <!-- Assets Tab -->
+                    <h3>3. Assets Tab</h3>
+                    <p>Manage your website assets (e.g., JavaScript, CSS files) and cloud sync settings in this tab.</p>
+                    <ul>
+                        <li>
+                            <strong>Use Cloud URL:</strong> Enable this switch to serve assets directly from the cloud
+                            instead of the site URL. This option is only available after syncing assets to the cloud.
+                            <!-- Screenshot Placeholder -->
+                            <img src="assets/images/30.png" alt="Use Cloud URL for Assets" class="img-fluid mt-3">
+                        </li>
+                        <li>
+                            <strong>Sync Local to Cloud Assets:</strong> Click this button to upload all local assets to
+                            the cloud.
+                            <!-- Screenshot Placeholder -->
+                            <img src="assets/images/31.webp" alt="Sync Local to Cloud Assets" class="img-fluid mt-3">
+                        </li>
+                    </ul>
+                    <p>On multisite, media synchronization stays inside the current site's uploads directory and excludes
+                        other sites' media. Site administrators can restore only file types allowed by WordPress;
+                        restoring shared assets requires network administrator permission.</p>
+                </section>
+            </article>
+
+
+            <!-- Custom URL Section -->
+            <article class="docs-article" id="custom-url">
+                <header class="docs-header">
+                    <h1 class="docs-heading">Custom URL Configuration</h1>
+                </header>
+                <section class="docs-section">
+                    <p>The <strong>Custom URL</strong> configuration allows you to use a custom domain for serving
+                        content via AWS CloudFront. Follow these steps to configure and attach a custom domain with SSL:
+                    </p>
+
+                    <h3>Step 1: Access the Custom URL Settings</h3>
+                    <ol>
+                        <li>
+                            Configure AWS with CloudFront first, then open <strong>SmartSync Settings &gt; Custom CloudFront URL</strong>.
+                            <!-- Screenshot Placeholder -->
+                            <img src="assets/images/32.webp" alt="Custom URL Menu" class="img-fluid mt-3">
+                        </li>
+                    </ol>
+
+                    <h3>Step 2: Enter the Domain Name</h3>
+                    <ol>
+                        <li>
+                            Enter the domain name you want to use in the provided input field and click the <strong>Generate
+                            Certificate</strong> button. Enter a hostname such as <code>cdn.example.com</code>, without a URL scheme or path.
+                            <!-- Screenshot Placeholder -->
+                            <img src="assets/images/33.webp" alt="Domain Name Input" class="img-fluid mt-3">
+                        </li>
+                        <li>
+                            The plugin requests an ACM certificate and displays DNS records to add to your domain's DNS settings.
+                            Validation records can appear on a subsequent status check.
+                            <!-- Screenshot Placeholder -->
+                        </li>
+                    </ol>
+
+                    <h3>Step 3: Verify the DNS Records</h3>
+                    <ol>
+                        <li>
+                            Add the displayed certificate-validation CNAME records and point the custom domain's CNAME
+                            to the configured CloudFront hostname.
+
+                        </li>
+                        <li>
+                            Wait for the DNS changes to propagate. The plugin will automatically verify the records
+                            after propagation. If a request fails, use <strong>Retry DNS Check</strong>.
+                            <!-- Screenshot Placeholder -->
+                            <img src="assets/images/34.webp" alt="DNS Verification" class="img-fluid mt-3">
+                        </li>
+                    </ol>
+
+                    <h3>Step 4: Attach the Domain to CloudFront</h3>
+                    <ol>
+                        <li>
+                            Once the DNS records are verified, an <strong>Attach to CloudFront</strong> button will
+                            become enabled. Verification requires both an issued matching certificate and the correct CloudFront CNAME.
+                            <!-- Screenshot Placeholder -->
+                            <img src="assets/images/35.webp" alt="Attach to CloudFront Button" class="img-fluid mt-3">
+                        </li>
+                        <li>
+                            Click the button to associate your custom domain with the CloudFront distribution.
+                            <!-- Screenshot Placeholder -->
+                        </li>
+                    </ol>
+
+                    <h3>Step 5: Complete Configuration</h3>
+                    <p>After AWS accepts the update, the custom domain becomes the active CDN URL. CloudFront deployment
+                        and DNS propagation may still need time before the domain serves traffic.</p>
+                    <h3>Deactivation and Uninstall</h3>
+                    <p>Deactivation cancels queued synchronization and keeps configuration. Uninstall removes SmartSync's
+                        local settings, credentials, queue, and offload metadata. It does not restore local files or delete
+                        remote objects. Restore any locally removed media before uninstalling.</p>
+
+                </section>
+            </article>
+
+        </div>
+    </div><!--//docs-content-->
+
+    <footer class="footer">
+        <div class="container text-center py-5">
+            <small class="copyright">Designed with <span class="sr-only">love</span><i class="fas fa-heart"
+                                                                                       style="color: #fb866a;"></i> By
+                <a href="https://infinitietech.com/" target="_blank">Infinitie Technologies</a></small>
+        </div>
+    </footer>
+</div><!--//docs-wrapper-->
+
+<!-- Javascript -->
+<script src="assets/plugins/popper.min.js"></script>
+<script src="assets/plugins/bootstrap/js/bootstrap.min.js"></script>
+
+
+<!-- Page Specific JS -->
+<script src="assets/plugins/smoothscroll.min.js"></script>
+<script src="assets/plugins/simplelightbox/simple-lightbox.min.js"></script>
+<script src="assets/plugins/gumshoe/gumshoe.polyfills.min.js"></script>
+<script src="assets/js/docs.js"></script>
+
+</body>
+</html> 
+
