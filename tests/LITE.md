@@ -1,6 +1,8 @@
 # SmartSync Lite 1.8.0 verification
 
-The `lite` branch retains Amazon S3, DigitalOcean Spaces, Wasabi and Bunny **media** operations. Google Cloud Storage, Cloudflare R2, Amazon CloudFront (including custom domains, certificates, DNS and cache invalidation), and JS/CSS synchronization have disabled **Pro only** previews and upgrade links. The maintained Pro integration implementations and Google dependencies are removed.
+The independent [SmartSync Lite repository](https://github.com/Infinitietechnologies/wp-smart-sync-lite), developed on `main`, retains Amazon S3, DigitalOcean Spaces, Wasabi and Bunny **media** operations. Google Cloud Storage, Cloudflare R2, Amazon CloudFront (including custom domains, certificates, DNS and cache invalidation), and JS/CSS synchronization have disabled **Pro only** previews and upgrade links. The maintained Pro integration implementations and Google dependencies are removed.
+
+Lite's complete six-commit source history through `0c6414affa07287734ad2e2ad8ced66cb32e4eab` was preserved when moving from the former `lite` branch of the full-edition repository. Full-edition release tags were not copied into Lite. Repository separation changes project location and documentation, without changing the verified plugin runtime or the existing Lite ZIP.
 
 Legacy settings remain readable for ownership tracking and uninstall cleanup. They do not authorize a Pro client, delivery URL or worker. Existing offloaded media on a Pro-only configuration must be restored using the full edition before switching. Both editions share class names and state; activate only one edition at a time. The install directory remains `smartsync` for upgrade continuity; the artifact is `smartsync-lite-1.8.0.zip`.
 

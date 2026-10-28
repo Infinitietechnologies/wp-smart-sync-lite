@@ -1,4 +1,4 @@
-> This is the SmartSync Lite branch. See [LITE.md](LITE.md) for current edition scope and verification. Historical full-edition reports and Pro-only fixtures do not establish Lite behavior. CI remains disabled.
+> This is the independent SmartSync Lite repository, `Infinitietechnologies/wp-smart-sync-lite`, developed on `main`. See [LITE.md](LITE.md) for current edition scope and verification. Historical full-edition reports and Pro-only fixtures do not establish Lite behavior. CI remains disabled.
 
 # SmartSync verification
 

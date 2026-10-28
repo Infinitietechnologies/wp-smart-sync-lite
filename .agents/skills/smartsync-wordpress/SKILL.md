@@ -5,13 +5,13 @@ description: Maintain the SmartSync WordPress media-offloading and CDN plugin us
 
 # SmartSync WordPress
 
-This checkout's `lite` branch is SmartSync Lite. Only Amazon S3, DigitalOcean Spaces, Wasabi and Bunny media operations are functional. Google Cloud Storage, Cloudflare R2, CloudFront/certificate provisioning and JS/CSS asset synchronization are Pro-only previews. Historical references describe the full edition; do not reintroduce those implementations or dependencies into Lite. Keep server, background-worker and UI restrictions consistent.
+This independent repository is SmartSync Lite (`Infinitietechnologies/wp-smart-sync-lite`), with `main` as its default branch. Only Amazon S3, DigitalOcean Spaces, Wasabi and Bunny media operations are functional. Google Cloud Storage, Cloudflare R2, CloudFront/certificate provisioning and JS/CSS asset synchronization are Pro-only previews. Historical references describe the full edition; do not reintroduce those implementations or dependencies into Lite. Keep server, background-worker and UI restrictions consistent.
 
 Use this skill to make scoped changes in the SmartSync plugin while following its actual PHP, database, scheduler, and JavaScript contracts.
 
 ## Locate the plugin and choose context
 
-Find `aws-s3-smartsync-wp.php`, `composer.json`, and `src/SMARL_SmartSync.php` in the workspace. The original checkout is `C:/projects/wordpress/smart-sync/Plugin`; use the current checkout when working on a copy. All source paths in these references are relative to that plugin root. Read applicable `AGENTS.md` instructions first.
+Find `aws-s3-smartsync-wp.php`, `composer.json`, and `src/SMARL_SmartSync.php` in the workspace. The Lite checkout is `C:/projects/wordpress/smart-sync/Lite`; the full edition remains separately at `C:/projects/wordpress/smart-sync/Plugin`. Use the current checkout when working on a copy. All source paths in these references are relative to that plugin root. Read applicable `AGENTS.md` instructions first.
 
 Read [architecture.md](references/architecture.md) for bootstrap, persistence, dependency, or lifecycle changes. Load only the additional context needed:
 
