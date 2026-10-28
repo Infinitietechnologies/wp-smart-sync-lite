@@ -3,10 +3,11 @@ $ErrorActionPreference = 'Stop'
 Add-Type -AssemblyName System.IO.Compression
 Add-Type -AssemblyName System.IO.Compression.FileSystem
 $pluginRoot = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
+$pluginSlug = 'smartsync-lite-media-offloader-and-assets-cdn'
 $bootstrap = Get-Content -Raw -LiteralPath (Join-Path $pluginRoot 'aws-s3-smartsync-wp.php')
 $version = [regex]::Match($bootstrap, 'Version:\s*([0-9]+(?:\.[0-9]+)+)').Groups[1].Value
 if (!$version) { throw 'Plugin version is missing.' }
-if (!$OutputPath) { $OutputPath = Join-Path $pluginRoot ('dist/smartsync-lite-' + $version + '.zip') }
+if (!$OutputPath) { $OutputPath = Join-Path $pluginRoot ('dist/' + $pluginSlug + '.' + $version + '.zip') }
 $archivePath = [IO.Path]::GetFullPath($OutputPath)
 foreach ($requiredFile in @('vendor/autoload.php', 'vendor/woocommerce/action-scheduler/action-scheduler.php', 'composer.lock')) {
     if (!(Test-Path -LiteralPath (Join-Path $pluginRoot $requiredFile))) { throw ('Install Composer dependencies before packaging: ' + $requiredFile) }
@@ -25,7 +26,7 @@ try {
     foreach ($sourceFile in $sourceFiles) {
         $relative = $sourceFile.FullName.Substring($pluginRoot.Length + 1).Replace('\', '/')
         if ($relative -match '(^|/)(\.idea|\.vscode|\.git|node_modules)(/|$)|(^|/)\.DS_Store$|\.log$') { continue }
-        [IO.Compression.ZipFileExtensions]::CreateEntryFromFile($archive, $sourceFile.FullName, ('smartsync/' + $relative), [IO.Compression.CompressionLevel]::Optimal) | Out-Null
+        [IO.Compression.ZipFileExtensions]::CreateEntryFromFile($archive, $sourceFile.FullName, ($pluginSlug + '/' + $relative), [IO.Compression.CompressionLevel]::Optimal) | Out-Null
         $fileCount++
     }
 } finally {
@@ -34,11 +35,11 @@ try {
 }
 $verification = [IO.Compression.ZipFile]::OpenRead($archivePath)
 try {
-    foreach ($requiredEntry in @('smartsync/aws-s3-smartsync-wp.php', 'smartsync/vendor/autoload.php', 'smartsync/vendor/woocommerce/action-scheduler/action-scheduler.php')) {
+    foreach ($requiredEntry in @("$pluginSlug/aws-s3-smartsync-wp.php", "$pluginSlug/vendor/autoload.php", "$pluginSlug/vendor/woocommerce/action-scheduler/action-scheduler.php")) {
         if (!$verification.GetEntry($requiredEntry)) { throw ('Release entry missing: ' + $requiredEntry) }
     }
     foreach ($entry in $verification.Entries) {
-        if ($entry.FullName -match '^smartsync/(?:tests|\.agents|\.git|dist)/') { throw ('Development file included: ' + $entry.FullName) }
+        if ($entry.FullName -match ('^' + [regex]::Escape($pluginSlug) + '/(?:tests|\.agents|\.git|dist)/')) { throw ('Development file included: ' + $entry.FullName) }
     }
 } finally { $verification.Dispose() }
 Write-Output ('Packaged ' + $fileCount + ' files: ' + $archivePath)

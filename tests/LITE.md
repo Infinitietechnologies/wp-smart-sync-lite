@@ -4,7 +4,9 @@ The independent [SmartSync Lite repository](https://github.com/Infinitietechnolo
 
 Lite's complete six-commit source history through `0c6414affa07287734ad2e2ad8ced66cb32e4eab` was preserved when moving from the former `lite` branch of the full-edition repository. Full-edition release tags were not copied into Lite. Repository separation changes project location and documentation, without changing the verified plugin runtime or the existing Lite ZIP.
 
-Legacy settings remain readable for ownership tracking and uninstall cleanup. They do not authorize a Pro client, delivery URL or worker. Existing offloaded media on a Pro-only configuration must be restored using the full edition before switching. Both editions share class names and state; activate only one edition at a time. The install directory remains `smartsync` for upgrade continuity; the artifact is `smartsync-lite-1.8.0.zip`.
+Legacy settings remain readable for ownership tracking and uninstall cleanup. They do not authorize a Pro client, delivery URL or worker. Existing offloaded media on a Pro-only configuration must be restored using the full edition before switching. Both editions share class names and state; activate only one edition at a time.
+
+WordPress.org release preparation verified the live version is 1.4 and the existing main file is `aws-s3-smartsync-wp.php`. Directory packages now use the existing WordPress.org slug `smartsync-lite-media-offloader-and-assets-cdn`, preserving the installed plugin basename. The directory artifact is `smartsync-lite-media-offloader-and-assets-cdn.1.8.0.zip`. The earlier GitHub-oriented archive below used `smartsync/`; its activation check does not establish a WordPress.org upgrade.
 
 Verified on 2026-10-28:
 
@@ -20,6 +22,7 @@ Verified on 2026-10-28:
 | Composer | Strict validation, platform requirements and locked dependency audit passed |
 | Browser previews | Settings, provider setup and CloudFront preview checked at 1280px and 390px; controls disabled, no horizontal overflow |
 | Extracted Lite ZIP, WordPress 7.1.3 / PHP 8.5 | Activated successfully; SDKs loaded from the extracted package; core/AJAX/scheduler/schema checks passed; Pro clients absent; no PHP debug output |
+| WordPress.org 1.4 → 1.8.0, WordPress 7.1.3 / PHP 8.1 | Installed the downloaded public 1.4 ZIP, seeded synthetic legacy settings, upgraded through the real WordPress plugin installer; retained the installed basename, active state, S3 settings and existing data; schema 3 and an empty debug log verified |
 
 Lite-specific regressions cover crafted provider discovery/configuration, all retired Pro AJAX actions, CloudFront requests, asset upload/restore/delivery requests, inherited asset jobs, injected JS queue rows, preserved legacy Pro settings, absence of asset URL hooks, disabled provider choices, private settings excluded from previews, badges and exact upgrade URLs.
 
@@ -27,4 +30,6 @@ The native WordPress fixtures use real MySQL, WordPress hooks/options/roles/nonc
 
 Commands: `php tests/run.php`, `npm test --prefix tests/admin`, `composer test --working-dir=tests/static`, `composer validate --strict --no-check-publish`, `composer check-platform-reqs`, `composer audit --locked`, and `./tests/build-plugin.ps1`. Run native integration files through WP-CLI only in their guarded disposable fixture paths, as described in [README.md](README.md).
 
-The verified Lite ZIP contains 6,353 entries. Its maintained files match the Lite source. SHA-256: `6e969a3a589beddca31bd8030039516a590587bd4e3e1738ef3a3d4699e1b5a2`.
+The earlier GitHub-oriented Lite ZIP contains 6,353 entries. Its maintained files matched that release source. SHA-256: `6e969a3a589beddca31bd8030039516a590587bd4e3e1738ef3a3d4699e1b5a2`.
+
+The WordPress.org update ZIP contains 6,354 entries and uses the existing directory slug. Its maintained files match the updated source, including the four operational providers' external-service disclosures. SHA-256: `f0f6cd3ee7e52c9188ea361412eba0a26e050a84b974f610499c353bb699a2ef`. See [RELEASING.md](../RELEASING.md) for publication and credential steps.
