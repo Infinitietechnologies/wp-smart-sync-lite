@@ -4,12 +4,30 @@ if (!defined('ABSPATH')) exit;
 
 use Google\Cloud\Storage\StorageClient;
 use Google\Auth\Credentials\ServiceAccountCredentials;
+use Google\Auth\HttpHandler\HttpHandlerFactory;
+use GuzzleHttp\Client;
 use SmartSyncS3\Helpers\SMARL_Helper;
+use SmartSyncS3\Exceptions\SMARL_ProviderException;
 use RuntimeException;
 
 class SMARLI_GoogleService
 {
     public StorageClient $storage;
+
+    /** Opaque reference binds an explicit reveal request to the credential shown on the current page. */
+    public static function credentialReference(string $path): string
+    {
+        return hash_hmac('sha256', 'smartsync-google-preview:' . $path, wp_salt('auth'));
+    }
+
+    public static function redactedPreview(array $credentials): array
+    {
+        $public = ['type', 'project_id', 'client_email', 'auth_uri', 'token_uri', 'auth_provider_x509_cert_url', 'client_x509_cert_url', 'universe_domain'];
+        $preview = [];
+        foreach ($credentials as $key => $value) $preview[$key] = in_array($key, $public, true) && is_string($value)
+            ? $value : __('[Hidden]', 'smartsync-lite-media-offloader-and-assets-cdn');
+        return $preview;
+    }
 
     public function __construct($path)
     {
@@ -17,7 +35,15 @@ class SMARLI_GoogleService
         if ($credentials === false) throw new RuntimeException('Upload a valid Google service account JSON file.');
         // Explicit credentials avoid changing authentication for other Google plugins.
         $fetcher = new ServiceAccountCredentials([StorageClient::FULL_CONTROL_SCOPE, 'https://www.googleapis.com/auth/iam'], $credentials);
-        $this->storage = new StorageClient(['credentialsFetcher' => $fetcher, 'projectId' => $credentials['project_id'], 'requestTimeout' => 120]);
+        // OAuth token exchange and Storage API calls must use the same trusted CA configuration.
+        $httpHandler = HttpHandlerFactory::build(new Client(SMARL_Helper::cloudHttpOptions()));
+        $this->storage = new StorageClient([
+            'credentialsFetcher' => $fetcher,
+            'projectId' => $credentials['project_id'],
+            'requestTimeout' => 120,
+            'httpHandler' => $httpHandler,
+            'authHttpHandler' => $httpHandler,
+        ]);
     }
 
     public function getBuckets(): array
@@ -82,9 +108,11 @@ class SMARLI_GoogleService
         $file = $_FILES['service_json'];
         if (!is_array($file) || ($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK
             || !is_string($file['tmp_name'] ?? null) || !is_uploaded_file($file['tmp_name'])
-            || strtolower(pathinfo((string) $file['name'], PATHINFO_EXTENSION)) !== 'json'
-            || (int) ($file['size'] ?? 0) <= 0 || (int) $file['size'] > 1048576) throw new RuntimeException('Upload a service account JSON file smaller than 1 MB.');
-        $credentials = self::getServiceJSON($file['tmp_name']);
+            || !is_string($file['name'] ?? null) || !in_array(strtolower(pathinfo($file['name'], PATHINFO_EXTENSION)), ['json', 'p12'], true)
+            || (int) ($file['size'] ?? 0) <= 0 || (int) $file['size'] > 1048576
+            || filesize($file['tmp_name']) > 1048576) throw new SMARL_ProviderException(__('Upload one service-account .json or .p12 file no larger than 1 MB.', 'smartsync-lite-media-offloader-and-assets-cdn'));
+        $credentials = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION)) === 'p12'
+            ? self::readP12Credentials($file['tmp_name']) : self::getServiceJSON($file['tmp_name']);
         if ($credentials === false) throw new RuntimeException('Invalid Google service account JSON.');
         $lock = SMARL_Helper::acquireSyncLock();
         if ($lock === null) throw new RuntimeException('Another cloud configuration request is running. Try the upload again shortly.');
@@ -112,6 +140,43 @@ class SMARLI_GoogleService
             if (is_string($previous) && $previous !== $path && !in_array($previous, $pinned, true) && ($previousReal === false || $previousReal !== $activeReal)) self::deleteCredentialFile($previous);
             return ['path' => $path, 'selectionToken' => $token];
         } finally { SMARL_Helper::releaseSyncLock($lock); }
+    }
+
+    /** Convert a P12 key into the same encrypted credential representation used for JSON uploads. */
+    private static function readP12Credentials(string $path): array
+    {
+        if (!function_exists('openssl_pkcs12_read')) throw new SMARL_ProviderException(__('P12 keys require the PHP OpenSSL extension. Enable it or upload a JSON key.', 'smartsync-lite-media-offloader-and-assets-cdn'));
+        $email = is_string($_POST['google_p12_email'] ?? null) ? trim(wp_unslash($_POST['google_p12_email'])) : '';
+        $project = is_string($_POST['google_p12_project'] ?? null) ? trim(wp_unslash($_POST['google_p12_project'])) : '';
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) throw new SMARL_ProviderException(__('Enter the service-account email for this P12 key.', 'smartsync-lite-media-offloader-and-assets-cdn'));
+        if (!preg_match('/^[a-z][a-z0-9:._-]{4,126}[a-z0-9]$/D', $project)) throw new SMARL_ProviderException(__('Enter the Google Cloud project ID, not its display name or project number.', 'smartsync-lite-media-offloader-and-assets-cdn'));
+        $password = $_POST['google_p12_password'] ?? '';
+        if (!is_string($password) || strlen($password) > 2048) throw new SMARL_ProviderException(__('Enter a valid P12 key password.', 'smartsync-lite-media-offloader-and-assets-cdn'));
+        $password = wp_unslash($password);
+        $raw = file_get_contents($path);
+        if ($raw === false) throw new SMARL_ProviderException(__('The P12 key could not be read. Choose the file again.', 'smartsync-lite-media-offloader-and-assets-cdn'));
+        self::drainOpenSslErrors();
+        $parts = [];
+        $read = @openssl_pkcs12_read($raw, $parts, $password === '' ? 'notasecret' : $password);
+        $unsupported = str_contains(strtolower(self::drainOpenSslErrors()), 'unsupported');
+        if (!$read) throw new SMARL_ProviderException($unsupported
+            ? __('This P12 uses encryption unsupported by this PHP OpenSSL installation. Download a JSON key from Google Cloud, or re-export the P12 using modern encryption.', 'smartsync-lite-media-offloader-and-assets-cdn')
+            : __('The P12 key could not be opened. Check its password and choose the original service-account key file. A blank password uses Google\'s default, notasecret.', 'smartsync-lite-media-offloader-and-assets-cdn'));
+        $key = isset($parts['pkey']) && is_string($parts['pkey']) ? @openssl_pkey_get_private($parts['pkey']) : false;
+        $details = $key !== false ? openssl_pkey_get_details($key) : false;
+        // PKCS12 decoding already exports PKCS8 PEM; re-exporting unnecessarily requires openssl.cnf on Windows.
+        $private = is_string($parts['pkey'] ?? null) ? $parts['pkey'] : '';
+        if ($key === false || !is_array($details) || $details['type'] !== OPENSSL_KEYTYPE_RSA
+            || !isset($parts['cert']) || !is_string($parts['cert']) || !@openssl_x509_check_private_key($parts['cert'], $key)
+            || !str_contains($private, '-----BEGIN PRIVATE KEY-----')) throw new SMARL_ProviderException(__('This P12 must contain a matching RSA private key and service-account certificate.', 'smartsync-lite-media-offloader-and-assets-cdn'));
+        return ['type' => 'service_account', 'project_id' => $project, 'client_email' => $email, 'private_key' => $private, 'token_uri' => 'https://oauth2.googleapis.com/token'];
+    }
+
+    private static function drainOpenSslErrors(): string
+    {
+        $errors = [];
+        while (($error = openssl_error_string()) !== false) $errors[] = $error;
+        return implode(' ', $errors);
     }
 
     public static function getServiceJSON($path): array|false

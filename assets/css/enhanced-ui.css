@@ -1,11 +1,26 @@
 /* SmartSync Enhanced UI CSS */
 
 /* Improved Typography */
+.smartsync-wrap .smartsync-upload-mode { width: 100%; margin-bottom: 18px; }
+.smartsync-wrap .smartsync-upload-mode label { display: block; margin-bottom: 8px; font-weight: 600; }
+.smartsync-wrap .smartsync-upload-mode select { min-height: 42px; border-radius: 7px; }
+.smartsync-wrap .smartsync-upload-mode .description { margin-top: 8px; }
 .smartsync-wrap {
+    --smartsync-container-width: 100%;
+    width: 100%;
+    min-width: 0;
+    max-width: var(--smartsync-container-width);
+    margin-inline: auto;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
     line-height: 1.6;
     color: #333;
 }
+
+/* Match container-md sizing without loading Bootstrap into WordPress admin. */
+@media (min-width: 768px) { .smartsync-wrap { --smartsync-container-width: 720px; } }
+@media (min-width: 992px) { .smartsync-wrap { --smartsync-container-width: 960px; } }
+@media (min-width: 1200px) { .smartsync-wrap { --smartsync-container-width: 1140px; } }
+@media (min-width: 1400px) { .smartsync-wrap { --smartsync-container-width: 1320px; } }
 
 .smartsync-wrap,
 .smartsync-wrap * {
@@ -25,13 +40,6 @@
 .smartsync-wrap .smartsync-breadcrumbs > * {
     max-width: 100%;
 }
-
-/* WordPress hides .spinner until .is-active; this indicator owns its active state. */
-.smartsync-wrap .smartsync-background-indicator .spinner {
-    visibility: visible;
-    float: none;
-}
-
 
 .smartsync-wrap .mt-5{
     margin-top: 5px;
@@ -79,9 +87,9 @@
 
 @media (max-width: 600px) {
     .smartsync-wrap .smartsync-background-indicator {
-        position: static;
-        max-width: 100%;
-        margin: 10px 0;
+        bottom: max(12px, env(safe-area-inset-bottom));
+        inset-inline-end: 12px;
+        max-width: calc(100% - 24px);
     }
 
     .smartsync-wrap .smartsync-progress-text,

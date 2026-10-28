@@ -20,6 +20,20 @@ use InvalidArgumentException;
 
 class SMARL_Helper
 {
+    /** Request-owned leases, including their original blog's options table. */
+    private static array $requestSyncLocks = [];
+    private static bool $syncLockCleanupRegistered = false;
+
+    /** Keep SDK requests verified, using WordPress's CA bundle when PHP has no configured trust store. */
+    public static function cloudHttpOptions(): array {
+        $options = ['connect_timeout' => 10, 'timeout' => 120];
+        $bundle = ABSPATH . (defined('WPINC') ? WPINC : 'wp-includes') . '/certificates/ca-bundle.crt';
+        if (!ini_get('curl.cainfo') && !ini_get('openssl.cafile') && !ini_get('openssl.capath')
+            && !getenv('SSL_CERT_FILE') && !getenv('SSL_CERT_DIR') && is_readable($bundle)) {
+            $options['verify'] = $bundle;
+        }
+        return $options;
+    }
 
     /** Object ownership follows the stable storage address, not rotating credentials or CDN settings. */
     public static function storageTargetFingerprint(\SmartSyncS3\Models\SMARL_CloudConfig $config): string {
@@ -51,7 +65,7 @@ class SMARL_Helper
         }
     }
 
-    /** A bulk copy may transfer ownership only after every tracked key was copied successfully. */
+    /** Every tracked key needs a completed copy or a receipt matching its current local contents. */
     public static function bindCompletedOffloadedFiles(\SmartSyncS3\Models\SMARL_CloudConfig $config, string $runId): void {
         global $wpdb;
         $fingerprint = self::storageTargetFingerprint($config);
@@ -68,6 +82,17 @@ class SMARL_Helper
                 $rows = $wpdb->get_results($wpdb->prepare("SELECT relative_path FROM $table WHERE run_id = %s AND status = %s AND relative_path IN ($placeholders)", array_merge([$runId, 'completed'], $keys)), ARRAY_A);
                 if ($wpdb->last_error !== '') throw new \RuntimeException(__('Unable to verify copied attachment files.', 'smartsync-lite-media-offloader-and-assets-cdn'));
                 $completed = array_fill_keys(array_column($rows ?: [], 'relative_path'), true);
+                $verify = [];
+                foreach ($keys as $key) {
+                    if (isset($completed[$key])) continue;
+                    try { $verify[] = ['path' => self::resolveLocalPath($key), 'relative_path' => $key]; }
+                    catch (\InvalidArgumentException $error) { continue; }
+                }
+                if ($verify) {
+                    $plan = \SmartSyncS3\Models\SMARL_UploadHistory::plan($verify, $config, false);
+                    $pending = array_fill_keys(array_column($plan['files'], 'relative_path'), true);
+                    foreach ($verify as $file) if (!isset($pending[$file['relative_path']])) $completed[$file['relative_path']] = true;
+                }
                 if (count(array_filter($keys, static fn(string $key): bool => isset($completed[$key]))) === count($keys)) self::saveOffloadTarget((int) $id, $fingerprint);
             }
             if (count($ids) < 100) return;
@@ -409,25 +434,79 @@ class SMARL_Helper
         // Request-local option caches can outlive another request's lease. The database is authoritative.
         $raw = $wpdb->get_var($wpdb->prepare("SELECT option_value FROM {$wpdb->options} WHERE option_name = %s", $name));
         $existing = maybe_unserialize($raw);
-        if ($raw !== null && (!is_array($existing) || !is_string($existing['token'] ?? null) || (int) ($existing['expires'] ?? 0) <= $now)) {
+        if ($raw !== null && (!is_array($existing) || !is_string($existing['token'] ?? null) || (int) ($existing['expires'] ?? 0) <= $now || self::isPreviousLocalServerLock($existing))) {
             $wpdb->query($wpdb->prepare("DELETE FROM {$wpdb->options} WHERE option_name = %s AND option_value = %s", $name, $raw));
         }
         wp_cache_delete($name, 'options');
         wp_cache_delete('notoptions', 'options');
         $token = bin2hex(random_bytes(16));
-        return add_option($name, ['token' => $token, 'expires' => $now + $ttl], '', false) ? $token : null;
+        $lease = ['token' => $token, 'expires' => $now + $ttl];
+        if (PHP_SAPI === 'cli-server') $lease['server_pid'] = getmypid();
+        if (!add_option($name, $lease, '', false)) return null;
+        self::$requestSyncLocks[$token] = $wpdb->options;
+        if (!self::$syncLockCleanupRegistered) {
+            // exit()/fatal errors can bypass finally. Run before other WordPress
+            // shutdown work, and again after it for leases acquired during shutdown.
+            add_action('shutdown', [self::class, 'releaseRequestSyncLocks'], -PHP_INT_MAX);
+            register_shutdown_function([self::class, 'releaseRequestSyncLocks']);
+            // WordPress's earlier fatal-error handler can exit before shutdown hooks.
+            add_filter('wp_php_error_message', static function ($message) {
+                self::releaseRequestSyncLocks();
+                return $message;
+            }, -PHP_INT_MAX);
+            self::$syncLockCleanupRegistered = true;
+        }
+        return $token;
     }
 
     public static function releaseSyncLock(string $token): void {
         global $wpdb;
         $name = 'smarl_sync_lock';
-        $raw = $wpdb->get_var($wpdb->prepare("SELECT option_value FROM {$wpdb->options} WHERE option_name = %s", $name));
+        $table = self::$requestSyncLocks[$token] ?? $wpdb->options;
+        $raw = $wpdb->get_var($wpdb->prepare("SELECT option_value FROM {$table} WHERE option_name = %s", $name));
         $value = maybe_unserialize($raw);
         if (is_array($value) && is_string($value['token'] ?? null) && hash_equals($value['token'], $token)) {
-            $wpdb->query($wpdb->prepare("DELETE FROM {$wpdb->options} WHERE option_name = %s AND option_value = %s", $name, $raw));
+            if ($wpdb->query($wpdb->prepare("DELETE FROM {$table} WHERE option_name = %s AND option_value = %s", $name, $raw)) !== false) unset(self::$requestSyncLocks[$token]);
+        } else {
+            unset(self::$requestSyncLocks[$token]);
         }
-        wp_cache_delete($name, 'options');
-        wp_cache_delete('notoptions', 'options');
+        if ($table === $wpdb->options) {
+            wp_cache_delete($name, 'options');
+            wp_cache_delete('notoptions', 'options');
+        }
+    }
+
+    /** Best-effort cleanup never releases a successor's or another request's lease. */
+    public static function releaseRequestSyncLocks(): void {
+        foreach (array_keys(self::$requestSyncLocks) as $token) {
+            try { self::releaseSyncLock($token); }
+            catch (\Throwable $error) { /* Expiry remains the fallback if the database is unavailable. */ }
+        }
+    }
+
+    /** Status is distinct from sync progress: a stopped transfer/configuration can still own a lease. */
+    public static function syncLockStatus(): array {
+        global $wpdb;
+        $raw = $wpdb->get_var($wpdb->prepare("SELECT option_value FROM {$wpdb->options} WHERE option_name = %s", 'smarl_sync_lock'));
+        $lock = maybe_unserialize($raw);
+        if (is_array($lock) && self::isPreviousLocalServerLock($lock)) {
+            // The built-in server handles one request at a time per process. An
+            // unowned lease from this same process belongs to an earlier request.
+            $deleted = $wpdb->query($wpdb->prepare("DELETE FROM {$wpdb->options} WHERE option_name = %s AND option_value = %s", 'smarl_sync_lock', $raw));
+            if ($deleted > 0) {
+                wp_cache_delete('smarl_sync_lock', 'options');
+                wp_cache_delete('notoptions', 'options');
+                $lock = null;
+            } else {
+                $lock = maybe_unserialize($wpdb->get_var($wpdb->prepare("SELECT option_value FROM {$wpdb->options} WHERE option_name = %s", 'smarl_sync_lock')));
+            }
+        }
+        $seconds = is_array($lock) && is_string($lock['token'] ?? null) && $lock['token'] !== '' ? max(0, (int) ($lock['expires'] ?? 0) - time()) : 0;
+        return ['busy' => $seconds > 0, 'retry_after' => $seconds];
+    }
+    private static function isPreviousLocalServerLock(array $lock): bool {
+        return PHP_SAPI === 'cli-server' && isset($lock['server_pid']) && $lock['server_pid'] === getmypid()
+            && is_string($lock['token'] ?? null) && !isset(self::$requestSyncLocks[$lock['token']]);
     }
 
     public static function formatBytes(int $bytes): string {

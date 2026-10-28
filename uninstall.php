@@ -60,8 +60,9 @@ function smarl_uninstall_site(): void
         $wpdb->delete($actions, ['hook' => 'process_s3_sync_batch'], ['%s']);
     }
     $wpdb->query("DROP TABLE IF EXISTS `{$wpdb->prefix}smarl_file_sync_queue`");
+    $wpdb->query("DROP TABLE IF EXISTS `{$wpdb->prefix}smarl_upload_history`");
 
-    foreach (['smarl_settings', 'smarl_sync_settings', 'custom_url_option', 'smarl_cloudfront_pending', 'service_json_path_temp', 'smarl_db_version', 'smarl_sync_lock', 'smarl_queue_generation', 'aws_s3_cloudfront_settings', 'use_aws'] as $option) {
+    foreach (['smarl_settings', 'smarl_sync_settings', 'custom_url_option', 'smarl_cloudfront_pending', 'smarl_aws_discovery_region', 'service_json_path_temp', 'smarl_db_version', 'smarl_sync_lock', 'smarl_queue_generation', 'aws_s3_cloudfront_settings', 'use_aws'] as $option) {
         delete_option($option);
     }
     foreach (['_smarl_offloaded_files', '_smarl_offload_error', '_smarl_offload_target'] as $metaKey) {

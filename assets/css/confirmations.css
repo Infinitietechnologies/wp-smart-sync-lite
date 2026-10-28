@@ -1,0 +1,28 @@
+html.smartsync-confirm-open { overflow: hidden; }
+html.smartsync-confirm-open.smartsync-confirm-gutter { scrollbar-gutter: stable; }
+.smartsync-confirm-dialog { --confirm-accent: #195fb9; --confirm-tint: #edf4ff; box-sizing: border-box; width: min(440px, calc(100% - 32px)); max-height: calc(100dvh - 48px); margin: auto; padding: 0; border: 1px solid #dce5f1; border-radius: 18px; background: #fff; color: #21354f; box-shadow: 0 24px 80px #10264233; font: 13px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; overflow: auto; opacity: 0; transform: translateY(8px) scale(.98); transition: opacity 180ms ease, transform 180ms ease; }
+.smartsync-confirm-dialog *, .smartsync-confirm-dialog *::before { box-sizing: border-box; }
+.smartsync-confirm-dialog::backdrop { background: #15294100; backdrop-filter: blur(3px); transition: background-color 180ms ease; }
+.smartsync-confirm-dialog.is-open { opacity: 1; transform: translateY(0) scale(1); }
+.smartsync-confirm-dialog.is-open::backdrop { background-color: #15294166; }
+.smartsync-confirm-dialog[data-tone="warning"] { --confirm-accent: #94611b; --confirm-tint: #fff4df; }
+.smartsync-confirm-dialog[data-tone="danger"] { --confirm-accent: #b34236; --confirm-tint: #fff0ec; }
+.smartsync-confirm-dialog .smartsync-confirm-body { display: grid; grid-template-columns: 46px minmax(0, 1fr); align-items: center; column-gap: 12px; padding: 28px; }
+.smartsync-confirm-dialog .smartsync-confirm-icon { display: grid; place-items: center; width: 46px; height: 46px; margin: 0; border-radius: 14px; background: var(--confirm-tint); color: var(--confirm-accent); }
+.smartsync-confirm-dialog .smartsync-confirm-title { min-width: 0; margin: 0; padding: 0; color: #192e4a; font-size: 21px; font-weight: 650; letter-spacing: -.4px; line-height: 1.35; overflow-wrap: anywhere; }
+.smartsync-confirm-dialog .smartsync-confirm-message { grid-column: 1 / -1; margin: 16px 0 0; color: #596d84; font-size: 13px; overflow-wrap: anywhere; white-space: pre-line; }
+.smartsync-confirm-dialog .smartsync-confirm-context { grid-column: 1 / -1; display: flex; flex-direction: column; gap: 3px; margin-top: 20px; padding: 12px 14px; border-radius: 9px; background: #f3f6fa; overflow-wrap: anywhere; }
+.smartsync-confirm-dialog .smartsync-confirm-context span { color: #6b7d94; font-size: 11px; }
+.smartsync-confirm-dialog .smartsync-confirm-context strong { color: #385576; font-size: 12px; font-weight: 500; }
+.smartsync-confirm-dialog .smartsync-confirm-actions { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 10px; padding: 18px 28px; border-top: 1px solid #eaf0f6; background: #fafbfd; }
+.smartsync-confirm-dialog button { display: inline-flex; justify-content: center; align-items: center; min-height: 40px; margin: 0; padding: 9px 16px; border: 1px solid transparent; border-radius: 8px; font: 600 12px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; cursor: pointer; transition: background-color 150ms, box-shadow 150ms; }
+.smartsync-confirm-dialog .smartsync-confirm-cancel { background: #edf1f6; color: #4c617a; }
+.smartsync-confirm-dialog .smartsync-confirm-cancel:hover { background: #e1e8f1; }
+.smartsync-confirm-dialog .smartsync-confirm-accept { color: #fff; background: #195fb9; box-shadow: 0 3px 8px #195fb91c; }
+.smartsync-confirm-dialog .smartsync-confirm-accept:hover { background: #124f9f; }
+.smartsync-confirm-dialog[data-tone="danger"] .smartsync-confirm-accept { background: #b34236; }
+.smartsync-confirm-dialog[data-tone="danger"] .smartsync-confirm-accept:hover { background: #96372d; }
+.smartsync-confirm-dialog button:focus-visible { outline: 2px solid #7096c6; outline-offset: 3px; }
+@media (max-width: 480px) { .smartsync-confirm-dialog .smartsync-confirm-body { padding: 24px; } .smartsync-confirm-dialog .smartsync-confirm-actions { padding: 16px 24px; } .smartsync-confirm-dialog button { min-height: 44px; } }
+@media (prefers-reduced-motion: reduce) { .smartsync-confirm-dialog, .smartsync-confirm-dialog::backdrop, .smartsync-confirm-dialog button { transition: none; } }
+@media (forced-colors: active) { .smartsync-confirm-dialog { border-color: CanvasText; } .smartsync-confirm-dialog button { border-color: ButtonText; } .smartsync-confirm-dialog button:focus-visible { outline-color: Highlight; } }

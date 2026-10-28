@@ -397,48 +397,93 @@
     }
 }
 
-/* 10. Background Processing Indicator */
-.smartsync-background-indicator {
+/* 10. Background sync status: informational, separate from action buttons. */
+.smartsync-wrap .smartsync-background-indicator {
     position: fixed;
-    bottom: 20px;
-    right: 20px;
-    background: #0073aa;
-    color: white;
-    padding: 10px 15px;
-    border-radius: 5px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-    display: none;
-    z-index: 9999;
-    animation: pulse 2s infinite;
-}
-
-.smartsync-background-indicator.active {
-    display: flex;
+    bottom: 24px;
+    inset-inline-end: 24px;
+    width: 320px;
+    max-width: calc(100% - 32px);
+    padding: 14px 16px;
+    grid-template-columns: 36px minmax(0, 1fr) auto;
     align-items: center;
+    gap: 10px 12px;
+    background: #fff;
+    color: #172b4d;
+    border: 1px solid #dce4ef;
+    border-radius: 14px;
+    box-shadow: 0 8px 28px rgba(24, 46, 78, 0.1), 0 2px 6px rgba(24, 46, 78, 0.04);
+    display: none;
+    z-index: 900;
 }
 
-.smartsync-background-indicator .spinner {
-    margin-right: 10px;
-    background-color: white;
-    width: 16px;
-    height: 16px;
+.smartsync-wrap .smartsync-background-indicator.active {
+    display: grid;
+}
+
+.smartsync-wrap .smartsync-status-activity {
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: #eef4ff;
+}
+
+.smartsync-wrap .smartsync-status-ring {
+    width: 18px;
+    height: 18px;
+    border: 2px solid #b8cffb;
+    border-top-color: #2563eb;
     border-radius: 50%;
-    animation: spin 1s linear infinite;
+    animation: smartsync-sync-spin 0.9s linear infinite;
 }
 
-@keyframes pulse {
-    0% {
-        box-shadow: 0 0 0 0 rgba(0, 115, 170, 0.7);
-    }
-    70% {
-        box-shadow: 0 0 0 10px rgba(0, 115, 170, 0);
-    }
-    100% {
-        box-shadow: 0 0 0 0 rgba(0, 115, 170, 0);
-    }
+.smartsync-wrap .smartsync-status-copy {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    gap: 2px;
+    overflow-wrap: anywhere;
 }
 
-@keyframes spin {
+.smartsync-wrap .smartsync-status-title {
+    font-size: 13px;
+    line-height: 19px;
+    font-weight: 600;
+}
+
+.smartsync-wrap .smartsync-status-detail {
+    color: #526477;
+    font-size: 12px;
+    line-height: 18px;
+}
+
+.smartsync-wrap .smartsync-status-percent {
+    color: #1d4ed8;
+    font-size: 13px;
+    line-height: 20px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+
+.smartsync-wrap .smartsync-status-track {
+    grid-column: 1 / -1;
+    height: 3px;
+    overflow: hidden;
+    border-radius: 3px;
+    background: #edf2f8;
+}
+
+.smartsync-wrap .smartsync-status-fill {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: #3478f6;
+    transition: width 0.3s ease;
+}
+
+@keyframes smartsync-sync-spin {
     0% {
         transform: rotate(0deg);
     }

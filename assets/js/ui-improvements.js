@@ -6,9 +6,17 @@ jQuery(function ($) {
     const settings = window.ajaxObject || {};
     const strings = settings.settings_strings || {};
     const text = (key, fallback) => strings[key] || fallback;
+    const statusSignalKey = 'smartsync.sync-signal.' + ((settings.widget || {}).scope || window.location.origin);
+    $(document).on('smartsync:sync-state-changed', function () {
+        try { window.localStorage.setItem(statusSignalKey, String(Date.now()) + '-' + Math.random()); }
+        catch (_) { /* Focus/visibility refresh still works when storage is unavailable. */ }
+    });
+    $(window).on('storage', function (event) {
+        if (event.originalEvent && event.originalEvent.key === statusSignalKey) $(document).trigger('smartsync:refresh-status');
+    });
 
     const page = new URLSearchParams(window.location.search).get('page');
-    if (['smarl-smart-sync', 'smarl-configuration-wizard', 'custom-cloudfront-url'].includes(page)) {
+    if (page === 'custom-cloudfront-url') {
         const navigation = $('<nav>').addClass('smartsync-breadcrumbs').attr('aria-label', text('breadcrumb', 'Breadcrumb'));
         navigation.append($('<a>').attr('href', new URL('index.php', window.location.href).href).text(text('dashboard', 'Dashboard')));
         navigation.append($('<span>').addClass('separator').attr('aria-hidden', 'true').text('›'));
@@ -22,14 +30,34 @@ jQuery(function ($) {
 
     // Tabs are owned by this script on every plugin page.
     const tabs = wrapper.find('.tab-button');
-    function selectTab(tab, focus) {
+    const urlTabs = wrapper.hasClass('smartsync-settings') && tabs.length > 0;
+    function selectTab(tab, focus, updateUrl) {
+        if (!tab.length) return;
         tabs.removeClass('active').attr({ 'aria-selected': 'false', tabindex: '-1' });
         tab.addClass('active').attr({ 'aria-selected': 'true', tabindex: '0' });
         wrapper.find('.tab-panel').removeClass('active').prop('hidden', true);
         $('#' + tab.attr('aria-controls')).addClass('active').prop('hidden', false);
+        if (urlTabs) wrapper.find('.settings-destination').prop('hidden', tab.attr('data-tab') === 'general');
         if (focus) tab.trigger('focus');
+        if (urlTabs && updateUrl) {
+            const url = new URL(window.location.href);
+            const value = tab.attr('data-tab') === 'general' ? 'overview' : tab.attr('data-tab');
+            if (url.searchParams.get('tab') !== value) {
+                url.searchParams.set('tab', value);
+                window.history.pushState(window.history.state, '', url.href);
+            }
+        }
     }
-    tabs.on('click', function () { selectTab($(this), false); });
+    function restoreTab() {
+        const value = new URL(window.location.href).searchParams.get('tab');
+        const name = value === 'media' || value === 'assets' ? value : 'general';
+        selectTab(tabs.filter(function () { return $(this).attr('data-tab') === name; }).first(), false, false);
+    }
+    if (urlTabs) {
+        restoreTab();
+        $(window).on('popstate pageshow', restoreTab);
+    }
+    tabs.on('click', function () { selectTab($(this), false, true); });
     tabs.on('keydown', function (event) {
         const current = tabs.index(this);
         let next;
@@ -39,10 +67,17 @@ jQuery(function ($) {
         if (event.key === 'End') next = tabs.length - 1;
         if (next === undefined) return;
         event.preventDefault();
-        selectTab(tabs.eq(next), true);
+        selectTab(tabs.eq(next), true, true);
     });
 
     if ($('#sync-log-container').length) {
+        function progressIcon(name) {
+            const paths = { files: 'M14 3H5v18h14V8l-5-5M14 3v5h5M8 12h8M8 16h5', clock: 'M12 8v4l3 2M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0', processed: 'M5 12l4 4L19 6' };
+            return $('<span>').addClass('smartsync-progress-icon').attr('aria-hidden', 'true').html('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="' + paths[name] + '"/></svg>');
+        }
+        let countFormat;
+        try { countFormat = new Intl.NumberFormat(document.documentElement.lang || undefined); }
+        catch (_) { countFormat = new Intl.NumberFormat(); }
         const progress = $('<div>').addClass('smartsync-progress-container').prop('hidden', true);
         const bar = $('<div>').addClass('smartsync-progress-bar').attr({
             role: 'progressbar', 'aria-valuemin': '0', 'aria-valuemax': '100',
@@ -53,36 +88,31 @@ jQuery(function ($) {
         const summary = $('<div>').addClass('smartsync-progress-text').attr('aria-live', 'polite');
         const percentage = $('<span>').addClass('smartsync-progress-percentage');
         const files = $('<span>').addClass('smartsync-progress-files');
+        const fileCount = $('<span>');
+        files.append(progressIcon('files'), fileCount);
         summary.append(percentage, files);
         const stats = $('<div>').addClass('smartsync-progress-stats');
         const processed = $('<span>').attr('id', 'progress-processed');
         const remaining = $('<span>').attr('id', 'progress-remaining');
-        const time = $('<span>').attr('id', 'progress-time');
+        const time = $('<span>').attr({ id: 'progress-time', title: text('eta_help', 'Approximate time remaining, based on completed files. File sizes, provider speed and background queue delays can change it.') }).text(text('widget_calculating', 'Calculating…'));
         [
-            [processed, text('processed', 'Processed')],
-            [remaining, text('remaining', 'Remaining')],
-            [time, text('estimated_time', 'Est. Time')]
+            [processed, text('processed', 'Processed'), 'processed'],
+            [remaining, text('files_remaining', 'Files remaining'), 'files'],
+            [time, text('widget_eta', 'Time remaining'), 'clock']
         ].forEach(function (item) {
             stats.append($('<div>').addClass('smartsync-progress-stat').append(
-                item[0].addClass('smartsync-progress-stat-value'),
-                $('<div>').addClass('smartsync-progress-stat-label').text(item[1])
+                progressIcon(item[2]),
+                $('<div>').addClass('smartsync-progress-stat-copy').append(item[0].addClass('smartsync-progress-stat-value'),
+                    $('<div>').addClass('smartsync-progress-stat-label').text(item[1]))
             ));
         });
         progress.append(bar, summary, stats);
-        $('#sync-log-container').before(progress);
-        const indicator = $('<div>').addClass('smartsync-background-indicator').attr({ role: 'status', 'aria-live': 'polite' }).append(
-            $('<span>').addClass('spinner').attr('aria-hidden', 'true'),
-            $('<span>').text(text('running', 'Sync in progress'))
-        );
-        wrapper.append(indicator);
-        let startTime = 0;
-        let baselineProcessed = 0;
+        if ($('#settings-progress-slot').length) $('#settings-progress-slot').append(progress);
+        else $('#sync-log-container').before(progress);
+        let progressRun = '';
         $(document).on('smartsync:sync-started', function () {
-            startTime = Date.now();
-            baselineProcessed = 0;
-        });
-        $(document).on('smartsync:running', function (_, isRunning) {
-            indicator.toggleClass('active', !!isRunning);
+            progressRun = '';
+            time.text(text('widget_calculating', 'Calculating…'));
         });
         $(document).on('smartsync:status', function (_, status) {
             const total = Math.max(0, Number(status.total_files) || 0);
@@ -90,22 +120,21 @@ jQuery(function ($) {
             const percent = total ? Math.min(100, completed / total * 100) : 0;
             const running = status.status === 'processing';
             progress.prop('hidden', !running);
-            indicator.toggleClass('active', running);
-            if (!running) { startTime = 0; baselineProcessed = 0; return; }
-            if (!startTime || completed < baselineProcessed) {
-                startTime = Date.now();
-                baselineProcessed = completed;
+            if (!running) { progressRun = ''; return; }
+            const run = status.run_id || [status.type, status.direction, total].join('|');
+            if (run !== progressRun) {
+                progressRun = run;
+                time.text(text('widget_calculating', 'Calculating…'));
             }
             inner.css('width', percent + '%');
             bar.attr('aria-valuenow', percent.toFixed(1));
             percentage.text(percent.toFixed(1) + '%');
-            files.text(completed + '/' + total + ' ' + text('files', 'files'));
-            processed.text(completed);
-            remaining.text(Math.max(0, total - completed));
-            const elapsed = (Date.now() - startTime) / 1000;
-            const observed = completed - baselineProcessed;
-            const seconds = observed > 0 && elapsed >= 1 ? Math.round(elapsed / observed * Math.max(0, total - completed)) : null;
-            time.text(seconds === null ? '--:--' : Math.floor(seconds / 60) + ':' + String(seconds % 60).padStart(2, '0'));
+            fileCount.text(text('progress_file_count', '%1$s of %2$s files').replace('%1$s', countFormat.format(completed)).replace('%2$s', countFormat.format(total)));
+            processed.text(countFormat.format(completed));
+            remaining.text(countFormat.format(Math.max(0, total - completed)));
+        });
+        $(document).on('smartsync:timing', function (_, timing) {
+            time.text(timing.eta_label || text('widget_calculating', 'Calculating…'));
         });
     }
 

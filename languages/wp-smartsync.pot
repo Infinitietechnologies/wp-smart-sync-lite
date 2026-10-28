@@ -3,19 +3,20 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: SmartSync 1.7.3\n"
-"Report-Msgid-Bugs-To: https://infinitietech.com/\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/Plugin\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-24T13:16:09+05:30\n"
+"POT-Creation-Date: 2026-10-28T09:23:36+05:30\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: smartsync-lite-media-offloader-and-assets-cdn\n"
 
 #. Plugin Name of the plugin
 #: aws-s3-smartsync-wp.php
+#: src/Views/templates/settings-home.php:29
 msgid "SmartSync"
 msgstr ""
 
@@ -34,1338 +35,3035 @@ msgstr ""
 msgid "https://infinitietech.com/"
 msgstr ""
 
-#: aws-s3-smartsync-wp.php:65
-#: aws-s3-smartsync-wp.php:69
+#: aws-s3-smartsync-wp.php:76
+#: aws-s3-smartsync-wp.php:80
 msgid "SmartSync requires PHP 8.1 or later and its Composer dependencies. Install the complete plugin package before activating it."
 msgstr ""
 
-#: src/Ajax/SMARL_AjaxHandler.php:31
+#: src/Ajax/SMARL_AjaxHandler.php:33
 msgid "You do not have permission to manage SmartSync."
 msgstr ""
 
-#: src/Ajax/SMARL_AjaxHandler.php:35
-#: src/Ajax/SMARL_AjaxHandler.php:294
+#: src/Ajax/SMARL_AjaxHandler.php:37
+#: src/Ajax/SMARL_AjaxHandler.php:409
+#: src/Models/SMARL_CloudConfig.php:241
+#: src/Models/SMARL_CloudConfig.php:292
 msgid "Cloud storage is not configured."
 msgstr ""
 
-#: src/Ajax/SMARL_AjaxHandler.php:40
+#: src/Ajax/SMARL_AjaxHandler.php:42
 msgid "A supported sync type is required."
 msgstr ""
 
-#: src/Ajax/SMARL_AjaxHandler.php:44
 #: src/Ajax/SMARL_AjaxHandler.php:46
+#: src/Ajax/SMARL_AjaxHandler.php:48
 msgid "A valid boolean setting is required."
 msgstr ""
 
-#: src/Ajax/SMARL_AjaxHandler.php:67
+#: src/Ajax/SMARL_AjaxHandler.php:68
 msgid "Unable to fetch cloud storage analytics. Check the provider configuration and permissions."
 msgstr ""
 
-#: src/Ajax/SMARL_AjaxHandler.php:76
+#: src/Ajax/SMARL_AjaxHandler.php:81
 msgid "Unable to resume the background sync."
 msgstr ""
 
-#: src/Ajax/SMARL_AjaxHandler.php:84
+#: src/Ajax/SMARL_AjaxHandler.php:107
 msgid "Invalid sync state."
 msgstr ""
 
-#: src/Ajax/SMARL_AjaxHandler.php:88
+#: src/Ajax/SMARL_AjaxHandler.php:111
 msgid "Sync state is controlled by the background job."
 msgstr ""
 
-#: src/Ajax/SMARL_AjaxHandler.php:98
+#: src/Ajax/SMARL_AjaxHandler.php:122
+msgid "Choose incremental sync or full resync."
+msgstr ""
+
+#: src/Ajax/SMARL_AjaxHandler.php:130
+#: src/Ajax/SMARL_AjaxHandler.php:134
+msgid "Choose one or more supported media file types."
+msgstr ""
+
+#: src/Ajax/SMARL_AjaxHandler.php:140
 msgid "Network administrator permission is required to restore shared assets."
 msgstr ""
 
-#: src/Ajax/SMARL_AjaxHandler.php:103
-msgid "A sync operation is already running or stopping."
-msgstr ""
-
-#: src/Ajax/SMARL_AjaxHandler.php:113
-msgid "A sync operation is already running."
-msgstr ""
-
-#: src/Ajax/SMARL_AjaxHandler.php:114
-msgid "Restore offloaded media locally before starting another upload sync."
-msgstr ""
-
-#: src/Ajax/SMARL_AjaxHandler.php:115
-msgid "The background scheduler is unavailable."
-msgstr ""
-
-#: src/Ajax/SMARL_AjaxHandler.php:142
 #: src/Ajax/SMARL_AjaxHandler.php:145
-msgid "The sync operation was stopped."
-msgstr ""
-
-#: src/Ajax/SMARL_AjaxHandler.php:149
-msgid "Unable to start sync. Check the cloud configuration, selected files, and database access."
-msgstr ""
-
-#: src/Ajax/SMARL_AjaxHandler.php:151
-msgid "Unable to start sync. Check the cloud configuration and local file permissions."
+msgid "Another SmartSync operation is still finishing. Please wait and try again."
 msgstr ""
 
 #: src/Ajax/SMARL_AjaxHandler.php:155
-msgid "Sync started"
+msgid "A sync operation is already running."
 msgstr ""
 
-#: src/Ajax/SMARL_AjaxHandler.php:159
-msgid "Unable to schedule the background sync."
+#: src/Ajax/SMARL_AjaxHandler.php:156
+msgid "Restore offloaded media locally before starting another upload sync."
 msgstr ""
 
-#: src/Ajax/SMARL_AjaxHandler.php:171
-msgid "Cloud configuration changed. Start a new sync."
-msgstr ""
-
-#: src/Ajax/SMARL_AjaxHandler.php:175
-msgid "Unable to recover the sync queue."
-msgstr ""
-
-#: src/Ajax/SMARL_AjaxHandler.php:182
-msgid "Unable to claim a queued file."
-msgstr ""
-
-#: src/Ajax/SMARL_AjaxHandler.php:186
-msgid "The media file belongs outside the current site uploads directory."
-msgstr ""
-
-#: src/Ajax/SMARL_AjaxHandler.php:187
-msgid "File extension is not selected for this sync."
-msgstr ""
-
-#: src/Ajax/SMARL_AjaxHandler.php:189
-msgid "Source file is missing or unreadable."
+#: src/Ajax/SMARL_AjaxHandler.php:157
+msgid "The background scheduler is unavailable."
 msgstr ""
 
 #: src/Ajax/SMARL_AjaxHandler.php:193
-msgid "Unable to record file completion."
+#: src/Ajax/SMARL_AjaxHandler.php:197
+msgid "The sync operation was stopped."
 msgstr ""
 
-#. translators: 1: transfer direction (upload or download), 2: cloud object key.
 #: src/Ajax/SMARL_AjaxHandler.php:201
-#, php-format
-msgid "Failed to %1$s: %2$s. Check provider access and file permissions."
+msgid "Unable to start sync. Check the cloud configuration, selected files, and database access."
 msgstr ""
 
-#. translators: 1: transfer direction (upload or download), 2: cloud object key.
-#: src/Ajax/SMARL_AjaxHandler.php:201
-msgid "upload"
+#: src/Ajax/SMARL_AjaxHandler.php:203
+msgid "Unable to start sync. Check the cloud configuration and local file permissions."
 msgstr ""
 
-#. translators: 1: transfer direction (upload or download), 2: cloud object key.
-#: src/Ajax/SMARL_AjaxHandler.php:201
-msgid "download"
+#: src/Ajax/SMARL_AjaxHandler.php:207
+msgid "No files need transferring."
 msgstr ""
 
-#: src/Ajax/SMARL_AjaxHandler.php:218
-msgid "The background sync failed. Check scheduler, storage configuration, and database access."
+#: src/Ajax/SMARL_AjaxHandler.php:207
+msgid "Sync started"
 msgstr ""
 
-#: src/Ajax/SMARL_AjaxHandler.php:226
-msgid "Unable to create the restore directory."
+#: src/Ajax/SMARL_AjaxHandler.php:213
+msgid "Unable to schedule the background sync."
+msgstr ""
+
+#: src/Ajax/SMARL_AjaxHandler.php:225
+msgid "Cloud configuration changed. Start a new sync."
 msgstr ""
 
 #: src/Ajax/SMARL_AjaxHandler.php:229
-msgid "Unable to create a temporary restore file."
+msgid "Unable to recover the sync queue."
 msgstr ""
 
-#: src/Ajax/SMARL_AjaxHandler.php:234
-msgid "The restored object is incomplete."
+#: src/Ajax/SMARL_AjaxHandler.php:236
+msgid "Unable to claim a queued file."
 msgstr ""
 
-#: src/Ajax/SMARL_AjaxHandler.php:235
-msgid "Unable to replace the local file."
+#: src/Ajax/SMARL_AjaxHandler.php:241
+msgid "The media file belongs outside the current site uploads directory."
 msgstr ""
 
-#: src/Ajax/SMARL_AjaxHandler.php:259
-msgid "Unable to confirm the sync has stopped. Check the WordPress database and try again."
+#: src/Ajax/SMARL_AjaxHandler.php:242
+msgid "File extension is not selected for this sync."
 msgstr ""
 
-#: src/Ajax/SMARL_AjaxHandler.php:260
-msgid "Stopped all queued sync processes. An active file transfer may finish before stopping."
+#: src/Ajax/SMARL_AjaxHandler.php:247
+msgid "Source file is missing or unreadable."
 msgstr ""
 
-#: src/Ajax/SMARL_AjaxHandler.php:272
-msgid "Restore offloaded media locally before disabling its CDN."
+#: src/Ajax/SMARL_AjaxHandler.php:258
+msgid "Unable to record file completion."
 msgstr ""
 
-#: src/Ajax/SMARL_AjaxHandler.php:274
-msgid "Complete a successful sync and configure a public URL before enabling CDN."
+#. translators: 1: transfer direction, 2: cloud object key, 3: safe failure reason.
+#: src/Ajax/SMARL_AjaxHandler.php:267
+#, php-format
+msgid "Failed to %1$s: %2$s. %3$s"
 msgstr ""
 
-#: src/Ajax/SMARL_AjaxHandler.php:279
-msgid "CDN setting updated successfully."
+#. translators: 1: transfer direction, 2: cloud object key, 3: safe failure reason.
+#: src/Ajax/SMARL_AjaxHandler.php:267
+msgid "upload"
+msgstr ""
+
+#. translators: 1: transfer direction, 2: cloud object key, 3: safe failure reason.
+#: src/Ajax/SMARL_AjaxHandler.php:267
+msgid "download"
 msgstr ""
 
 #: src/Ajax/SMARL_AjaxHandler.php:287
-msgid "Automatic local cleanup setting updated."
+msgid "The background sync failed. Check scheduler, storage configuration, and database access."
 msgstr ""
 
-#: src/Ajax/SMARL_AjaxHandler.php:291
-#: src/Ajax/SMARL_AwsConfigAjax.php:292
-msgid "Another sync or configuration request is running. Try again shortly."
+#: src/Ajax/SMARL_AjaxHandler.php:299
+msgid "The provider denied access. Check the storage credentials and permissions."
 msgstr ""
 
-#: src/Ajax/SMARL_AjaxHandler.php:303
-msgid "Unable to invalidate CloudFront. Verify the AWS configuration and permissions."
+#: src/Ajax/SMARL_AjaxHandler.php:300
+msgid "The provider rate limit was reached. Wait briefly and retry the failed files."
+msgstr ""
+
+#: src/Ajax/SMARL_AjaxHandler.php:301
+msgid "The provider reported a server error. Retry the failed files shortly."
+msgstr ""
+
+#: src/Ajax/SMARL_AjaxHandler.php:302
+msgid "The storage destination was not found. Check the bucket or zone and region."
 msgstr ""
 
 #: src/Ajax/SMARL_AjaxHandler.php:304
-msgid "Cache invalidation requested successfully."
+msgid "The local file could not be read. Check that it still exists and is readable by PHP."
+msgstr ""
+
+#: src/Ajax/SMARL_AjaxHandler.php:305
+msgid "The local file changed or became unreadable during upload. Retry after it stops changing."
+msgstr ""
+
+#: src/Ajax/SMARL_AjaxHandler.php:306
+msgid "The upload history could not be updated. Check database access before retrying."
+msgstr ""
+
+#: src/Ajax/SMARL_AjaxHandler.php:307
+msgid "Transfer completion could not be saved. Check database access before retrying."
 msgstr ""
 
 #: src/Ajax/SMARL_AjaxHandler.php:308
-msgid "CloudFront is not configured."
+msgid "The file path or extension is not allowed for this sync."
+msgstr ""
+
+#: src/Ajax/SMARL_AjaxHandler.php:309
+msgid "The downloaded file could not be verified or saved locally. Check the connection and local write access."
 msgstr ""
 
 #: src/Ajax/SMARL_AjaxHandler.php:310
+msgid "The provider request failed. Check connectivity and storage access, then retry the failed files."
+msgstr ""
+
+#: src/Ajax/SMARL_AjaxHandler.php:314
+msgid "Unable to create the restore directory."
+msgstr ""
+
+#: src/Ajax/SMARL_AjaxHandler.php:317
+msgid "Unable to create a temporary restore file."
+msgstr ""
+
+#: src/Ajax/SMARL_AjaxHandler.php:322
+msgid "The restored object is incomplete."
+msgstr ""
+
+#: src/Ajax/SMARL_AjaxHandler.php:323
+msgid "Unable to replace the local file."
+msgstr ""
+
+#: src/Ajax/SMARL_AjaxHandler.php:356
+msgid "Unable to confirm the sync has stopped. Check the WordPress database and try again."
+msgstr ""
+
+#: src/Ajax/SMARL_AjaxHandler.php:357
+msgid "Stopped all queued sync processes. An active file transfer may finish before stopping."
+msgstr ""
+
+#: src/Ajax/SMARL_AjaxHandler.php:369
+msgid "Restore offloaded media locally before disabling its CDN."
+msgstr ""
+
+#: src/Ajax/SMARL_AjaxHandler.php:375
+msgid "Restore offloaded media locally before enabling temporary CDN testing."
+msgstr ""
+
+#: src/Ajax/SMARL_AjaxHandler.php:377
+msgid "Complete a selected-format Media upload before enabling temporary CDN testing."
+msgstr ""
+
+#: src/Ajax/SMARL_AjaxHandler.php:383
+msgid "Complete a successful sync and configure a public URL before enabling CDN."
+msgstr ""
+
+#: src/Ajax/SMARL_AjaxHandler.php:391
+msgid "CDN setting updated successfully."
+msgstr ""
+
+#: src/Ajax/SMARL_AjaxHandler.php:398
+msgid "Local copies are kept during temporary CDN testing."
+msgstr ""
+
+#: src/Ajax/SMARL_AjaxHandler.php:402
+msgid "Automatic local cleanup setting updated."
+msgstr ""
+
+#: src/Ajax/SMARL_AjaxHandler.php:406
+#: src/Ajax/SMARL_AwsConfigAjax.php:314
+#: src/Ajax/SMARL_AwsConfigAjax.php:390
+msgid "Another sync or configuration request is running. Try again shortly."
+msgstr ""
+
+#: src/Ajax/SMARL_AjaxHandler.php:418
+msgid "Unable to invalidate CloudFront. Verify the AWS configuration and permissions."
+msgstr ""
+
+#: src/Ajax/SMARL_AjaxHandler.php:419
+msgid "Cache invalidation requested successfully."
+msgstr ""
+
+#: src/Ajax/SMARL_AjaxHandler.php:423
+msgid "CloudFront is not configured."
+msgstr ""
+
+#: src/Ajax/SMARL_AjaxHandler.php:425
 msgid "At least one invalidation path is required."
 msgstr ""
 
-#: src/Ajax/SMARL_AjaxHandler.php:315
+#: src/Ajax/SMARL_AjaxHandler.php:430
 msgid "Bunny storage zone is not configured."
 msgstr ""
 
-#: src/Ajax/SMARL_AjaxHandler.php:320
+#: src/Ajax/SMARL_AjaxHandler.php:435
 msgid "Cloud configuration not found."
 msgstr ""
 
-#: src/Ajax/SMARL_AwsConfigAjax.php:37
+#: src/Ajax/SMARL_AwsConfigAjax.php:39
 msgid "You do not have permission to manage SmartSync settings."
 msgstr ""
 
-#: src/Ajax/SMARL_AwsConfigAjax.php:54
+#: src/Ajax/SMARL_AwsConfigAjax.php:61
+msgid "No Google service account is saved. Upload a key to connect."
+msgstr ""
+
+#: src/Ajax/SMARL_AwsConfigAjax.php:66
+msgid "The saved service account changed. Reload this page to view its current details."
+msgstr ""
+
+#: src/Ajax/SMARL_AwsConfigAjax.php:70
+msgid "The saved Google key could not be read. Upload a replacement JSON or P12 key."
+msgstr ""
+
+#: src/Ajax/SMARL_AwsConfigAjax.php:82
 msgid "The cloud provider request failed. Check the credentials, permissions, region, and provider settings, then try again."
 msgstr ""
 
-#: src/Ajax/SMARL_AwsConfigAjax.php:179
+#: src/Ajax/SMARL_AwsConfigAjax.php:85
+msgid "PHP could not verify the cloud provider TLS certificate. Check the server CA certificate configuration and the WordPress CA bundle. Certificate verification must remain enabled."
+msgstr ""
+
+#: src/Ajax/SMARL_AwsConfigAjax.php:86
+msgid "The cloud provider hostname could not be resolved. Check the server DNS configuration."
+msgstr ""
+
+#: src/Ajax/SMARL_AwsConfigAjax.php:87
+msgid "Unable to connect to the cloud provider. Check outbound HTTPS access and the selected region."
+msgstr ""
+
+#: src/Ajax/SMARL_AwsConfigAjax.php:88
+msgid "The cloud provider request timed out. Check outbound HTTPS access and try again."
+msgstr ""
+
+#: src/Ajax/SMARL_AwsConfigAjax.php:95
+msgid "That bucket name is already taken. Choose another name, such as your site name plus a random suffix, and try again."
+msgstr ""
+
+#: src/Ajax/SMARL_AwsConfigAjax.php:96
+msgid "You already own a bucket with that name. Choose Use existing storage and select it, or enter a different name for a new bucket."
+msgstr ""
+
+#: src/Ajax/SMARL_AwsConfigAjax.php:224
 msgid "The CloudFront recovery records are invalid. Review the saved AWS resources before retrying setup."
 msgstr ""
 
-#: src/Ajax/SMARL_AwsConfigAjax.php:186
+#: src/Ajax/SMARL_AwsConfigAjax.php:227
+msgid "No complete CloudFront setup was found to check. Choose Set up CloudFront to start or resume setup."
+msgstr ""
+
+#: src/Ajax/SMARL_AwsConfigAjax.php:234
 msgid "The CloudFront recovery record does not match this storage target. Review its AWS resources before retrying."
 msgstr ""
 
-#: src/Ajax/SMARL_AwsConfigAjax.php:194
+#: src/Ajax/SMARL_AwsConfigAjax.php:242
 msgid "Unable to save the CloudFront recovery record. No CloudFront resources were created. Check the WordPress database before retrying."
 msgstr ""
 
-#: src/Ajax/SMARL_AwsConfigAjax.php:201
+#: src/Ajax/SMARL_AwsConfigAjax.php:249
 msgid "The saved CloudFront origin access control changed. Review the recovery resources before retrying."
 msgstr ""
 
 #. translators: %s: AWS origin access control ID.
-#: src/Ajax/SMARL_AwsConfigAjax.php:211
+#: src/Ajax/SMARL_AwsConfigAjax.php:259
 #, php-format
 msgid "CloudFront created origin access control %s, but its recovery record could not be saved. Review that AWS resource before retrying setup."
 msgstr ""
 
-#: src/Ajax/SMARL_AwsConfigAjax.php:221
+#: src/Ajax/SMARL_AwsConfigAjax.php:269
 msgid "The saved CloudFront distribution changed. Review the recovery resources before retrying."
 msgstr ""
 
 #. translators: 1: AWS distribution ID, 2: AWS origin access control ID.
-#: src/Ajax/SMARL_AwsConfigAjax.php:233
+#: src/Ajax/SMARL_AwsConfigAjax.php:281
 #, php-format
 msgid "CloudFront created distribution %1$s with origin access control %2$s, but its recovery record could not be saved. Review those AWS resources before retrying setup."
 msgstr ""
 
-#: src/Ajax/SMARL_AwsConfigAjax.php:288
-msgid "Stop the current sync before changing its cloud configuration."
+#: src/Ajax/SMARL_AwsConfigAjax.php:316
+msgid "Connect an AWS S3 bucket before setting up CloudFront here."
 msgstr ""
 
-#: src/Ajax/SMARL_AwsConfigAjax.php:313
-msgid "Automatic CloudFront setup requires commercial AWS credentials and regions. Choose direct S3 delivery for China or GovCloud buckets."
+#: src/Ajax/SMARL_AwsConfigAjax.php:317
+msgid "Cloud settings changed. Reload this page before setting up CloudFront."
 msgstr ""
 
 #: src/Ajax/SMARL_AwsConfigAjax.php:319
+#: src/Views/templates/custom-domain.php:22
+msgid "Wait for the current sync to finish before setting up CloudFront."
+msgstr ""
+
+#: src/Ajax/SMARL_AwsConfigAjax.php:320
+msgid "Inline CloudFront setup requires a commercial AWS region. Review your AWS cloud configuration first."
+msgstr ""
+
+#: src/Ajax/SMARL_AwsConfigAjax.php:322
+msgid "Choose a valid CloudFront setup action."
+msgstr ""
+
+#: src/Ajax/SMARL_AwsConfigAjax.php:386
+msgid "Stop the current sync before changing its cloud configuration."
+msgstr ""
+
+#: src/Ajax/SMARL_AwsConfigAjax.php:411
+msgid "Automatic CloudFront setup requires commercial AWS credentials and regions. Choose direct S3 delivery for China or GovCloud buckets."
+msgstr ""
+
+#: src/Ajax/SMARL_AwsConfigAjax.php:417
 msgid "The Google credential selection expired. List buckets again before saving."
 msgstr ""
 
-#: src/Ajax/SMARL_AwsConfigAjax.php:381
+#: src/Ajax/SMARL_AwsConfigAjax.php:479
 msgid "Cloud configuration saved successfully."
 msgstr ""
 
-#: src/Ajax/SMARL_AwsConfigAjax.php:390
+#: src/Ajax/SMARL_AwsConfigAjax.php:488
 msgid "Bunny returned an invalid storage zone list. Try listing the zones again."
 msgstr ""
 
-#: src/Ajax/SMARL_AwsConfigAjax.php:393
+#: src/Ajax/SMARL_AwsConfigAjax.php:491
 msgid "Bunny returned invalid storage zone pagination. Try again."
 msgstr ""
 
-#: src/Ajax/SMARL_AwsConfigAjax.php:400
+#: src/Ajax/SMARL_AwsConfigAjax.php:498
 msgid "Bunny returned inconsistent storage zone details. Try again."
 msgstr ""
 
-#: src/Ajax/SMARL_AwsConfigAjax.php:423
+#: src/Ajax/SMARL_AwsConfigAjax.php:521
 msgid "This account API key cannot read the storage zone credentials. Check its permissions."
 msgstr ""
 
-#: src/Ajax/SMARL_AwsConfigAjax.php:424
+#: src/Ajax/SMARL_AwsConfigAjax.php:522
 msgid "Connect an active public pull zone to this storage zone. Use its Bunny hostname or a custom hostname with an issued SSL certificate; token-protected zones need signed URLs."
 msgstr ""
 
-#: src/Ajax/SMARL_AwsConfigAjax.php:428
+#: src/Ajax/SMARL_AwsConfigAjax.php:526
 msgid "Bunny returned too many pages of storage zones. Try a more restricted account key."
 msgstr ""
 
-#: src/Ajax/SMARL_AwsConfigAjax.php:436
+#: src/Ajax/SMARL_AwsConfigAjax.php:534
 msgid "Unable to reach the Bunny account API. Check outbound HTTPS and DNS on the WordPress server."
 msgstr ""
 
-#: src/Ajax/SMARL_AwsConfigAjax.php:438
+#: src/Ajax/SMARL_AwsConfigAjax.php:536
 msgid "Bunny rejected the account API key or its permissions. Use your account API key, not a storage zone password or Stream API key."
 msgstr ""
 
-#: src/Ajax/SMARL_AwsConfigAjax.php:439
+#: src/Ajax/SMARL_AwsConfigAjax.php:537
 msgid "Bunny API rate limit reached. Wait a moment, then try again."
 msgstr ""
 
 #. translators: %d: HTTP response status code.
-#: src/Ajax/SMARL_AwsConfigAjax.php:441
+#: src/Ajax/SMARL_AwsConfigAjax.php:539
 #, php-format
 msgid "Bunny account API request failed (HTTP %d). Try again or check the account status."
 msgstr ""
 
-#: src/Ajax/SMARL_AwsConfigAjax.php:443
+#: src/Ajax/SMARL_AwsConfigAjax.php:541
 msgid "Bunny returned an invalid account API response. Try again."
 msgstr ""
 
-#: src/Ajax/SMARL_AwsConfigAjax.php:548
+#: src/Ajax/SMARL_AwsConfigAjax.php:550
+msgid "Wait for the current sync to finish, or stop it before discovering cloud storage."
+msgstr ""
+
+#: src/Ajax/SMARL_AwsConfigAjax.php:583
+msgid "Enter a valid AWS region, such as ap-south-1."
+msgstr ""
+
+#: src/Ajax/SMARL_AwsConfigAjax.php:586
+msgid "The AWS discovery region could not be saved. Check the WordPress database and try again."
+msgstr ""
+
+#: src/Ajax/SMARL_AwsConfigAjax.php:606
+msgid "The provider returned an invalid bucket region. Refresh the storage list or enter the bucket and its region manually."
+msgstr ""
+
+#: src/Ajax/SMARL_AwsConfigAjax.php:676
 msgid "Certificate requested. DNS records may take a moment to become available."
 msgstr ""
 
-#: src/Ajax/SMARL_AwsConfigAjax.php:622
+#: src/Ajax/SMARL_AwsConfigAjax.php:750
 msgid "CloudFront custom domain and certificate updated successfully."
 msgstr ""
 
-#: src/Helpers/SMARL_Helper.php:69
+#: src/Helpers/SMARL_Helper.php:83
 msgid "Unable to verify copied attachment files."
 msgstr ""
 
-#: src/Helpers/SMARL_Helper.php:79
+#: src/Helpers/SMARL_Helper.php:104
 msgid "Unable to record the attachment storage target."
 msgstr ""
 
-#: src/Helpers/SMARL_Helper.php:298
+#: src/Helpers/SMARL_Helper.php:323
 msgid "The current site uploads directory is unavailable."
 msgstr ""
 
-#: src/Models/SMARL_CloudConfig.php:91
+#: src/Models/SMARL_CloudConfig.php:108
 msgid "Cloud settings could not be saved. Check the WordPress database and try again."
 msgstr ""
 
-#: src/Models/SMARL_CloudConfig.php:341
+#: src/Models/SMARL_CloudConfig.php:242
+#: src/Models/SMARL_CloudConfig.php:249
+#: src/Models/SMARL_CloudConfig.php:255
+#: src/Models/SMARL_CloudConfig.php:600
+msgid "The local upload file cannot be read."
+msgstr ""
+
+#: src/Models/SMARL_CloudConfig.php:302
+msgid "A Bunny account API key is required to read storage usage. Reconnect the account in Cloud Config."
+msgstr ""
+
+#: src/Models/SMARL_CloudConfig.php:315
+msgid "Bunny returned invalid storage usage pagination. Try again shortly."
+msgstr ""
+
+#: src/Models/SMARL_CloudConfig.php:327
+msgid "Bunny returned usage for a different storage zone. Refresh your cloud connection."
+msgstr ""
+
+#: src/Models/SMARL_CloudConfig.php:333
+msgid "Bunny has not returned valid file and storage totals for this zone. Check the Bunny dashboard or try again shortly."
+msgstr ""
+
+#: src/Models/SMARL_CloudConfig.php:338
+msgid "The connected storage zone was not found in this Bunny account. Check the account API key and cloud configuration."
+msgstr ""
+
+#: src/Models/SMARL_CloudConfig.php:340
+msgid "Bunny repeated a storage usage page. Try again shortly."
+msgstr ""
+
+#: src/Models/SMARL_CloudConfig.php:343
+msgid "Too many Bunny storage zones to check in one request. Check usage in the Bunny dashboard."
+msgstr ""
+
+#: src/Models/SMARL_CloudConfig.php:349
+msgid "The Bunny usage request took too long. Check outbound HTTPS and try again."
+msgstr ""
+
+#: src/Models/SMARL_CloudConfig.php:354
+msgid "Unable to reach Bunny usage statistics within the time limit. Check outbound HTTPS and DNS, then try again."
+msgstr ""
+
+#: src/Models/SMARL_CloudConfig.php:356
+msgid "Bunny rejected the account API key or its storage-usage permissions. Reconnect with the account API key in Cloud Config."
+msgstr ""
+
+#: src/Models/SMARL_CloudConfig.php:357
+msgid "Bunny API rate limit reached. Wait a moment, then fetch usage again."
+msgstr ""
+
+#: src/Models/SMARL_CloudConfig.php:358
+msgid "Bunny usage statistics are temporarily unavailable. Try again shortly."
+msgstr ""
+
+#: src/Models/SMARL_CloudConfig.php:360
+msgid "Bunny returned an invalid usage response. Try again shortly."
+msgstr ""
+
+#: src/Models/SMARL_CloudConfig.php:367
+msgid "Cloud files could not be verified. Check the storage connection and object-listing permissions, then retry. Full resync can upload the selected local files without this check."
+msgstr ""
+
+#: src/Models/SMARL_CloudConfig.php:486
+msgid "Google Public access prevention is enforced on this bucket. SmartSync cannot set up public CDN delivery. Use a dedicated public website bucket; if the restriction is inherited, ask your Google Cloud administrator."
+msgstr ""
+
+#: src/Models/SMARL_CloudConfig.php:507
+msgid "Google Public access prevention blocks public viewing on this bucket or its parent project. Use a bucket permitted for public website files, or ask your Google Cloud administrator to review the restriction."
+msgstr ""
+
+#: src/Models/SMARL_CloudConfig.php:509
+msgid "A Google Cloud organization policy blocks granting public access to allUsers. Ask your administrator to review Domain Restricted Sharing and public-sharing policies for this website bucket."
+msgstr ""
+
+#: src/Models/SMARL_CloudConfig.php:511
+msgid "Google rejected the service-account credentials. Check that the key is active and belongs to the selected account. For P12, also check the account email and project ID."
+msgstr ""
+
+#. translators: %s is a Google Cloud IAM permission name.
+#: src/Models/SMARL_CloudConfig.php:514
+#, php-format
+msgid "Google denied bucket setup. The service account needs %s on this bucket. Bucket listing can succeed without this permission. Grant the required bucket permission and retry."
+msgstr ""
+
+#: src/Models/SMARL_CloudConfig.php:516
+msgid "Google could not find or access the selected bucket. Refresh the bucket list and check the service account and project."
+msgstr ""
+
+#: src/Models/SMARL_CloudConfig.php:518
+msgid "Google rejected the public-access policy update. Check Public access prevention and organization policies, refresh the bucket list, then retry."
+msgstr ""
+
+#. translators: %d is an HTTP status code returned by Google Cloud Storage.
+#: src/Models/SMARL_CloudConfig.php:521
+#, php-format
+msgid "Google could not configure public bucket delivery (HTTP %d). Check the bucket IAM permissions, public-sharing policies and Cloud Storage API settings."
+msgstr ""
+
+#: src/Models/SMARL_CloudConfig.php:530
 msgid "Google storage is not configured."
 msgstr ""
 
-#: src/Models/SMARL_CloudConfig.php:363
+#: src/Models/SMARL_CloudConfig.php:552
 msgid "Bunny returned an invalid storage hostname. Refresh the storage zones and try again."
 msgstr ""
 
-#: src/Models/SMARL_CloudConfig.php:371
+#: src/Models/SMARL_CloudConfig.php:560
 msgid "Bunny storage is not configured."
 msgstr ""
 
-#: src/Models/SMARL_CloudConfig.php:374
+#: src/Models/SMARL_CloudConfig.php:563
 msgid "Bunny storage returned an invalid directory response. Check the selected zone and region."
 msgstr ""
 
-#: src/Models/SMARL_CloudConfig.php:380
+#: src/Models/SMARL_CloudConfig.php:569
 msgid "Enable the PHP cURL extension to upload Bunny files larger than 1 MB."
 msgstr ""
 
-#: src/Models/SMARL_CloudConfig.php:402
-#: src/Models/SMARL_CloudConfig.php:407
+#: src/Models/SMARL_CloudConfig.php:579
+msgid "The Bunny storage request timed out. Check the connection and retry the failed files."
+msgstr ""
+
+#: src/Models/SMARL_CloudConfig.php:580
+msgid "The Bunny storage hostname could not be resolved. Check DNS and retry the failed files."
+msgstr ""
+
+#: src/Models/SMARL_CloudConfig.php:581
+msgid "A connection to Bunny storage could not be opened. Check outbound HTTPS and retry."
+msgstr ""
+
+#: src/Models/SMARL_CloudConfig.php:582
+msgid "The secure connection to Bunny storage could not be verified. Check the server TLS and CA certificate configuration."
+msgstr ""
+
+#: src/Models/SMARL_CloudConfig.php:583
 msgid "Unable to contact Bunny storage. Check outbound HTTPS, DNS, and the selected storage region."
 msgstr ""
 
-#: src/Models/SMARL_CloudConfig.php:411
+#: src/Models/SMARL_CloudConfig.php:615
 msgid "Bunny storage rejected access. Refresh the storage zones and check the zone password, region, and permissions."
 msgstr ""
 
 #. translators: %d: HTTP response status code.
-#: src/Models/SMARL_CloudConfig.php:413
+#: src/Models/SMARL_CloudConfig.php:617
 #, php-format
 msgid "Bunny storage request failed (HTTP %d). Try again or check the storage zone status."
+msgstr ""
+
+#: src/Models/SMARL_CloudConfig.php:618
+msgid "Bunny storage rate limit reached. Wait briefly and retry the failed files."
 msgstr ""
 
 #: src/Models/SMARL_CustomUrl.php:59
 msgid "Custom domain settings could not be saved. Check the WordPress database and try again."
 msgstr ""
 
-#: src/Models/SMARL_S3SyncSettings.php:34
+#: src/Models/SMARL_S3SyncSettings.php:42
 msgid "An incomplete or older sync was interrupted. Start a new sync."
 msgstr ""
 
-#: src/Models/SMARL_S3SyncSettings.php:53
+#: src/Models/SMARL_S3SyncSettings.php:61
 msgid "Unable to save sync progress. Check the WordPress database and try again."
 msgstr ""
 
-#: src/SMARL_SmartSync.php:570
-#: src/SMARL_SmartSync.php:749
-msgid "Loading..."
+#: src/Services/SMARLI_GoogleService.php:28
+#: src/Views/templates/cloud-setup.php:172
+msgid "[Hidden]"
 msgstr ""
 
-#: src/SMARL_SmartSync.php:571
-msgid "Select a supported storage provider."
+#: src/Services/SMARLI_GoogleService.php:113
+msgid "Upload one service-account .json or .p12 file no larger than 1 MB."
 msgstr ""
 
-#: src/SMARL_SmartSync.php:572
-msgid "Select a Google service account JSON file."
+#: src/Services/SMARLI_GoogleService.php:148
+msgid "P12 keys require the PHP OpenSSL extension. Enable it or upload a JSON key."
 msgstr ""
 
-#: src/SMARL_SmartSync.php:573
-msgid "Enter a valid storage endpoint."
+#: src/Services/SMARLI_GoogleService.php:151
+#: src/Views/templates/cloud-setup.php:161
+msgid "Enter the service-account email for this P12 key."
 msgstr ""
 
-#: src/SMARL_SmartSync.php:574
-msgid "Enter a valid public CDN URL."
+#: src/Services/SMARLI_GoogleService.php:152
+#: src/Views/templates/cloud-setup.php:162
+msgid "Enter the Google Cloud project ID, not its display name or project number."
 msgstr ""
 
-#: src/SMARL_SmartSync.php:575
-msgid "Select a pull zone."
+#: src/Services/SMARLI_GoogleService.php:154
+msgid "Enter a valid P12 key password."
 msgstr ""
 
-#: src/SMARL_SmartSync.php:576
-msgid "The storage provider returned an invalid bucket response."
+#: src/Services/SMARLI_GoogleService.php:157
+msgid "The P12 key could not be read. Choose the file again."
 msgstr ""
 
-#: src/SMARL_SmartSync.php:577
-msgid "Configuration could not be saved. Check the settings and try again."
+#: src/Services/SMARLI_GoogleService.php:163
+msgid "This P12 uses encryption unsupported by this PHP OpenSSL installation. Download a JSON key from Google Cloud, or re-export the P12 using modern encryption."
 msgstr ""
 
-#: src/SMARL_SmartSync.php:578
-msgid "Enter a valid bucket name."
+#: src/Services/SMARLI_GoogleService.php:164
+msgid "The P12 key could not be opened. Check its password and choose the original service-account key file. A blank password uses Google's default, notasecret."
+msgstr ""
+
+#: src/Services/SMARLI_GoogleService.php:171
+msgid "This P12 must contain a matching RSA private key and service-account certificate."
 msgstr ""
 
 #: src/SMARL_SmartSync.php:579
-msgid "Enter a valid domain name."
+msgid "Cancel"
 msgstr ""
 
 #: src/SMARL_SmartSync.php:580
-msgid "No storage buckets were found."
+msgid "Keep syncing"
 msgstr ""
 
 #: src/SMARL_SmartSync.php:581
-msgid "Save Configuration"
+msgid "Destination"
 msgstr ""
 
 #: src/SMARL_SmartSync.php:582
-msgid "Attaching..."
-msgstr ""
-
-#: src/SMARL_SmartSync.php:583
-msgid "Select a bucket."
+msgid "The confirmation could not open. Refresh the page and try again."
 msgstr ""
 
 #: src/SMARL_SmartSync.php:584
-#: src/Views/SMARL_AWSWizard.php:205
-msgid "US East (N. Virginia)"
+msgid "Upload media?"
+msgstr ""
+
+#: src/SMARL_SmartSync.php:584
+#: src/Views/templates/settings-home.php:132
+msgid "Upload media"
 msgstr ""
 
 #: src/SMARL_SmartSync.php:585
-msgid "US East (Ohio)"
+msgid "Upload assets?"
+msgstr ""
+
+#: src/SMARL_SmartSync.php:585
+#: src/Views/templates/settings-home.php:132
+msgid "Upload assets"
 msgstr ""
 
 #: src/SMARL_SmartSync.php:586
-#: src/Views/SMARL_AWSWizard.php:206
-msgid "US West (N. California)"
+msgid "Resync all media?"
+msgstr ""
+
+#: src/SMARL_SmartSync.php:586
+#: src/SMARL_SmartSync.php:587
+#: src/Views/templates/settings-home.php:109
+msgid "Full resync"
 msgstr ""
 
 #: src/SMARL_SmartSync.php:587
-#: src/Views/SMARL_AWSWizard.php:207
-msgid "US West (Oregon)"
+msgid "Resync all assets?"
 msgstr ""
 
 #: src/SMARL_SmartSync.php:588
-msgid "Canada (Central)"
+msgid "Restore local media?"
+msgstr ""
+
+#: src/SMARL_SmartSync.php:588
+msgid "Restore files"
 msgstr ""
 
 #: src/SMARL_SmartSync.php:589
-msgid "Europe (Ireland)"
+msgid "Stop this sync?"
+msgstr ""
+
+#: src/SMARL_SmartSync.php:589
+#: src/SMARL_SmartSync.php:793
+#: src/Views/templates/settings-home.php:146
+msgid "Stop sync"
 msgstr ""
 
 #: src/SMARL_SmartSync.php:590
-msgid "Europe (London)"
+msgid "Refresh CloudFront cache?"
 msgstr ""
 
-#: src/SMARL_SmartSync.php:591
-msgid "Europe (Paris)"
-msgstr ""
-
-#: src/SMARL_SmartSync.php:592
-msgid "Europe (Frankfurt)"
-msgstr ""
-
-#: src/SMARL_SmartSync.php:593
-msgid "Europe (Milan)"
-msgstr ""
-
-#: src/SMARL_SmartSync.php:594
-msgid "Europe (Spain)"
+#: src/SMARL_SmartSync.php:590
+msgid "Clear cache"
 msgstr ""
 
 #: src/SMARL_SmartSync.php:595
-msgid "Middle East (Bahrain)"
+msgid "Notifications"
 msgstr ""
 
 #: src/SMARL_SmartSync.php:596
-msgid "Middle East (UAE)"
-msgstr ""
-
-#: src/SMARL_SmartSync.php:597
-msgid "Africa (Cape Town)"
-msgstr ""
-
-#: src/SMARL_SmartSync.php:598
-msgid "Asia Pacific (Tokyo)"
-msgstr ""
-
-#: src/SMARL_SmartSync.php:599
-msgid "Asia Pacific (Seoul)"
-msgstr ""
-
-#: src/SMARL_SmartSync.php:600
-msgid "Asia Pacific (Osaka)"
-msgstr ""
-
-#: src/SMARL_SmartSync.php:601
-msgid "Asia Pacific (Singapore)"
-msgstr ""
-
-#: src/SMARL_SmartSync.php:602
-msgid "Asia Pacific (Sydney)"
-msgstr ""
-
-#: src/SMARL_SmartSync.php:603
-msgid "Asia Pacific (Jakarta)"
-msgstr ""
-
-#: src/SMARL_SmartSync.php:604
-msgid "Asia Pacific (Mumbai)"
-msgstr ""
-
-#: src/SMARL_SmartSync.php:605
-msgid "Asia Pacific (Hyderabad)"
-msgstr ""
-
-#: src/SMARL_SmartSync.php:606
-msgid "South America (São Paulo)"
-msgstr ""
-
-#: src/SMARL_SmartSync.php:607
-msgid "China (Beijing)"
-msgstr ""
-
-#: src/SMARL_SmartSync.php:608
-msgid "China (Ningxia)"
-msgstr ""
-
-#: src/SMARL_SmartSync.php:609
-msgid "AWS GovCloud (US-East)"
-msgstr ""
-
-#: src/SMARL_SmartSync.php:610
-msgid "AWS GovCloud (US-West)"
-msgstr ""
-
-#: src/SMARL_SmartSync.php:612
-msgid "New York City 1"
+#: src/SMARL_SmartSync.php:794
+msgid "Dismiss notification"
 msgstr ""
 
 #: src/SMARL_SmartSync.php:613
-msgid "New York City 2"
+msgid "Automatic status checks are paused. Reload this page to check again."
 msgstr ""
 
 #: src/SMARL_SmartSync.php:614
-msgid "New York City 3"
+#: src/SMARL_SmartSync.php:864
+msgid "Loading..."
 msgstr ""
 
 #: src/SMARL_SmartSync.php:615
-msgid "Amsterdam 3"
+msgid "Select a supported storage provider."
 msgstr ""
 
 #: src/SMARL_SmartSync.php:616
-msgid "San Francisco 2"
+msgid "Select a Google service-account JSON or P12 file."
 msgstr ""
 
 #: src/SMARL_SmartSync.php:617
-msgid "San Francisco 3"
+msgid "Enter a valid storage endpoint."
 msgstr ""
 
 #: src/SMARL_SmartSync.php:618
-msgid "Singapore 1"
+msgid "Enter a valid public CDN URL."
 msgstr ""
 
 #: src/SMARL_SmartSync.php:619
-msgid "London 1"
+msgid "Select a pull zone."
 msgstr ""
 
 #: src/SMARL_SmartSync.php:620
-msgid "Frankfurt 1"
+msgid "The storage provider returned an invalid bucket response."
 msgstr ""
 
 #: src/SMARL_SmartSync.php:621
-msgid "Toronto 1"
+msgid "Configuration could not be saved. Check the settings and try again."
+msgstr ""
+
+#: src/SMARL_SmartSync.php:622
+msgid "Enter a valid bucket name."
+msgstr ""
+
+#: src/SMARL_SmartSync.php:623
+msgid "Enter a valid domain name."
 msgstr ""
 
 #: src/SMARL_SmartSync.php:624
-msgid "Please enter a domain."
+msgid "No storage buckets were found."
 msgstr ""
 
 #: src/SMARL_SmartSync.php:625
-msgid "Certificate generated successfully!"
+msgid "Save Configuration"
 msgstr ""
 
 #: src/SMARL_SmartSync.php:626
-msgid "No DNS records available. Please wait and try again later."
+msgid "Attaching..."
 msgstr ""
 
 #: src/SMARL_SmartSync.php:627
-msgid "Certificate generation failed"
+msgid "Select a bucket."
 msgstr ""
 
 #: src/SMARL_SmartSync.php:628
-msgid "An error occurred while generating the certificate. Please try again."
+msgid "US East (N. Virginia)"
+msgstr ""
+
+#: src/SMARL_SmartSync.php:629
+msgid "US East (Ohio)"
+msgstr ""
+
+#: src/SMARL_SmartSync.php:630
+msgid "US West (N. California)"
 msgstr ""
 
 #: src/SMARL_SmartSync.php:631
-msgid "DNS Validation Records"
+msgid "US West (Oregon)"
 msgstr ""
 
 #: src/SMARL_SmartSync.php:632
-msgid "Checking..."
+msgid "Canada (Central)"
 msgstr ""
 
 #: src/SMARL_SmartSync.php:633
-msgid "Domain"
+msgid "Europe (Ireland)"
 msgstr ""
 
 #: src/SMARL_SmartSync.php:634
-msgid "Type"
+msgid "Europe (London)"
 msgstr ""
 
 #: src/SMARL_SmartSync.php:635
-msgid "Name"
+msgid "Europe (Paris)"
 msgstr ""
 
 #: src/SMARL_SmartSync.php:636
-msgid "Value"
+msgid "Europe (Frankfurt)"
 msgstr ""
 
 #: src/SMARL_SmartSync.php:637
-msgid "Verified"
+msgid "Europe (Milan)"
 msgstr ""
 
 #: src/SMARL_SmartSync.php:638
-msgid "Pending Validation"
+msgid "Europe (Spain)"
 msgstr ""
 
 #: src/SMARL_SmartSync.php:639
-msgid "All DNS records have been verified!"
+msgid "Middle East (Bahrain)"
+msgstr ""
+
+#: src/SMARL_SmartSync.php:640
+msgid "Middle East (UAE)"
+msgstr ""
+
+#: src/SMARL_SmartSync.php:641
+msgid "Africa (Cape Town)"
 msgstr ""
 
 #: src/SMARL_SmartSync.php:642
-#: src/SMARL_SmartSync.php:750
-msgid "Error"
+msgid "Asia Pacific (Tokyo)"
 msgstr ""
 
 #: src/SMARL_SmartSync.php:643
-msgid "An error occurred while checking DNS records."
+msgid "Asia Pacific (Seoul)"
+msgstr ""
+
+#: src/SMARL_SmartSync.php:644
+msgid "Asia Pacific (Osaka)"
+msgstr ""
+
+#: src/SMARL_SmartSync.php:645
+msgid "Asia Pacific (Singapore)"
 msgstr ""
 
 #: src/SMARL_SmartSync.php:646
-msgid "Certificate attached successfully!"
+msgid "Asia Pacific (Sydney)"
 msgstr ""
 
 #: src/SMARL_SmartSync.php:647
-msgid "Attachment failed"
+msgid "Asia Pacific (Jakarta)"
 msgstr ""
 
 #: src/SMARL_SmartSync.php:648
-msgid "An error occurred while attaching the certificate. Please try again."
+msgid "Asia Pacific (Mumbai)"
+msgstr ""
+
+#: src/SMARL_SmartSync.php:649
+msgid "Asia Pacific (Hyderabad)"
+msgstr ""
+
+#: src/SMARL_SmartSync.php:650
+msgid "South America (São Paulo)"
 msgstr ""
 
 #: src/SMARL_SmartSync.php:651
-msgid "IAM Key and Secret are required."
+msgid "China (Beijing)"
 msgstr ""
 
 #: src/SMARL_SmartSync.php:652
-msgid "Bucket name is required."
+msgid "China (Ningxia)"
 msgstr ""
 
 #: src/SMARL_SmartSync.php:653
-msgid "Configuration saved successfully!"
+msgid "AWS GovCloud (US-East)"
 msgstr ""
 
 #: src/SMARL_SmartSync.php:654
-msgid "Configuration failed"
+msgid "AWS GovCloud (US-West)"
+msgstr ""
+
+#: src/SMARL_SmartSync.php:656
+msgid "New York City 1"
 msgstr ""
 
 #: src/SMARL_SmartSync.php:657
-#: src/Views/SMARL_AWSWizard.php:171
-msgid "Loading buckets..."
+msgid "New York City 2"
 msgstr ""
 
 #: src/SMARL_SmartSync.php:658
-msgid "Failed to load buckets. Check your IAM credentials or permissions."
+msgid "New York City 3"
 msgstr ""
 
 #: src/SMARL_SmartSync.php:659
-msgid "An error occurred while loading buckets. Please try again."
+msgid "Amsterdam 3"
+msgstr ""
+
+#: src/SMARL_SmartSync.php:660
+msgid "San Francisco 2"
+msgstr ""
+
+#: src/SMARL_SmartSync.php:661
+msgid "San Francisco 3"
 msgstr ""
 
 #: src/SMARL_SmartSync.php:662
-msgid "Next: Validate IAM Credentials"
+msgid "Singapore 1"
 msgstr ""
 
 #: src/SMARL_SmartSync.php:663
-msgid "Next: Configure Bucket"
+msgid "London 1"
 msgstr ""
 
 #: src/SMARL_SmartSync.php:664
-msgid "Back to Step 1"
+msgid "Frankfurt 1"
 msgstr ""
 
 #: src/SMARL_SmartSync.php:665
-msgid "Back to Step 2"
+msgid "Toronto 1"
 msgstr ""
 
-#: src/SMARL_SmartSync.php:666
-msgid "Finalize Configuration"
+#: src/SMARL_SmartSync.php:668
+msgid "Please enter a domain."
 msgstr ""
 
 #: src/SMARL_SmartSync.php:669
-msgid "General Settings"
+msgid "Certificate generated successfully!"
 msgstr ""
 
 #: src/SMARL_SmartSync.php:670
-msgid "Advanced Settings"
+msgid "No DNS records available. Please wait and try again later."
 msgstr ""
 
 #: src/SMARL_SmartSync.php:671
-msgid "Help"
+msgid "Certificate generation failed"
+msgstr ""
+
+#: src/SMARL_SmartSync.php:672
+msgid "An error occurred while generating the certificate. Please try again."
+msgstr ""
+
+#: src/SMARL_SmartSync.php:675
+msgid "DNS Validation Records"
+msgstr ""
+
+#: src/SMARL_SmartSync.php:676
+msgid "Checking..."
+msgstr ""
+
+#: src/SMARL_SmartSync.php:677
+msgid "Domain"
+msgstr ""
+
+#: src/SMARL_SmartSync.php:678
+msgid "Type"
+msgstr ""
+
+#: src/SMARL_SmartSync.php:679
+msgid "Name"
+msgstr ""
+
+#: src/SMARL_SmartSync.php:680
+msgid "Value"
+msgstr ""
+
+#: src/SMARL_SmartSync.php:681
+msgid "Verified"
+msgstr ""
+
+#: src/SMARL_SmartSync.php:682
+msgid "Pending Validation"
+msgstr ""
+
+#: src/SMARL_SmartSync.php:683
+msgid "All DNS records have been verified!"
+msgstr ""
+
+#: src/SMARL_SmartSync.php:686
+#: src/SMARL_SmartSync.php:865
+msgid "Error"
+msgstr ""
+
+#: src/SMARL_SmartSync.php:687
+msgid "An error occurred while checking DNS records."
+msgstr ""
+
+#: src/SMARL_SmartSync.php:690
+msgid "Certificate attached successfully!"
+msgstr ""
+
+#: src/SMARL_SmartSync.php:691
+msgid "Attachment failed"
+msgstr ""
+
+#: src/SMARL_SmartSync.php:692
+msgid "An error occurred while attaching the certificate. Please try again."
+msgstr ""
+
+#: src/SMARL_SmartSync.php:695
+msgid "IAM Key and Secret are required."
+msgstr ""
+
+#: src/SMARL_SmartSync.php:696
+msgid "Bucket name is required."
+msgstr ""
+
+#: src/SMARL_SmartSync.php:697
+msgid "Configuration saved successfully!"
+msgstr ""
+
+#: src/SMARL_SmartSync.php:698
+msgid "Configuration failed"
+msgstr ""
+
+#: src/SMARL_SmartSync.php:701
+msgid "Loading buckets..."
+msgstr ""
+
+#: src/SMARL_SmartSync.php:702
+msgid "Failed to load buckets. Check your IAM credentials or permissions."
+msgstr ""
+
+#: src/SMARL_SmartSync.php:703
+msgid "An error occurred while loading buckets. Please try again."
+msgstr ""
+
+#: src/SMARL_SmartSync.php:706
+msgid "Next: Validate IAM Credentials"
 msgstr ""
 
 #: src/SMARL_SmartSync.php:707
-msgid "Breadcrumb"
+msgid "Next: Configure Bucket"
 msgstr ""
 
 #: src/SMARL_SmartSync.php:708
-msgid "Dashboard"
+msgid "Back to Step 1"
 msgstr ""
 
 #: src/SMARL_SmartSync.php:709
+msgid "Back to Step 2"
+msgstr ""
+
+#: src/SMARL_SmartSync.php:710
+msgid "Finalize Configuration"
+msgstr ""
+
+#: src/SMARL_SmartSync.php:713
+msgid "General Settings"
+msgstr ""
+
+#: src/SMARL_SmartSync.php:714
+msgid "Advanced Settings"
+msgstr ""
+
+#: src/SMARL_SmartSync.php:715
+msgid "Help"
+msgstr ""
+
+#: src/SMARL_SmartSync.php:759
+msgid "Breadcrumb"
+msgstr ""
+
+#: src/SMARL_SmartSync.php:760
+msgid "Sync status"
+msgstr ""
+
+#: src/SMARL_SmartSync.php:761
+msgid "Expand sync details"
+msgstr ""
+
+#: src/SMARL_SmartSync.php:762
+msgid "Collapse sync details"
+msgstr ""
+
+#: src/SMARL_SmartSync.php:763
+#: src/Views/templates/cloud-setup.php:124
+msgid "Provider"
+msgstr ""
+
+#: src/SMARL_SmartSync.php:764
+#: src/Views/templates/cloud-setup.php:124
+#: src/Views/templates/settings-home.php:63
+msgid "Storage"
+msgstr ""
+
+#: src/SMARL_SmartSync.php:765
+msgid "Operation"
+msgstr ""
+
+#: src/SMARL_SmartSync.php:766
+msgid "Current file"
+msgstr ""
+
+#: src/SMARL_SmartSync.php:767
+msgid "Waiting for an update"
+msgstr ""
+
+#: src/SMARL_SmartSync.php:768
+msgid "Calculating…"
+msgstr ""
+
+#: src/SMARL_SmartSync.php:769
+msgid "Elapsed"
+msgstr ""
+
+#: src/SMARL_SmartSync.php:770
+msgid "Time observed"
+msgstr ""
+
+#: src/SMARL_SmartSync.php:771
+msgid "Time remaining"
+msgstr ""
+
+#: src/SMARL_SmartSync.php:772
+msgid "<1 min"
+msgstr ""
+
+#. translators: %s: approximate minutes remaining.
+#: src/SMARL_SmartSync.php:774
+#, php-format
+msgid "~%s min"
+msgstr ""
+
+#. translators: 1: approximate hours remaining, 2: minutes remaining.
+#: src/SMARL_SmartSync.php:776
+#, php-format
+msgid "~%1$s hr %2$s min"
+msgstr ""
+
+#. translators: 1: approximate days remaining, 2: hours remaining.
+#: src/SMARL_SmartSync.php:778
+#, php-format
+msgid "~%1$s d %2$s hr"
+msgstr ""
+
+#: src/SMARL_SmartSync.php:779
+msgid "Updating…"
+msgstr ""
+
+#: src/SMARL_SmartSync.php:780
+msgid "Approximate time remaining, based on completed files. File sizes, provider speed and background queue delays can change it."
+msgstr ""
+
+#: src/SMARL_SmartSync.php:781
+msgid "Failed files"
+msgstr ""
+
+#: src/SMARL_SmartSync.php:782
+msgid "Uploading media"
+msgstr ""
+
+#: src/SMARL_SmartSync.php:783
+msgid "Uploading assets"
+msgstr ""
+
+#: src/SMARL_SmartSync.php:784
+msgid "Restoring media"
+msgstr ""
+
+#: src/SMARL_SmartSync.php:785
+msgid "Restoring assets"
+msgstr ""
+
+#: src/SMARL_SmartSync.php:786
+msgid "Sync complete"
+msgstr ""
+
+#: src/SMARL_SmartSync.php:787
+msgid "File-type test complete"
+msgstr ""
+
+#: src/SMARL_SmartSync.php:788
+msgid "Sync needs attention"
+msgstr ""
+
+#: src/SMARL_SmartSync.php:789
+#: src/SMARL_SmartSync.php:817
+msgid "Sync stopped"
+msgstr ""
+
+#: src/SMARL_SmartSync.php:790
+msgid "View logs"
+msgstr ""
+
+#: src/SMARL_SmartSync.php:791
+msgid "View results"
+msgstr ""
+
+#: src/SMARL_SmartSync.php:792
+msgid "Sync settings"
+msgstr ""
+
+#: src/SMARL_SmartSync.php:795
+msgid "Unable to refresh status. Retrying…"
+msgstr ""
+
+#: src/SMARL_SmartSync.php:796
+msgid "Not recorded"
+msgstr ""
+
+#: src/SMARL_SmartSync.php:797
+msgid "No transfers needed"
+msgstr ""
+
+#: src/SMARL_SmartSync.php:798
+msgid "unchanged"
+msgstr ""
+
+#. translators: 1: files queued for upload, 2: unchanged files skipped.
+#: src/SMARL_SmartSync.php:800
+#, php-format
+msgid "Uploads: %1$s · Unchanged: %2$s"
+msgstr ""
+
+#: src/SMARL_SmartSync.php:801
+msgid "Full resync will upload every selected local file again, including unchanged files."
+msgstr ""
+
+#: src/SMARL_SmartSync.php:802
+msgid "Dashboard"
+msgstr ""
+
+#: src/SMARL_SmartSync.php:803
 #: src/Views/SMARL_SettingsPage.php:26
 msgid "SmartSync Settings"
 msgstr ""
 
-#: src/SMARL_SmartSync.php:710
+#: src/SMARL_SmartSync.php:804
+#: src/Views/templates/settings-home.php:79
 msgid "Unavailable"
 msgstr ""
 
-#: src/SMARL_SmartSync.php:711
+#: src/SMARL_SmartSync.php:805
+msgid "Storage usage updated."
+msgstr ""
+
+#: src/SMARL_SmartSync.php:806
 msgid "Sync stopped."
 msgstr ""
 
-#: src/SMARL_SmartSync.php:712
+#: src/SMARL_SmartSync.php:807
 msgid "Unable to check sync status."
 msgstr ""
 
-#: src/SMARL_SmartSync.php:713
+#: src/SMARL_SmartSync.php:808
+msgid "The server is taking longer to respond. Retrying the status check shortly."
+msgstr ""
+
+#: src/SMARL_SmartSync.php:809
+msgid "Check status"
+msgstr ""
+
+#: src/SMARL_SmartSync.php:810
+msgid "Automatic status checks are paused. Use Check status to try again."
+msgstr ""
+
+#: src/SMARL_SmartSync.php:811
+msgid "Ready"
+msgstr ""
+
+#: src/SMARL_SmartSync.php:812
+msgid "Another operation is finishing…"
+msgstr ""
+
+#: src/SMARL_SmartSync.php:813
+msgid "Preparing sync…"
+msgstr ""
+
+#: src/SMARL_SmartSync.php:814
+msgid "Last sync completed"
+msgstr ""
+
+#: src/SMARL_SmartSync.php:815
+msgid "Needs attention"
+msgstr ""
+
+#: src/SMARL_SmartSync.php:816
+msgid "Status unavailable"
+msgstr ""
+
+#: src/SMARL_SmartSync.php:818
+#: src/Views/templates/settings-home.php:112
+msgid "Skips unchanged files and retries unsuccessful uploads."
+msgstr ""
+
+#: src/SMARL_SmartSync.php:819
+msgid "Uploads every selected local file again."
+msgstr ""
+
+#: src/SMARL_SmartSync.php:820
+#: src/Views/templates/settings-home.php:116
+msgid "File types"
+msgstr ""
+
+#: src/SMARL_SmartSync.php:821
 msgid "The request failed. Please try again."
 msgstr ""
 
-#: src/SMARL_SmartSync.php:714
+#: src/SMARL_SmartSync.php:822
+#: src/Views/templates/settings-home.php:147
 msgid "Clear logs"
 msgstr ""
 
-#: src/SMARL_SmartSync.php:715
+#: src/SMARL_SmartSync.php:823
 msgid "No log messages yet."
 msgstr ""
 
-#: src/SMARL_SmartSync.php:716
+#: src/SMARL_SmartSync.php:824
 msgid "Processed"
 msgstr ""
 
-#: src/SMARL_SmartSync.php:717
+#: src/SMARL_SmartSync.php:825
 msgid "Remaining"
 msgstr ""
 
-#: src/SMARL_SmartSync.php:718
+#: src/SMARL_SmartSync.php:826
+msgid "Files remaining"
+msgstr ""
+
+#. translators: 1: processed file count, 2: total file count.
+#: src/SMARL_SmartSync.php:828
+#, php-format
+msgid "%1$s of %2$s files"
+msgstr ""
+
+#: src/SMARL_SmartSync.php:829
 msgid "Estimated time"
 msgstr ""
 
-#: src/SMARL_SmartSync.php:719
+#: src/SMARL_SmartSync.php:830
 msgid "A sync is already in progress."
 msgstr ""
 
-#: src/SMARL_SmartSync.php:720
+#: src/SMARL_SmartSync.php:831
 msgid "Syncing..."
 msgstr ""
 
-#: src/SMARL_SmartSync.php:721
+#: src/SMARL_SmartSync.php:832
 msgid "Sync"
 msgstr ""
 
-#: src/SMARL_SmartSync.php:722
+#: src/SMARL_SmartSync.php:833
 msgid "Progress"
 msgstr ""
 
-#: src/SMARL_SmartSync.php:723
+#: src/SMARL_SmartSync.php:834
 msgid "Sync completed successfully."
 msgstr ""
 
-#: src/SMARL_SmartSync.php:724
+#: src/SMARL_SmartSync.php:835
+msgid "Selected file types synced successfully."
+msgstr ""
+
+#: src/SMARL_SmartSync.php:836
+msgid "You can now enable media cloud delivery to test these file types. Other formats will stay local."
+msgstr ""
+
+#. translators: %s: selected file extensions.
+#: src/SMARL_SmartSync.php:838
+#: src/Views/templates/settings-home.php:97
+#, php-format
+msgid "Temporary CDN test: %s. Only confirmed uploads use cloud delivery; local copies are kept."
+msgstr ""
+
+#: src/SMARL_SmartSync.php:839
 msgid "Sync failed. Check errors below."
 msgstr ""
 
-#: src/SMARL_SmartSync.php:725
+#: src/SMARL_SmartSync.php:840
 msgid "Starting sync process..."
 msgstr ""
 
-#: src/SMARL_SmartSync.php:726
+#: src/SMARL_SmartSync.php:841
 msgid "Starting sync of"
 msgstr ""
 
-#: src/SMARL_SmartSync.php:727
+#: src/SMARL_SmartSync.php:842
 msgid "files"
 msgstr ""
 
-#: src/SMARL_SmartSync.php:728
+#: src/SMARL_SmartSync.php:843
 msgid "Uploaded"
 msgstr ""
 
-#: src/SMARL_SmartSync.php:729
+#: src/SMARL_SmartSync.php:844
 msgid "Downloaded"
 msgstr ""
 
-#: src/SMARL_SmartSync.php:730
-msgid "Are you sure you want to sync local files to cloud storage?"
+#: src/SMARL_SmartSync.php:845
+msgid "Upload new or changed local files to your connected cloud storage. Unchanged files will be skipped."
 msgstr ""
 
-#: src/SMARL_SmartSync.php:731
-msgid "Are you sure you want to restore cloud files locally?"
+#: src/SMARL_SmartSync.php:846
+msgid "Download media back to this site. Existing local files will be replaced after a successful download."
 msgstr ""
 
-#: src/SMARL_SmartSync.php:732
+#: src/SMARL_SmartSync.php:847
 msgid "Failed to start sync. Please try again."
 msgstr ""
 
-#: src/SMARL_SmartSync.php:733
-msgid "Are you sure you want to stop all the running processes?"
+#: src/SMARL_SmartSync.php:848
+msgid "Queued transfers will stop. An active file transfer may finish before stopping."
 msgstr ""
 
-#: src/SMARL_SmartSync.php:734
+#: src/SMARL_SmartSync.php:849
 msgid "Stopping..."
 msgstr ""
 
-#: src/SMARL_SmartSync.php:735
+#: src/SMARL_SmartSync.php:850
 msgid "Stopping all processes..."
 msgstr ""
 
-#: src/SMARL_SmartSync.php:736
+#: src/SMARL_SmartSync.php:851
 msgid "Failed to stop processes."
 msgstr ""
 
-#: src/SMARL_SmartSync.php:737
+#: src/SMARL_SmartSync.php:852
 msgid "Clearing CloudFront cache..."
 msgstr ""
 
-#: src/SMARL_SmartSync.php:738
-msgid "CloudFront cache cleared successfully."
+#: src/SMARL_SmartSync.php:853
+msgid "CloudFront cache refresh requested."
 msgstr ""
 
-#: src/SMARL_SmartSync.php:739
+#: src/SMARL_SmartSync.php:854
 msgid "Failed to clear CloudFront cache."
 msgstr ""
 
-#: src/SMARL_SmartSync.php:740
+#: src/SMARL_SmartSync.php:855
 msgid "Setting up CDN..."
 msgstr ""
 
-#: src/SMARL_SmartSync.php:741
+#: src/SMARL_SmartSync.php:856
 msgid "Removing CDN..."
 msgstr ""
 
-#: src/SMARL_SmartSync.php:742
-msgid "CDN setup successfully."
+#: src/SMARL_SmartSync.php:857
+msgid "Cloud delivery setting updated."
 msgstr ""
 
-#: src/SMARL_SmartSync.php:743
-msgid "Failed to set up CDN."
+#: src/SMARL_SmartSync.php:858
+msgid "Could not update cloud delivery."
 msgstr ""
 
-#: src/SMARL_SmartSync.php:744
+#: src/SMARL_SmartSync.php:859
 msgid "Enabling auto-delete..."
 msgstr ""
 
-#: src/SMARL_SmartSync.php:745
+#: src/SMARL_SmartSync.php:860
 msgid "Disabling auto-delete..."
 msgstr ""
 
-#: src/SMARL_SmartSync.php:746
+#: src/SMARL_SmartSync.php:861
 msgid "Auto-delete enabled successfully."
 msgstr ""
 
-#: src/SMARL_SmartSync.php:747
+#: src/SMARL_SmartSync.php:862
 msgid "Auto-delete disabled successfully."
 msgstr ""
 
-#: src/SMARL_SmartSync.php:748
+#: src/SMARL_SmartSync.php:863
 msgid "Failed to toggle auto-delete."
 msgstr ""
 
-#: src/SMARL_SmartSync.php:751
+#: src/SMARL_SmartSync.php:866
 msgid "Failed to fetch analytics. Please try again."
 msgstr ""
 
-#: src/SMARL_SmartSync.php:752
-msgid "Sync is running."
+#: src/SMARL_SmartSync.php:867
+msgid "Fetching usage…"
 msgstr ""
 
-#: src/SMARL_SmartSync.php:753
+#: src/SMARL_SmartSync.php:868
+msgid "The storage usage request timed out. Check your connection and try again."
+msgstr ""
+
+#: src/SMARL_SmartSync.php:869
+msgid "Usage totals reported by your storage provider."
+msgstr ""
+
+#: src/SMARL_SmartSync.php:870
+msgid "Sync in progress"
+msgstr ""
+
+#: src/SMARL_SmartSync.php:871
+msgid "Uploading files"
+msgstr ""
+
+#: src/SMARL_SmartSync.php:872
+msgid "Restoring files"
+msgstr ""
+
+#: src/SMARL_SmartSync.php:873
+msgid "Running in the background"
+msgstr ""
+
+#: src/SMARL_SmartSync.php:874
 msgid "No sync is running."
 msgstr ""
 
-#: src/SMARL_SmartSync.php:754
+#: src/SMARL_SmartSync.php:875
 msgid "sync in process. Please try again after some time."
 msgstr ""
 
-#: src/SMARL_SmartSync.php:755
+#: src/SMARL_SmartSync.php:876
 msgid "to cloud storage"
 msgstr ""
 
-#: src/SMARL_SmartSync.php:756
+#: src/SMARL_SmartSync.php:877
 msgid "from cloud storage"
 msgstr ""
 
-#: src/SMARL_SmartSync.php:757
-msgid "Are you sure you want to clear all the cache from AWS CloudFront?"
+#: src/SMARL_SmartSync.php:878
+msgid "Request a CloudFront cache refresh so visitors receive updated files. Cached files may take time to refresh."
 msgstr ""
 
-#: src/SMARL_SmartSync.php:848
+#: src/SMARL_SmartSync.php:969
 msgid "Local media cleanup could not finish. Cloud copies were retained."
 msgstr ""
 
-#: src/SMARL_SmartSync.php:911
+#: src/SMARL_SmartSync.php:1032
 msgid "Media upload failed. Local files were retained; check your storage configuration and retry."
 msgstr ""
 
-#: src/Views/SMARL_AWSWizard.php:31
-#: src/Views/SMARL_AWSWizard.php:47
+#: src/Views/SMARL_AWSWizard.php:22
 msgid "Cloud Configuration Wizard"
 msgstr ""
 
-#: src/Views/SMARL_AWSWizard.php:32
+#: src/Views/SMARL_AWSWizard.php:23
 msgid "Cloud Config"
 msgstr ""
 
-#: src/Views/SMARL_AWSWizard.php:42
+#: src/Views/SMARL_AWSWizard.php:33
 #: src/Views/SMARL_CustomUrl.php:36
 #: src/Views/SMARL_SettingsPage.php:37
 msgid "You are not allowed to manage SmartSync settings."
 msgstr ""
 
-#: src/Views/SMARL_AWSWizard.php:56
-msgid "IAM Credentials"
-msgstr ""
-
-#: src/Views/SMARL_AWSWizard.php:62
-msgid "Select/Create Bucket"
-msgstr ""
-
-#: src/Views/SMARL_AWSWizard.php:68
-msgid "Configure CloudFront"
-msgstr ""
-
-#: src/Views/SMARL_AWSWizard.php:74
-msgid "Complete"
-msgstr ""
-
-#: src/Views/SMARL_AWSWizard.php:82
-msgid "Step 1: Enter IAM Credentials"
-msgstr ""
-
-#: src/Views/SMARL_AWSWizard.php:83
-msgid "Provide your Cloud IAM Key and Secret."
-msgstr ""
-
-#: src/Views/SMARL_AWSWizard.php:86
-msgid "Provider"
-msgstr ""
-
-#: src/Views/SMARL_AWSWizard.php:89
-msgid "Amazon AWS"
-msgstr ""
-
-#: src/Views/SMARL_AWSWizard.php:92
-msgid "Digital Ocean"
-msgstr ""
-
-#: src/Views/SMARL_AWSWizard.php:95
-msgid "Wasabi"
-msgstr ""
-
-#: src/Views/SMARL_AWSWizard.php:98
-msgid "Google Cloud"
-msgstr ""
-
-#: src/Views/SMARL_AWSWizard.php:101
-msgid "Cloudflare"
-msgstr ""
-
-#: src/Views/SMARL_AWSWizard.php:104
-msgid "Bunny CDN"
-msgstr ""
-
-#: src/Views/SMARL_AWSWizard.php:110
-msgid "IAM Key:"
-msgstr ""
-
-#: src/Views/SMARL_AWSWizard.php:111
-msgid "Enter your IAM Access Key ID"
-msgstr ""
-
-#: src/Views/SMARL_AWSWizard.php:112
-msgid "Your IAM Access Key ID from your cloud provider. This is used to authenticate API requests."
-msgstr ""
-
-#: src/Views/SMARL_AWSWizard.php:114
-msgid "IAM Secret:"
-msgstr ""
-
-#: src/Views/SMARL_AWSWizard.php:115
-msgid "Enter your IAM Secret Access Key"
-msgstr ""
-
-#: src/Views/SMARL_AWSWizard.php:116
-msgid "Your IAM Secret Access Key. Keep this secure as it provides access to your cloud resources."
-msgstr ""
-
-#: src/Views/SMARL_AWSWizard.php:121
-msgid "Wasabi Bucket Region"
-msgstr ""
-
-#: src/Views/SMARL_AWSWizard.php:126
-msgid "Service-account JSON file"
-msgstr ""
-
-#: src/Views/SMARL_AWSWizard.php:129
-msgid "Leave this blank to use the saved service account."
-msgstr ""
-
-#: src/Views/SMARL_AWSWizard.php:133
-msgid "Cloudflare Storage Endpoint"
-msgstr ""
-
-#: src/Views/SMARL_AWSWizard.php:136
-msgid "Cloudflare Public URL"
-msgstr ""
-
-#: src/Views/SMARL_AWSWizard.php:140
-msgid "Bunny Account API Key"
-msgstr ""
-
-#: src/Views/SMARL_AWSWizard.php:142
-msgid "Use the account API key from Bunny account settings, not the storage zone password or a Stream API key. Storage credentials are retrieved securely after choosing a zone."
-msgstr ""
-
-#: src/Views/SMARL_AWSWizard.php:146
-#: src/Views/SMARL_AWSWizard.php:218
-msgid "Next"
-msgstr ""
-
-#: src/Views/SMARL_AWSWizard.php:154
-msgid "Step 2: Select or Create a Bucket"
-msgstr ""
-
-#: src/Views/SMARL_AWSWizard.php:158
-msgid "Use Existing Bucket"
-msgstr ""
-
-#: src/Views/SMARL_AWSWizard.php:163
-msgid "Create New Bucket"
-msgstr ""
-
-#: src/Views/SMARL_AWSWizard.php:169
-msgid "Select Existing Bucket:"
-msgstr ""
-
-#: src/Views/SMARL_AWSWizard.php:176
-msgid "Enter an existing bucket manually"
-msgstr ""
-
-#: src/Views/SMARL_AWSWizard.php:177
-msgid "Use this when your credentials can access a bucket but cannot list every bucket in the account."
-msgstr ""
-
-#: src/Views/SMARL_AWSWizard.php:180
-msgid "Existing Bucket Name"
-msgstr ""
-
-#: src/Views/SMARL_AWSWizard.php:183
-msgid "Existing Bucket Region"
-msgstr ""
-
-#: src/Views/SMARL_AWSWizard.php:189
-msgid "Select Pull Zone:"
-msgstr ""
-
-#: src/Views/SMARL_AWSWizard.php:191
-msgid "Loading zones..."
-msgstr ""
-
-#: src/Views/SMARL_AWSWizard.php:197
-msgid "New Bucket Name:"
-msgstr ""
-
-#: src/Views/SMARL_AWSWizard.php:198
-msgid "Enter a globally unique bucket name"
-msgstr ""
-
-#: src/Views/SMARL_AWSWizard.php:199
-msgid "Use a bucket name accepted by the selected provider."
-msgstr ""
-
-#: src/Views/SMARL_AWSWizard.php:203
-msgid "Bucket Region:"
-msgstr ""
-
-#: src/Views/SMARL_AWSWizard.php:208
-msgid "EU (Ireland)"
-msgstr ""
-
-#: src/Views/SMARL_AWSWizard.php:215
-#: src/Views/SMARL_AWSWizard.php:238
-msgid "Back"
-msgstr ""
-
-#: src/Views/SMARL_AWSWizard.php:225
-msgid "Step 3: Configure CloudFront"
-msgstr ""
-
-#: src/Views/SMARL_AWSWizard.php:226
-msgid "Do you want to use CloudFront for a CDN?"
-msgstr ""
-
-#: src/Views/SMARL_AWSWizard.php:229
-msgid "Yes"
-msgstr ""
-
-#: src/Views/SMARL_AWSWizard.php:233
-msgid "No"
-msgstr ""
-
-#: src/Views/SMARL_AWSWizard.php:244
-msgid "Configuration Complete"
-msgstr ""
-
-#: src/Views/SMARL_AWSWizard.php:245
-msgid "Your Cloud configuration is complete! You can now sync your assets and manage your Cloud settings."
-msgstr ""
-
-#: src/Views/SMARL_AWSWizard.php:248
-msgid "Finish"
-msgstr ""
-
 #: src/Views/SMARL_CustomUrl.php:25
 #: src/Views/SMARL_CustomUrl.php:26
+#: src/Views/templates/custom-domain.php:9
 msgid "Custom CloudFront URL"
 msgstr ""
 
-#: src/Views/SMARL_CustomUrl.php:41
-msgid "Set Up a Custom CloudFront URL"
+#: src/Views/SMARL_ProviderGuides.php:12
+msgid "Access key ID"
 msgstr ""
 
-#: src/Views/SMARL_CustomUrl.php:44
-msgid "Configure AWS with CloudFront before setting up a custom domain."
+#: src/Views/SMARL_ProviderGuides.php:12
+msgid "Secret access key"
 msgstr ""
 
-#: src/Views/SMARL_CustomUrl.php:45
-msgid "Open Cloud Configuration"
+#: src/Views/SMARL_ProviderGuides.php:13
+msgid "Paste the access key ID created for this website."
 msgstr ""
 
-#: src/Views/SMARL_CustomUrl.php:56
-msgid "Enter Domain"
+#: src/Views/SMARL_ProviderGuides.php:14
+msgid "The secret is usually shown only when the key is created."
 msgstr ""
 
-#: src/Views/SMARL_CustomUrl.php:60
-msgid "Verify Certificate"
+#: src/Views/SMARL_ProviderGuides.php:15
+msgid "Paste your access key ID"
 msgstr ""
 
-#: src/Views/SMARL_CustomUrl.php:64
-#: src/Views/SMARL_CustomUrl.php:73
-msgid "Attach to CloudFront"
+#: src/Views/SMARL_ProviderGuides.php:16
+msgid "Paste your secret access key"
 msgstr ""
 
-#: src/Views/SMARL_CustomUrl.php:69
-msgid "Custom domain"
+#: src/Views/SMARL_ProviderGuides.php:17
+msgid "e.g. my-website-media"
 msgstr ""
 
-#: src/Views/SMARL_CustomUrl.php:71
-msgid "Enter a domain you own, such as cdn.example.com, without a scheme or path. Add the certificate validation records and point its CNAME to CloudFront."
+#: src/Views/SMARL_ProviderGuides.php:18
+msgid "Use a unique name accepted by your provider. A dedicated bucket keeps website files separate."
 msgstr ""
 
-#: src/Views/SMARL_CustomUrl.php:72
-msgid "Generate Certificate"
+#: src/Views/SMARL_ProviderGuides.php:19
+msgid "e.g. us-east-1"
 msgstr ""
 
-#: src/Views/SMARL_CustomUrl.php:74
-msgid "Retry DNS Check"
+#: src/Views/SMARL_ProviderGuides.php:20
+msgid "Choose a storage bucket"
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:20
+msgid "Storage bucket"
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:21
+msgid "Choose an existing bucket or create a dedicated bucket for this website."
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:22
+msgid "Choose storage"
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:22
+msgid "Connect and find buckets"
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:23
+msgid "Connecting and finding buckets…"
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:24
+msgid "Enter both the access key ID and secret access key."
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:25
+msgid "Use storage dedicated to your public website files, without private data. No files are transferred until you start a sync."
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:26
+msgid "No buckets found"
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:27
+msgid "Create a bucket below, or create one in your provider dashboard and refresh this list."
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:31
+msgid "AWS shares this bucket-name namespace across accounts and regions. Changing regions will not make a taken name available. Add a unique suffix, e.g. my-site-media-a7f3c9."
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:32
+msgid "e.g. AKIA... from AWS IAM"
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:33
+msgid "Amazon S3"
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:33
+msgid "S3 storage · optional CloudFront"
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:34
+msgid "Connect your AWS account"
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:35
+msgid "Use an IAM access key with permission to manage this website’s bucket."
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:36
+msgid "Open AWS IAM"
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:39
+msgid "Create a dedicated IAM user"
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:39
+msgid "In the AWS console, open IAM → Users. Create or select a user for this website; use its credentials rather than root account keys."
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:40
+#: src/Views/SMARL_ProviderGuides.php:87
+msgid "Create an access key"
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:40
+msgid "Open the user’s Security credentials → Access keys → Create access key. Copy the access key ID and secret into this form."
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:41
+msgid "Check bucket permissions"
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:41
+msgid "The user needs bucket discovery/access, object read/write/delete, and delivery-policy permissions. CloudFront setup also needs CloudFront permissions and an STS account lookup."
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:43
+msgid "Ask your AWS administrator to scope access to this website’s bucket. You can choose S3 delivery or CloudFront later."
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:45
+#: src/Views/templates/cloud-setup.php:157
+msgid "Amazon CloudFront"
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:46
+msgid "DELIVERY SETUP"
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:47
+msgid "Set up CloudFront delivery"
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:49
+msgid "Check your IAM permissions"
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:49
+msgid "In IAM → Users → your user → Permissions, check access to CloudFront and this bucket. The required actions are listed below."
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:50
+msgid "Choose Save with CloudFront"
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:50
+msgid "SmartSync creates or resumes the distribution and origin access control, restricts S3 access to CloudFront, and saves its cloudfront.net address automatically."
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:51
+msgid "Wait for AWS deployment"
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:51
+msgid "Open CloudFront → Distributions, find the saved distribution, and wait for deployment to finish."
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:52
+msgid "Upload files, then enable delivery"
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:52
+msgid "In SmartSync → Media or Assets, upload your files. After a successful sync and CloudFront deployment, enable cloud delivery for that tab."
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:56
+msgid "Open CloudFront distributions"
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:58
+msgid "AWS charges apply. A custom domain is optional: start with the saved cloudfront.net address and use Custom CloudFront URL later if needed. Saving this step does not upload files."
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:62
+msgid "Paste your Spaces access key ID"
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:63
+msgid "Paste your Spaces secret key"
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:64
+msgid "e.g. nyc3"
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:65
+msgid "DigitalOcean Spaces"
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:65
+msgid "S3-compatible object storage"
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:66
+msgid "Connect DigitalOcean Spaces"
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:67
+msgid "Use a Spaces access key pair, rather than a DigitalOcean personal access token."
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:68
+msgid "Open DigitalOcean Spaces"
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:71
+msgid "Open your Spaces dashboard"
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:71
+msgid "Sign in to DigitalOcean and open Spaces Object Storage. Create a Space for this website if you do not already have one."
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:72
+msgid "Generate Spaces credentials"
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:72
+msgid "Open Spaces access-key management in your control panel. Create a key with access to the intended Space and copy its key ID and secret."
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:73
+msgid "Confirm access and location"
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:73
+msgid "Allow the object operations needed for uploads, reads and deletion. The next step lets you choose the Space and its datacenter."
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:75
+msgid "A restricted key may not list every Space. You can enter an existing Space and datacenter manually in the next step."
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:78
+msgid "Paste your Wasabi access key ID"
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:79
+msgid "Paste your Wasabi secret key"
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:80
+msgid "Wasabi"
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:80
+msgid "Regional S3-compatible storage"
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:81
+msgid "Connect your Wasabi account"
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:82
+msgid "Use a Wasabi access key pair and the exact region of your bucket."
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:83
+msgid "Open Wasabi Console"
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:86
+msgid "Select a Wasabi user"
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:86
+msgid "In Wasabi Console, create or select a sub-user for this website and grant access to its bucket and objects."
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:87
+msgid "Open the user’s Access Keys and create a key pair. Copy the access key and secret here."
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:88
+msgid "Copy your bucket region"
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:88
+msgid "Find the region in your bucket’s details, such as us-east-1. Enter the same region below so SmartSync searches the correct location."
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:90
+msgid "Public website delivery must be allowed by your Wasabi account. Check your account policy if public access is restricted."
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:93
+msgid "Saving sets up public object viewing on this bucket. Your project must allow public media delivery. No files are transferred yet."
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:94
+msgid "Google Cloud Storage"
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:94
+msgid "Service-account authentication"
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:95
+msgid "Connect Google Cloud Storage"
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:96
+msgid "Upload a JSON or P12 key for a service account with access to your storage project."
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:97
+msgid "Open Google service accounts"
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:100
+msgid "Select the correct project"
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:100
+msgid "In Google Cloud Console, select your project and open IAM & Admin → Service Accounts. Create or choose a dedicated service account."
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:101
+msgid "Grant storage permissions"
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:101
+msgid "Give the service account bucket/object access for this website. Setup also needs storage.buckets.getIamPolicy and storage.buckets.setIamPolicy. Listing buckets alone is not enough."
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:102
+msgid "Download a service-account key"
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:102
+msgid "Open the service account → Keys → Add key → Create new key. JSON is recommended; P12 is also supported with the account email and project ID. Upload one file up to 1 MB."
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:104
+msgid "This connection uses public website delivery. Public access prevention or organization sharing policies can block setup. Use a dedicated website bucket and ask your administrator if public access is restricted."
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:107
+msgid "Paste your R2 Access Key ID"
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:108
+msgid "Paste your R2 Secret Access Key"
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:109
+msgid "auto"
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:110
+msgid "Cloudflare R2"
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:110
+msgid "S3 API + your public delivery URL"
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:111
+msgid "Connect Cloudflare R2"
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:112
+msgid "Use R2 S3 credentials, your account endpoint, and the public URL for the bucket."
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:113
+msgid "Open Cloudflare Dashboard"
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:116
+msgid "Create R2 API credentials"
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:116
+msgid "Open R2 Object Storage → Manage R2 API Tokens. Create credentials with the required access and copy the generated Access Key ID and Secret Access Key."
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:117
+msgid "Copy the S3 API endpoint"
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:117
+msgid "Copy the account S3 endpoint shown by R2. It ends in r2.cloudflarestorage.com and is used for storage requests, not public media links."
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:118
+msgid "Enable a public delivery URL"
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:118
+msgid "In the bucket settings, connect a custom domain or enable the development r2.dev URL. Paste that public URL into the separate delivery field below."
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:120
+msgid "A bucket-scoped key can use manual bucket entry in the next step. Creating a bucket here requires bucket-management permission."
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:121
+msgid "The public URL must already be connected to this bucket in Cloudflare. Saving does not transfer files or enable public access in Cloudflare."
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:124
+msgid "Bunny CDN"
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:124
+msgid "Storage zone + connected pull zone"
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:125
+msgid "Connect your Bunny account"
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:126
+msgid "Use your account API key. In the next step, choose a storage zone and its connected delivery zone."
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:127
+msgid "Open Bunny account settings"
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:130
+msgid "Copy your account API key"
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:130
+msgid "Sign in to the Bunny dashboard and open Account settings → API. Copy the account API key, then return to the connection form."
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:131
+msgid "Create a storage zone"
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:131
+msgid "Open Storage in Bunny and create or choose a storage zone for this website’s files."
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:132
+msgid "Connect a pull zone"
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:132
+msgid "Inside that storage zone, open Connected Pull Zones and create a connected pull zone. It needs a working public hostname, such as your-zone.b-cdn.net."
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:134
+msgid "If the account API key is unavailable to your subaccount, ask the main account owner for access."
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:135
+msgid "Choose your storage and pull zone"
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:135
+msgid "Storage zone"
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:136
+msgid "Storage & delivery"
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:137
+msgid "Choose where files will be stored, then select a public pull-zone hostname connected to that storage zone."
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:138
+msgid "Connect and find storage zones"
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:139
+msgid "Connecting and finding storage zones…"
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:140
+msgid "Enter the account API key from your Bunny account settings."
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:141
+msgid "Saving connects these zones to SmartSync. It does not upload or move any files."
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:142
+msgid "No storage zones found"
+msgstr ""
+
+#: src/Views/SMARL_ProviderGuides.php:143
+msgid "Create a storage zone in Bunny, connect a public pull zone to it, then refresh this list."
 msgstr ""
 
 #: src/Views/SMARL_SettingsPage.php:25
-#: src/Views/SMARL_SettingsPage.php:81
 msgid "Cloud Configuration"
 msgstr ""
 
-#: src/Views/SMARL_SettingsPage.php:46
-msgid "Not configured"
+#: src/Views/templates/cloud-setup.php:14
+#: src/Views/templates/settings-home.php:36
+msgid "SmartSync settings"
 msgstr ""
 
-#: src/Views/SMARL_SettingsPage.php:50
-msgid "Cloud Settings"
+#: src/Views/templates/cloud-setup.php:15
+msgid "Cloud setup"
 msgstr ""
 
-#: src/Views/SMARL_SettingsPage.php:54
-msgid "Errors Detected"
+#: src/Views/templates/cloud-setup.php:17
+msgid "Currently connected:"
 msgstr ""
 
-#: src/Views/SMARL_SettingsPage.php:65
-msgid "Cloud settings"
+#: src/Views/templates/cloud-setup.php:22
+msgid "Configuration is locked during sync"
 msgstr ""
 
-#: src/Views/SMARL_SettingsPage.php:66
-msgid "General"
+#: src/Views/templates/cloud-setup.php:22
+msgid "Wait for the transfer to finish, or stop it in settings before changing providers or storage."
 msgstr ""
 
-#: src/Views/SMARL_SettingsPage.php:67
+#: src/Views/templates/cloud-setup.php:22
+msgid "View sync status"
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:24
+msgid "Cloud setup progress"
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:26
+msgid "Connect account"
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:26
+msgid "Choose a provider and add credentials"
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:27
+msgid "Choose where your files will live"
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:28
+msgid "Set up delivery"
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:28
+msgid "Choose S3 or CloudFront"
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:29
+msgid "Ready to sync"
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:29
+msgid "Review your connection"
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:40
+msgid "Step 1"
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:40
+msgid "Get credentials and setup instructions"
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:43
+msgid "Storage provider"
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:52
+msgid "AWS region (optional)"
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:52
+msgid "Automatic, or enter a region such as ap-south-1"
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:52
+msgid "Leave blank for automatic discovery. This choice is remembered when you connect. Existing buckets still use their detected region."
+msgstr ""
+
+#. translators: Keep {current} and {total}; they are replaced with setup step numbers.
+#: src/Views/templates/cloud-setup.php:55
+#: src/Views/templates/cloud-setup.php:86
+#: src/Views/templates/cloud-setup.php:95
+#: src/Views/templates/cloud-setup.php:153
+msgid "Show"
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:58
+#: src/Views/templates/cloud-setup.php:110
+msgid "Bucket region"
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:58
+msgid "Copy the region from the bucket details in Wasabi Console."
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:61
+msgid "Service-account key"
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:63
+msgid "Saved service account"
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:63
+msgid "Ready to reuse · no upload needed"
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:63
+msgid "Saved key needs attention"
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:65
+msgid "Project ID"
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:65
+#: src/Views/templates/cloud-setup.php:84
+msgid "Service-account email"
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:66
+msgid "This account will be used when you connect. Replace the key only if you want to change accounts or rotate credentials."
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:67
+msgid "View saved key values"
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:67
+msgid "Saved key values"
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:67
+#: src/Views/templates/cloud-setup.php:79
+#: src/Views/templates/cloud-setup.php:173
+msgid "Show sensitive values"
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:67
+msgid "Saved service-account key values"
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:67
+#: src/Views/templates/cloud-setup.php:165
+msgid "Sensitive values are hidden. Reveal them only when needed."
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:69
+msgid "The saved key could not be read. Upload a replacement JSON or P12 key to reconnect."
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:71
+msgid "Replace key"
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:71
+msgid "Your saved account stays active until a replacement connection is saved."
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:76
+msgid "Drop your JSON or P12 key here"
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:76
+msgid "or choose it from your computer"
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:76
+msgid "Browse files"
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:76
+msgid "One .json or .p12 file · up to 1 MB"
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:77
+msgid "Replace"
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:77
+msgid "Remove"
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:79
+msgid "Project"
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:79
+msgid "Service account"
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:79
+msgid "JSON preview"
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:79
+msgid "Formatted JSON key preview"
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:79
+#: src/Views/templates/cloud-setup.php:175
+msgid "Sensitive values are hidden. This preview stays in your browser."
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:81
+msgid "Use a JSON or P12 service-account key from Google Cloud. It is sent only when you connect."
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:83
+msgid "P12 keys need these account details. The private key is checked securely when you connect; it is not displayed in the browser."
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:84
+msgid "media@my-project.iam.gserviceaccount.com"
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:84
+msgid "Copy the email from IAM & Admin → Service Accounts for the account that owns this key."
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:85
+msgid "Google Cloud project ID"
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:85
+msgid "my-cloud-project"
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:85
+msgid "Use the project ID from the project selector, not the project name or number."
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:86
+msgid "P12 password (optional)"
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:86
+msgid "Leave blank to use notasecret"
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:86
+msgid "Google P12 keys normally use notasecret. Enter a password only if it was changed. The password is not saved."
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:91
+msgid "R2 S3 API endpoint"
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:91
+msgid "Copy the account endpoint from R2. Do not use your public website or CDN address here."
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:92
+msgid "Bucket public delivery URL"
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:92
+msgid "Use the bucket’s connected custom domain or enabled r2.dev URL. This is separate from its S3 API endpoint."
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:95
+msgid "Bunny account API key"
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:95
+msgid "Paste the account API key from Bunny"
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:95
+msgid "Find it in Bunny → Account settings → API. Use the account key, not a storage-zone password or a Stream API key."
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:96
+msgid "Connecting checks access to your storage provider. It does not start a sync."
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:98
+msgid "Next: choose your storage"
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:98
+#: src/Views/templates/cloud-setup.php:107
+msgid "Enter an existing bucket manually"
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:102
+msgid "Step 2"
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:104
+msgid "Storage selection"
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:104
+msgid "Use existing storage"
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:104
+msgid "Create a new bucket"
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:106
+#: src/Views/templates/cloud-setup.php:155
+msgid "Refresh list"
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:106
+msgid "Connect your account to load storage."
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:107
+msgid "Useful when your key can access one bucket but cannot list the whole account."
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:108
+msgid "Existing bucket name"
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:108
+msgid "Existing bucket region"
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:109
+msgid "Connected pull zone"
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:109
+msgid "Choose a storage zone first."
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:109
+msgid "This public hostname delivers files from the selected storage zone. Manage it in Bunny → Storage → Connected Pull Zones."
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:110
+msgid "New bucket name"
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:113
+msgid "Back"
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:113
+#: src/Views/templates/cloud-setup.php:154
+msgid "Save connection"
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:117
+msgid "Step 3"
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:117
+msgid "How should AWS deliver your files?"
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:117
+msgid "CloudFront adds CDN delivery. Direct S3 delivery connects the bucket without creating a CloudFront distribution."
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:118
+msgid "Selected storage"
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:118
+#: src/Views/templates/custom-domain.php:25
+#: src/Views/templates/custom-domain.php:40
+msgid "Set up CloudFront"
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:118
+msgid "Create or reuse a distribution and origin access control for this bucket. AWS permissions and charges apply."
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:118
+msgid "Save with CloudFront"
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:118
+msgid "Use S3 delivery"
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:118
+msgid "Make website objects publicly readable through S3. No CloudFront distribution is created."
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:118
+msgid "Save with S3"
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:118
+msgid "Saving can update bucket delivery policies. Use a dedicated website bucket without private data."
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:119
+msgid "Back to storage"
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:123
+msgid "Your cloud connection is ready"
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:123
+msgid "The connection is saved. Your files have not been moved or synced yet."
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:124
+#: src/Views/templates/settings-home.php:64
+msgid "Region"
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:124
+msgid "Delivery"
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:124
+msgid "What happens next?"
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:124
+msgid "Open SmartSync settings and choose Media or Assets to sync."
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:124
+msgid "Start the sync, check its results, then enable CDN delivery when your files are ready."
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:125
+msgid "You control when the first sync starts."
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:125
+msgid "Go to sync settings"
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:132
+#: src/Views/templates/cloud-setup.php:151
+msgid "BEFORE YOU CONNECT"
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:132
+#: src/Views/templates/cloud-setup.php:150
+msgid "Get your account ready"
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:139
+msgid "Required AWS permissions"
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:139
+msgid "Ask your AWS administrator to add these permissions alongside your existing bucket and object permissions. SmartSync also uses STS GetCallerIdentity to identify the account."
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:140
+#: src/Views/templates/cloud-setup.php:141
+msgid "(opens in a new tab)"
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:141
+msgid "Read the official setup guide"
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:148
+msgid "Enable JavaScript to connect your provider and complete this wizard."
+msgstr ""
+
+#. translators: Keep {current} and {total}; they are replaced with setup step numbers.
+#: src/Views/templates/cloud-setup.php:153
+msgid "Step {current} of {total}"
+msgstr ""
+
+#. translators: Keep {current} and {total}; they are replaced with setup step numbers.
+#: src/Views/templates/cloud-setup.php:153
+msgid "Hide"
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:154
+msgid "Review delivery options"
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:155
+msgid "Saving connection…"
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:156
+msgid "Refreshing storage…"
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:156
+#: src/Views/templates/settings-home.php:30
+msgid "Connected"
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:157
+msgid "Direct storage delivery"
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:158
+msgid "Choose a JSON or P12 file no larger than 1 MB."
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:159
+msgid "Choose a service-account file with a .json or .p12 extension."
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:160
+msgid "P12 selected · enter the account details below"
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:163
+msgid "Reading JSON…"
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:164
+msgid "Ready to connect"
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:166
+msgid "The saved key values could not be loaded. Try again or reload this page."
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:167
+msgid "Loading sensitive values…"
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:168
+msgid "This file contains invalid JSON. Choose the original service-account key downloaded from Google Cloud."
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:169
+msgid "This is not a service-account key. Choose a JSON key with a project ID, service-account email, private key and Google token URL."
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:170
+msgid "This file could not be read. Choose it again or try another JSON key."
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:171
+msgid "Choose one JSON or P12 file at a time. Your current selection has been kept."
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:174
+msgid "Hide sensitive values"
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:176
+msgid "Sensitive values are visible. Hide them before sharing your screen."
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:177
+msgid "This JSON is too deeply nested to preview."
+msgstr ""
+
+#: src/Views/templates/cloud-setup.php:178
+msgid "Enter the bucket region shown in your provider dashboard."
+msgstr ""
+
+#: src/Views/templates/custom-domain.php:9
+msgid "← SmartSync settings"
+msgstr ""
+
+#: src/Views/templates/custom-domain.php:9
+msgid "Connect CloudFront, then use your own domain for website files."
+msgstr ""
+
+#: src/Views/templates/custom-domain.php:11
+msgid "Connect your AWS storage first"
+msgstr ""
+
+#: src/Views/templates/custom-domain.php:11
+msgid "This flow needs an AWS S3 bucket in a commercial AWS region. Connect your bucket in Cloud Configuration, then return here to set up CloudFront and your custom URL."
+msgstr ""
+
+#: src/Views/templates/custom-domain.php:11
+msgid "Open Cloud Configuration"
+msgstr ""
+
+#: src/Views/templates/custom-domain.php:17
+msgid "First, connect CloudFront"
+msgstr ""
+
+#: src/Views/templates/custom-domain.php:18
+msgid "Your S3 bucket is ready. Add CloudFront next."
+msgstr ""
+
+#: src/Views/templates/custom-domain.php:19
+msgid "Set up a distribution for this bucket using your saved AWS connection. SmartSync creates the distribution and origin access control, then grants CloudFront read access."
+msgstr ""
+
+#: src/Views/templates/custom-domain.php:20
+msgid "S3 bucket"
+msgstr ""
+
+#: src/Views/templates/custom-domain.php:20
+msgid "AWS region"
+msgstr ""
+
+#: src/Views/templates/custom-domain.php:21
+msgid "Existing S3 delivery continues while you prepare the custom URL. This step adds CloudFront access and keeps the bucket’s current public-access settings. AWS charges apply."
+msgstr ""
+
+#: src/Views/templates/custom-domain.php:24
+msgid "Distribution"
+msgstr ""
+
+#: src/Views/templates/custom-domain.php:24
+msgid "CloudFront address"
+msgstr ""
+
+#: src/Views/templates/custom-domain.php:25
+msgid "Continue to custom URL →"
+msgstr ""
+
+#: src/Views/templates/custom-domain.php:25
+msgid "Open CloudFront ↗"
+msgstr ""
+
+#: src/Views/templates/custom-domain.php:26
+msgid "Next: choose your custom domain"
+msgstr ""
+
+#: src/Views/templates/custom-domain.php:26
+msgid "Certificate and DNS setup unlocks once CloudFront is deployed."
+msgstr ""
+
+#: src/Views/templates/custom-domain.php:30
+msgid "CloudFront connected"
+msgstr ""
+
+#: src/Views/templates/custom-domain.php:31
+msgid "Use your own domain"
+msgstr ""
+
+#: src/Views/templates/custom-domain.php:33
+msgid "Choose domain"
+msgstr ""
+
+#: src/Views/templates/custom-domain.php:33
+msgid "Verify DNS"
+msgstr ""
+
+#: src/Views/templates/custom-domain.php:33
+msgid "Attach domain"
+msgstr ""
+
+#: src/Views/templates/custom-domain.php:34
+msgid "Custom domain"
+msgstr ""
+
+#: src/Views/templates/custom-domain.php:34
+msgid "e.g. cdn.example.com"
+msgstr ""
+
+#: src/Views/templates/custom-domain.php:34
+msgid "Use a domain you own, without https:// or a path. You will add certificate validation records and a CNAME pointing to CloudFront."
+msgstr ""
+
+#: src/Views/templates/custom-domain.php:34
+msgid "Generate Certificate"
+msgstr ""
+
+#: src/Views/templates/custom-domain.php:34
+msgid "Attach to CloudFront"
+msgstr ""
+
+#: src/Views/templates/custom-domain.php:34
+msgid "Retry DNS Check"
+msgstr ""
+
+#: src/Views/templates/custom-domain.php:37
+msgid "BEFORE YOU START"
+msgstr ""
+
+#: src/Views/templates/custom-domain.php:37
+msgid "Get your custom URL ready"
+msgstr ""
+
+#: src/Views/templates/custom-domain.php:37
+msgid "Allow CloudFront setup"
+msgstr ""
+
+#: src/Views/templates/custom-domain.php:37
+msgid "Your saved AWS key needs CloudFront distribution and origin-access-control permissions, plus read/write access to this bucket’s policy. Ask your AWS administrator if setup is denied."
+msgstr ""
+
+#: src/Views/templates/custom-domain.php:37
+msgid "Choose a domain you control"
+msgstr ""
+
+#: src/Views/templates/custom-domain.php:37
+msgid "Use a subdomain such as cdn.example.com. Keep access to its DNS provider available for the next step."
+msgstr ""
+
+#: src/Views/templates/custom-domain.php:37
+msgid "Validate the certificate and DNS"
+msgstr ""
+
+#: src/Views/templates/custom-domain.php:37
+msgid "SmartSync requests the certificate in AWS US East (N. Virginia). Add the records shown here, wait for verification, then attach the domain."
+msgstr ""
+
+#: src/Views/templates/custom-domain.php:37
+msgid "Read the AWS custom-domain guide ↗"
+msgstr ""
+
+#: src/Views/templates/custom-domain.php:41
+msgid "Setting up CloudFront…"
+msgstr ""
+
+#: src/Views/templates/custom-domain.php:42
+msgid "Checking deployment…"
+msgstr ""
+
+#: src/Views/templates/custom-domain.php:43
+msgid "Check deployment"
+msgstr ""
+
+#: src/Views/templates/custom-domain.php:44
+msgid "CloudFront is deploying. This usually takes a few minutes. Use Check deployment when you are ready; your current S3 delivery continues."
+msgstr ""
+
+#: src/Views/templates/custom-domain.php:45
+msgid "CloudFront is ready. Continue to choose your custom domain."
+msgstr ""
+
+#: src/Views/templates/custom-domain.php:46
+msgid "CloudFront setup could not finish. Review the error and retry to resume setup."
+msgstr ""
+
+#: src/Views/templates/settings-home.php:30
+msgid "Needs setup"
+msgstr ""
+
+#: src/Views/templates/settings-home.php:30
+msgid "No connection"
+msgstr ""
+
+#: src/Views/templates/settings-home.php:37
+msgid "Overview"
+msgstr ""
+
+#: src/Views/templates/settings-home.php:38
 msgid "Media"
 msgstr ""
 
-#: src/Views/SMARL_SettingsPage.php:68
+#: src/Views/templates/settings-home.php:39
 msgid "Assets"
 msgstr ""
 
-#: src/Views/SMARL_SettingsPage.php:85
-msgid "Provider:"
+#: src/Views/templates/settings-home.php:41
+msgid "Sync destination"
 msgstr ""
 
-#: src/Views/SMARL_SettingsPage.php:89
-msgid "Bucket:"
+#: src/Views/templates/settings-home.php:48
+#: src/Views/templates/settings-home.php:70
+msgid "Connect storage"
 msgstr ""
 
-#: src/Views/SMARL_SettingsPage.php:93
-msgid "Region:"
+#: src/Views/templates/settings-home.php:57
+msgid "Connection"
 msgstr ""
 
-#: src/Views/SMARL_SettingsPage.php:97
-msgid "URL:"
+#: src/Views/templates/settings-home.php:58
+msgid "Manage connection"
 msgstr ""
 
-#: src/Views/SMARL_SettingsPage.php:101
-msgid "Reconfigure Cloud"
+#: src/Views/templates/settings-home.php:65
+msgid "Delivery URL"
 msgstr ""
 
-#: src/Views/SMARL_SettingsPage.php:102
-msgid "Click to re-launch the Cloud Configuration Wizard."
+#: src/Views/templates/settings-home.php:65
+msgid "Not set"
 msgstr ""
 
-#: src/Views/SMARL_SettingsPage.php:108
-msgid "Cloud Analytics"
+#: src/Views/templates/settings-home.php:68
+msgid "Connect your storage"
 msgstr ""
 
-#: src/Views/SMARL_SettingsPage.php:111
-msgid "Total Files:"
+#: src/Views/templates/settings-home.php:69
+msgid "Choose a provider to start uploading media and assets."
 msgstr ""
 
-#: src/Views/SMARL_SettingsPage.php:111
-#: src/Views/SMARL_SettingsPage.php:112
-#: src/Views/SMARL_SettingsPage.php:113
-msgid "No Data"
+#: src/Views/templates/settings-home.php:74
+msgid "Storage usage"
 msgstr ""
 
-#: src/Views/SMARL_SettingsPage.php:112
-msgid "Total Storage Used:"
+#: src/Views/templates/settings-home.php:75
+msgid "Refresh usage"
 msgstr ""
 
-#: src/Views/SMARL_SettingsPage.php:113
-msgid "Monthly Cost:"
+#: src/Views/templates/settings-home.php:77
+msgid "Files"
 msgstr ""
 
-#: src/Views/SMARL_SettingsPage.php:115
-msgid "Fetch Analytics"
+#: src/Views/templates/settings-home.php:77
+msgid "Storage used"
 msgstr ""
 
-#: src/Views/SMARL_SettingsPage.php:116
-msgid "Click to Fetch Analytics from Cloud"
+#: src/Views/templates/settings-home.php:78
+msgid "Refresh to load usage from your provider."
 msgstr ""
 
-#: src/Views/SMARL_SettingsPage.php:122
-msgid "Clear CloudFront Cache"
+#: src/Views/templates/settings-home.php:78
+msgid "Connect storage to view its usage."
 msgstr ""
 
-#: src/Views/SMARL_SettingsPage.php:123
-msgid "Click to clear the CloudFront cache."
+#: src/Views/templates/settings-home.php:79
+msgid "Usage details"
 msgstr ""
 
-#: src/Views/SMARL_SettingsPage.php:132
-msgid "Media Settings"
+#: src/Views/templates/settings-home.php:79
+msgid "Estimated monthly cost:"
 msgstr ""
 
-#: src/Views/SMARL_SettingsPage.php:136
-#: src/Views/SMARL_SettingsPage.php:164
-msgid "Use Cloud Storage:"
+#: src/Views/templates/settings-home.php:83
+msgid "CloudFront cache"
 msgstr ""
 
-#: src/Views/SMARL_SettingsPage.php:142
-msgid "Enable to serve media files from your cloud storage provider, improving website performance and reducing server load."
+#: src/Views/templates/settings-home.php:83
+msgid "Refresh cached files after updating your content."
 msgstr ""
 
-#: src/Views/SMARL_SettingsPage.php:147
-msgid "Automatically delete media from local after upload?"
+#: src/Views/templates/settings-home.php:83
+msgid "Clear CloudFront cache"
 msgstr ""
 
-#: src/Views/SMARL_SettingsPage.php:149
-msgid "Remove local copies after every attachment file uploads successfully and media CDN delivery is enabled."
+#: src/Views/templates/settings-home.php:90
+msgid "Cloud delivery"
 msgstr ""
 
-#: src/Views/SMARL_SettingsPage.php:153
-msgid "Sync Local to Cloud Media"
+#: src/Views/templates/settings-home.php:91
+msgid "Serve media from cloud"
 msgstr ""
 
-#: src/Views/SMARL_SettingsPage.php:154
-msgid "Sync Cloud to Local"
+#: src/Views/templates/settings-home.php:91
+msgid "Serve assets from cloud"
 msgstr ""
 
-#: src/Views/SMARL_SettingsPage.php:162
-msgid "Assets Settings"
+#: src/Views/templates/settings-home.php:91
+msgid "Deliver media through your connected storage URL."
 msgstr ""
 
-#: src/Views/SMARL_SettingsPage.php:171
-msgid "Enable to serve static assets (JS, CSS, images) from your cloud storage provider, improving page load times."
+#: src/Views/templates/settings-home.php:91
+msgid "Deliver scripts, styles and fonts through your connected storage URL."
 msgstr ""
 
-#: src/Views/SMARL_SettingsPage.php:174
-msgid "Sync Local to Cloud Assets"
+#: src/Views/templates/settings-home.php:99
+msgid "Remove local copies"
 msgstr ""
 
-#: src/Views/SMARL_SettingsPage.php:183
-msgid "Logs"
+#: src/Views/templates/settings-home.php:99
+msgid "Only after all attachment files upload successfully and cloud delivery is enabled."
 msgstr ""
 
-#: src/Views/SMARL_SettingsPage.php:187
-msgid "Stop all running processes"
+#: src/Views/templates/settings-home.php:103
+msgid "Sync media"
 msgstr ""
 
-#: src/Views/SMARL_SettingsPage.php:192
-msgid "View the status and progress of your sync operations. This log shows real-time updates as files are transferred between your server and cloud storage."
+#: src/Views/templates/settings-home.php:103
+msgid "Sync assets"
 msgstr ""
 
-#: src/Views/SMARL_SettingsPage.php:196
-msgid "No logs available. Start a sync operation to see logs here."
+#: src/Views/templates/settings-home.php:106
+msgid "Upload mode"
+msgstr ""
+
+#: src/Views/templates/settings-home.php:108
+msgid "Incremental"
+msgstr ""
+
+#: src/Views/templates/settings-home.php:108
+msgid "Recommended"
+msgstr ""
+
+#: src/Views/templates/settings-home.php:116
+msgid "Temporary testing"
+msgstr ""
+
+#: src/Views/templates/settings-home.php:118
+msgid "All supported media"
+msgstr ""
+
+#: src/Views/templates/settings-home.php:125
+msgid "Reset to all"
+msgstr ""
+
+#: src/Views/templates/settings-home.php:128
+msgid "Choose formats to test this upload. Leave all unselected to upload every supported media type."
+msgstr ""
+
+#: src/Views/templates/settings-home.php:129
+msgid "After a successful test, enable cloud delivery for these formats. Only confirmed uploads use the CDN; local copies are kept."
+msgstr ""
+
+#: src/Views/templates/settings-home.php:133
+msgid "How syncing works"
+msgstr ""
+
+#: src/Views/templates/settings-home.php:133
+msgid "Untracked files upload once to establish history. Before skipping unchanged files, SmartSync checks their cloud copies. Missing or size-mismatched copies upload again. Full resync uploads every selected local file without checking existing copies."
+msgstr ""
+
+#: src/Views/templates/settings-home.php:135
+msgid "Restore from cloud"
+msgstr ""
+
+#: src/Views/templates/settings-home.php:135
+msgid "Download media back to this site. Existing local files are replaced only after a successful download."
+msgstr ""
+
+#: src/Views/templates/settings-home.php:135
+msgid "Restore local files"
+msgstr ""
+
+#: src/Views/templates/settings-home.php:144
+msgid "Activity"
+msgstr ""
+
+#: src/Views/templates/settings-home.php:144
+msgid "Checking status…"
+msgstr ""
+
+#: src/Views/templates/settings-home.php:151
+msgid "View transfer log"
+msgstr ""
+
+#: src/Views/templates/settings-home.php:151
+msgid "No transfers yet. Start an upload from Media or Assets."
 msgstr ""

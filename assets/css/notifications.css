@@ -1,0 +1,23 @@
+/* Viewport notifications are independent of the plugin's page layout. */
+.smartsync-notifications { position: fixed; inset-block-start: calc(var(--wp-admin--admin-bar--height, 32px) + 18px); inset-inline-end: 24px; width: 420px; max-width: calc(100vw - 32px); max-height: calc(100dvh - 100px); overflow-y: auto; scrollbar-width: thin; z-index: 10010; pointer-events: none; font: 13px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+.smartsync-notifications:empty { display: none; }
+.smartsync-notifications * { box-sizing: border-box; }
+.smartsync-notifications .smartsync-notice-item { --notice-color: #2464b9; --notice-background: #f1f7ff; display: grid; grid-template-rows: 1fr; margin-bottom: 10px; opacity: 1; transform: translateY(0); transition: grid-template-rows 200ms ease, margin-bottom 200ms ease, opacity 180ms ease, transform 200ms ease; }
+.smartsync-notifications .smartsync-notice-item[data-type="error"] { --notice-color: #b23e31; --notice-background: #fff5f2; }
+.smartsync-notifications .smartsync-notice-item[data-type="warning"] { --notice-color: #95620b; --notice-background: #fffaed; }
+.smartsync-notifications .smartsync-notice-item[data-type="success"] { --notice-color: #267657; --notice-background: #eff9f3; }
+.smartsync-notifications .smartsync-notice-item:is(.is-entering,.is-leaving) { grid-template-rows: 0fr; margin-bottom: 0; opacity: 0; transform: translateY(-8px); pointer-events: none; }
+.smartsync-notifications .smartsync-notice-clip { min-height: 0; overflow: hidden; padding: 1px; }
+.smartsync-notifications .smartsync-notice-card { display: grid; grid-template-columns: 22px minmax(0,1fr) 26px; align-items: start; gap: 10px; padding: 14px 12px 14px 14px; border: 1px solid color-mix(in srgb, var(--notice-color) 18%, #fff); border-inline-start: 3px solid var(--notice-color); border-radius: 10px; background: var(--notice-background); color: #25354b; box-shadow: 0 4px 18px #203b6014; pointer-events: auto; }
+.smartsync-notifications .smartsync-notice-icon { display: flex; align-items: center; margin-top: 1px; color: var(--notice-color); }
+.smartsync-notifications .smartsync-notice-card { position: relative; overflow: hidden; padding-bottom: 18px; }
+.smartsync-notifications .smartsync-notice-countdown { position: absolute; inset-inline: 0; bottom: 0; height: 3px; background: var(--notice-color); opacity: .65; transform-origin: left center; pointer-events: none; }
+.smartsync-notifications .smartsync-notice-countdown[hidden] { display: none; }
+.smartsync-notifications .smartsync-notice-icon svg { width: 21px; height: 21px; }
+.smartsync-notifications .smartsync-notice-message { max-height: 160px; overflow-y: auto; overflow-wrap: anywhere; white-space: pre-line; }
+.smartsync-notifications .smartsync-notice-dismiss { display: grid; place-items: center; width: 26px; height: 26px; margin: -2px 0 0; padding: 0; border: 0; border-radius: 5px; background: transparent; color: #69758a; font: 22px/1 sans-serif; cursor: pointer; }
+.smartsync-notifications .smartsync-notice-dismiss:hover { background: #172b4d0a; color: #25354b; }
+.smartsync-notifications .smartsync-notice-dismiss:focus-visible { outline: 2px solid var(--notice-color); outline-offset: 2px; }
+@media (max-width: 782px) { .smartsync-notifications { inset-block-start: calc(var(--wp-admin--admin-bar--height, 46px) + 12px); inset-inline-end: 12px; max-width: calc(100vw - 24px); } }
+@media (prefers-reduced-motion: reduce) { .smartsync-notifications .smartsync-notice-item { transition: none; transform: none; } }
+@media (forced-colors: active) { .smartsync-notifications .smartsync-notice-card { border: 1px solid CanvasText; border-inline-start-width: 3px; background: Canvas; color: CanvasText; } .smartsync-notifications .smartsync-notice-icon { color: CanvasText; } .smartsync-notifications .smartsync-notice-dismiss:focus-visible { outline-color: Highlight; } }

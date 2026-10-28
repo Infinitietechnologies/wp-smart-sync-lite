@@ -1,0 +1,44 @@
+/* Shared sync monitor; loaded only on SmartSync admin screens. */
+.smartsync-wrap .smartsync-widget-retry { display: block; margin-top: 8px; padding: 4px 0; border: 0; background: none; color: #195fb9; font: inherit; font-weight: 600; text-decoration: underline; cursor: pointer; }
+.smartsync-wrap .smartsync-background-indicator { padding: 0; display: none; flex-direction: column; align-items: stretch; gap: 0; width: 320px; max-height: calc(100dvh - 96px); overflow: hidden; opacity: 1; transform: translateY(0); transition: width 260ms cubic-bezier(.2,.7,.2,1), opacity 180ms ease, transform 220ms cubic-bezier(.2,.7,.2,1); }
+.smartsync-wrap .smartsync-background-indicator:is(.is-entering,.is-leaving) { opacity: 0; transform: translateY(12px); pointer-events: none; }
+.smartsync-wrap .smartsync-widget-announcement { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; border: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.smartsync-wrap .smartsync-background-indicator.active { display: flex; }
+.smartsync-wrap .smartsync-background-indicator.is-expanded { width: 390px; }
+.smartsync-wrap .smartsync-widget-toggle { display: grid; grid-template-columns: 36px minmax(0,1fr) auto 10px; align-items: center; gap: 10px; flex-shrink: 0; width: 100%; margin: 0; padding: 14px 16px; border: 0; border-radius: 14px; background: transparent; color: #172b4d; text-align: start; font: inherit; box-shadow: none; cursor: pointer; }
+.smartsync-wrap .smartsync-widget-toggle:hover { background: #f8faff; }
+.smartsync-wrap .smartsync-widget-toggle:focus-visible { outline: 2px solid #7498ca; outline-offset: -4px; }
+.smartsync-wrap .smartsync-status-percent { grid-column: 3; }
+.smartsync-wrap .smartsync-status-chevron { grid-column: 4; width: 7px; height: 7px; border-inline-end: 1.5px solid #73839a; border-bottom: 1.5px solid #73839a; transform: rotate(45deg); transition: transform 260ms cubic-bezier(.2,.7,.2,1); }
+.smartsync-wrap .is-expanded .smartsync-status-chevron { transform: rotate(225deg); }
+.smartsync-wrap .smartsync-status-track { flex-shrink: 0; margin: 0 16px 14px; }
+.smartsync-wrap .smartsync-widget-details, .smartsync-wrap .smartsync-widget-footer { display: grid; grid-template-rows: 0fr; min-height: 0; opacity: 0; visibility: hidden; transition: grid-template-rows 260ms cubic-bezier(.2,.7,.2,1), opacity 180ms ease, visibility 0s 260ms; }
+.smartsync-wrap .smartsync-widget-footer { flex-shrink: 0; }
+.smartsync-wrap .is-expanded .smartsync-widget-details, .smartsync-wrap :is(.is-expanded,.is-completed,.is-failed,.is-stopped) .smartsync-widget-footer { grid-template-rows: 1fr; opacity: 1; visibility: visible; transition-delay: 0s; }
+.smartsync-wrap .smartsync-widget-details-clip, .smartsync-wrap .smartsync-widget-footer-clip { min-height: 0; overflow: hidden; }
+.smartsync-wrap .smartsync-widget-content { max-height: calc(100dvh - 246px); overflow: auto; padding: 16px; border-top: 1px solid #e7edf5; }
+.smartsync-wrap .smartsync-widget-metadata { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 14px 16px; margin: 0 0 16px; }
+.smartsync-wrap .smartsync-widget-metadata > div { min-width: 0; }
+.smartsync-wrap .smartsync-widget-metadata dt { margin-bottom: 4px; color: #64748b; font-size: 11px; line-height: 16px; }
+.smartsync-wrap .smartsync-widget-metadata dd { margin: 0; color: #24364e; font-size: 12px; font-weight: 600; line-height: 18px; overflow-wrap: anywhere; }
+.smartsync-wrap #sync-widget-current_file { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 400; }
+.smartsync-wrap .smartsync-widget-metrics { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 6px; padding: 12px 8px; border: 1px solid #e4ebf4; border-radius: 8px; background: #f8faff; }
+.smartsync-wrap .smartsync-widget-metrics > div { min-width: 0; display: flex; flex-direction: column; gap: 5px; text-align: center; }
+.smartsync-wrap .smartsync-widget-metrics strong { color: #24364e; font-size: 13px; line-height: 19px; font-weight: 600; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.smartsync-wrap .smartsync-widget-metrics span { color: #64748b; font-size: 10px; line-height: 15px; }
+.smartsync-wrap .smartsync-widget-actions, .smartsync-wrap .smartsync-widget-terminal { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+.smartsync-wrap .smartsync-widget-actions { padding: 0 16px 14px; }
+.smartsync-wrap .smartsync-widget-actions a, .smartsync-wrap .smartsync-widget-terminal a { color: #1757a5; font-size: 12px; text-underline-offset: 2px; }
+.smartsync-wrap .smartsync-widget-stop { min-height: 36px; padding: 7px 12px; border: 1px solid #e3b9b6; border-radius: 7px; background: #fff9f8; color: #a2342a; font-size: 12px; cursor: pointer; }
+.smartsync-wrap .smartsync-widget-stop:hover { background: #fff0ee; border-color: #cc8b85; }
+.smartsync-wrap .smartsync-widget-terminal { flex-shrink: 0; padding: 0 16px 14px; }
+.smartsync-wrap .smartsync-widget-terminal button { padding: 5px 0; border: 0; background: none; color: #64748b; font-size: 11px; cursor: pointer; }
+.smartsync-wrap .smartsync-widget-error { margin: 12px 0 0; padding: 10px; border-radius: 6px; background: #fff2f0; color: #a2342a; font-size: 12px; line-height: 18px; overflow-wrap: anywhere; }
+.smartsync-wrap .smartsync-widget-connection { margin: 12px 0 0; color: #8c651c; font-size: 11px; line-height: 17px; }
+.smartsync-wrap :is(.is-completed,.is-stopped,.is-failed) .smartsync-status-ring { animation: none; border: 0; height: auto; width: auto; font-size: 18px; line-height: 20px; font-weight: 600; }
+.smartsync-wrap .is-completed .smartsync-status-ring::after { content: "✓"; color: #18724c; }
+.smartsync-wrap .is-completed .smartsync-status-activity { background: #eaf7ef; }
+.smartsync-wrap .is-failed .smartsync-status-ring::after { content: "!"; color: #b23c31; }
+.smartsync-wrap .is-failed .smartsync-status-activity { background: #fff0ed; }
+.smartsync-wrap .is-stopped .smartsync-status-ring::after { content: "■"; color: #64748b; font-size: 12px; }
+@media(max-width:600px) { .smartsync-wrap .smartsync-widget-actions button { min-height: 44px; } .smartsync-wrap .smartsync-background-indicator { max-height: calc(100dvh - 90px); } }

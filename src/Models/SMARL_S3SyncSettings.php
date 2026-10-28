@@ -17,6 +17,14 @@ class SMARL_S3SyncSettings {
     public string $runId = '';
     public int $batchNumber = 1;
     public string $cloudFingerprint = '';
+    public int $startedAt = 0;
+    public int $finishedAt = 0;
+    public string $syncProvider = '';
+    public string $syncStorage = '';
+    public ?int $failedFiles = null;
+    public int $skippedFiles = 0;
+    public int $scannedFiles = 0;
+    public string $syncMode = 'incremental';
     private string $optionName = 'smarl_sync_settings';
 
     public function load(): void {
@@ -79,16 +87,32 @@ class SMARL_S3SyncSettings {
         }
         $instance->s3SyncErrors = array_slice($instance->s3SyncErrors, -200);
         $instance->s3SyncSuccesses = array_slice($instance->s3SyncSuccesses, -500);
-        foreach (['s3SyncProcessedFiles', 's3SyncTotalFiles', 'batchNumber'] as $key) {
+        foreach (['s3SyncProcessedFiles', 's3SyncTotalFiles', 'batchNumber', 'startedAt', 'finishedAt', 'skippedFiles', 'scannedFiles'] as $key) {
             if (isset($data[$key]) && is_numeric($data[$key])) { $instance->$key = max($key === 'batchNumber' ? 1 : 0, (int) $data[$key]); }
         }
-        foreach (['runId', 'cloudFingerprint'] as $key) { if (isset($data[$key]) && is_string($data[$key])) { $instance->$key = $data[$key]; } }
+        foreach (['runId', 'cloudFingerprint', 'syncProvider', 'syncStorage'] as $key) { if (isset($data[$key]) && is_string($data[$key])) { $instance->$key = $data[$key]; } }
+        if (isset($data['failedFiles']) && is_numeric($data['failedFiles'])) $instance->failedFiles = max(0, (int) $data['failedFiles']);
+        if (($data['syncMode'] ?? '') === 'full') $instance->syncMode = 'full';
         foreach (['syncState' => ['default', 'syncing'], 's3SyncStatus' => ['idle', 'processing', 'completed', 'failed'], 's3SyncDirection' => ['', 'upload', 'download'], 'syncType' => ['media', 'assets']] as $key => $allowed) {
             if (isset($data[$key]) && in_array($data[$key], $allowed, true)) { $instance->$key = $data[$key]; }
         }
         $instance->syncState = $instance->s3SyncStatus === 'processing' ? 'syncing' : 'default';
         // Old full manifests are deliberately not reloaded into progress polling responses.
         return $instance;
+    }
+    /** Public, credential-free progress shared by the page seed and AJAX response. */
+    public function statusData(?SMARL_CloudConfig $config = null): array {
+        return ['total_files' => $this->s3SyncTotalFiles, 'processed_files' => $this->s3SyncProcessedFiles,
+            'status' => $this->s3SyncStatus, 'direction' => $this->s3SyncDirection,
+            'errors' => $this->s3SyncErrors, 'successes' => $this->s3SyncSuccesses, 'type' => $this->syncType,
+            'run_id' => $this->runId, 'started_at' => $this->startedAt, 'finished_at' => $this->finishedAt,
+            'server_time' => time(), 'failed_files' => $this->failedFiles, 'current_file' => '',
+            'skipped_files' => $this->skippedFiles, 'scanned_files' => $this->scannedFiles, 'mode' => $this->syncMode,
+            'filtered_media_upload' => $this->s3SyncDirection === 'upload' && $this->syncType === 'media' && $this->extensions !== [] && (bool) array_diff(\SmartSyncS3\Helpers\SMARL_Helper::getExtension('media'), $this->extensions),
+            'media_cdn_sync_ready' => $config !== null && ($config->canEnableMediaCDN || $config->hasMediaCdnTestScope()),
+            'cdn_test_extensions' => $config !== null && $config->useCdnForMedia && $config->hasMediaCdnTestScope() ? $config->mediaCdnTestExtensions : [],
+            'provider' => $this->syncProvider ?: ($this->s3SyncStatus === 'processing' && $config !== null ? $config->serviceProvider : ''),
+            'storage' => $this->syncStorage ?: ($this->s3SyncStatus === 'processing' && $config !== null ? $config->bucket : '')];
     }
     public function toArray(): array { $data = get_object_vars($this); unset($data['optionName']); return $data; }
 }

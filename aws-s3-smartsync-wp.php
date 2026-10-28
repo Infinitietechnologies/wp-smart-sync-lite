@@ -22,7 +22,7 @@ if (!defined('ABSPATH')) {
 if (!defined('SMARL_TEXT_DOMAIN')) define('SMARL_TEXT_DOMAIN', 'smartsync-lite-media-offloader-and-assets-cdn');
 if (!defined('SMARL_VERSION')) define('SMARL_VERSION', '1.7.3');
 if (!defined('SMARL_ASSET_VERSION_CODE')) define('SMARL_ASSET_VERSION_CODE', SMARL_VERSION);
-if (!defined('SMARL_DB_VERSION')) define('SMARL_DB_VERSION', '2');
+if (!defined('SMARL_DB_VERSION')) define('SMARL_DB_VERSION', '3');
 
 /** Keep activation and updates on the same versioned schema path. */
 function smarl_file_sync_queue_create_table(): void
@@ -46,7 +46,18 @@ function smarl_file_sync_queue_create_table(): void
         require_once ABSPATH . 'wp-admin/includes/upgrade.php';
     }
     dbDelta($sql);
-    if (empty($wpdb->last_error)) {
+    $queueCreated = empty($wpdb->last_error);
+    $history = $wpdb->prefix . 'smarl_upload_history';
+    dbDelta("CREATE TABLE {$history} (
+        target_hash char(64) NOT NULL,
+        key_hash char(64) NOT NULL,
+        relative_path text NOT NULL,
+        content_hash char(64) NOT NULL,
+        size bigint(20) NOT NULL,
+        updated_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY  (target_hash,key_hash)
+    ) {$collation};");
+    if ($queueCreated && empty($wpdb->last_error)) {
         update_option('smarl_db_version', SMARL_DB_VERSION, false);
     }
 }

@@ -1,0 +1,209 @@
+/* Cloud setup only: leave the settings and custom-domain pages untouched. */
+.smartsync-cloud-setup { --setup-blue: #1761c5; --setup-ink: #172b4d; --setup-muted: #56657a; --setup-line: #dfe5ed; width: 100%; min-width: 0; max-width: var(--smartsync-container-width, 100%); margin: 28px auto 48px; padding-inline-end: 20px; color: var(--setup-ink); }
+.smartsync-cloud-setup .setup-page-header { margin-bottom: 24px; }
+.smartsync-cloud-setup .setup-eyebrow { margin: 0 0 10px; color: var(--setup-muted); font-size: 11px; font-weight: 700; letter-spacing: 1.2px; }
+.smartsync-cloud-setup h1 { margin: 0; padding: 0; color: var(--setup-ink); font-size: 28px; line-height: 1.2; letter-spacing: -.6px; }
+.smartsync-cloud-setup .setup-settings-link { display: inline-flex; align-items: center; gap: 6px; margin: 0 0 14px; color: var(--setup-muted); font-size: 12px; text-decoration: none; }
+.smartsync-cloud-setup .setup-settings-link:hover { color: var(--setup-blue); text-decoration: underline; }
+.smartsync-cloud-setup .stepper { display: grid; grid-template-columns: repeat(var(--setup-step-count, 3), minmax(0, 1fr)); align-items: stretch; gap: 12px; max-width: none; margin: 0 0 26px; padding: 0; }
+.smartsync-cloud-setup .stepper::before { content: none; }
+.smartsync-cloud-setup .step { display: flex; align-items: stretch; min-width: 0; margin: 0; padding: 0; border: 1px solid var(--setup-line); border-radius: 9px; background: #fff; text-align: start; }
+.smartsync-cloud-setup .setup-step-link { display: flex; align-items: center; gap: 12px; width: 100%; min-width: 0; padding: 14px; border: 0; border-radius: inherit; background: transparent; color: inherit; text-align: start; font: inherit; cursor: pointer; }
+.smartsync-cloud-setup .setup-step-link:enabled:hover { background: #eaf2fd; }
+.smartsync-cloud-setup .setup-step-link:disabled { opacity: 1; cursor: default; }
+.smartsync-cloud-setup #setup-controls { min-width: 0; margin: 0; padding: 0; border: 0; }
+.smartsync-cloud-setup .setup-connection-context { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 6px; margin: 8px 0 0; color: var(--setup-muted); font-size: 12px; line-height: 1.6; }
+.smartsync-cloud-setup .setup-connection-context span { color: var(--setup-muted); overflow-wrap: anywhere; }
+.smartsync-cloud-setup .setup-connection-context strong { color: var(--setup-muted); font-weight: 500; }
+.smartsync-cloud-setup #setup-active-storage:not(:empty)::before { content: "·"; margin-inline-end: 6px; }
+.smartsync-cloud-setup .setup-sync-lock { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; padding: 14px 16px; margin-bottom: 22px; border: 1px solid #e6d5ac; border-radius: 8px; background: #fffcf5; font-size: 12px; }
+.smartsync-cloud-setup .setup-sync-lock strong { display: block; margin-bottom: 4px; color: #59451b; }
+.smartsync-cloud-setup .setup-sync-lock p { margin: 0; color: #665a41; font-size: 12px; }
+.smartsync-cloud-setup .setup-sync-lock a { flex-shrink: 0; color: #1757a5; }
+.smartsync-cloud-setup .setup-field :is(input, select):disabled { background-color: #f5f7fa; color: #67778b; cursor: wait; }
+.smartsync-cloud-setup button[data-busy="true"] { display: inline-flex; align-items: center; opacity: 1; cursor: progress; }
+.smartsync-cloud-setup button[data-busy="true"]::before { content: ""; display: inline-block; flex-shrink: 0; width: 13px; height: 13px; margin-inline-end: 6px; border: 2px solid currentColor; border-inline-end-color: transparent; border-radius: 50%; animation: setup-request-spin .8s linear infinite; }
+.smartsync-cloud-setup button[data-busy="true"] .dashicons { display: none; }
+@keyframes setup-request-spin { to { transform: rotate(360deg); } }
+.smartsync-cloud-setup .step-icon { width: 30px; height: 30px; margin: 0; flex: 0 0 30px; border-radius: 50%; background: #eef1f6; color: #56657a; font-size: 13px; transform: none; }
+.smartsync-cloud-setup .step-label { display: block; margin: 0; font-size: 13px; line-height: 1.4; color: var(--setup-muted); }
+.smartsync-cloud-setup .setup-step-description { display: block; margin-top: 3px; font-size: 11px; line-height: 1.5; color: var(--setup-muted); }
+.smartsync-cloud-setup .step.active { border-color: #9ebfe8; background: #f2f7ff; }
+.smartsync-cloud-setup .step.active .step-icon { background: var(--setup-blue); color: #fff; transform: none; }
+.smartsync-cloud-setup .step.active .step-label { color: #164d94; }
+.smartsync-cloud-setup .step.completed .step-icon { background: #e5f4ec; color: #146c43; }
+.smartsync-cloud-setup .step.completed .step-label { color: #146c43; }
+.smartsync-cloud-setup .setup-workspace { display: grid; width: 100%; min-width: 0; grid-template-columns: minmax(0, 1fr) 380px; align-items: start; gap: 24px; }
+.smartsync-cloud-setup .setup-main { min-width: 0; }
+.smartsync-cloud-setup .setup-workspace.setup-complete { grid-template-columns: minmax(0, 1fr); max-width: none; margin-inline: 0; }
+.smartsync-cloud-setup .wizard-step { margin: 0; padding: 0; background: #fff; border: 1px solid var(--setup-line); border-radius: 12px; box-shadow: 0 3px 12px #172b4d05; overflow: hidden; }
+.smartsync-cloud-setup .setup-card-heading { padding: 26px 30px 22px; border-bottom: 1px solid #edf0f5; }
+.smartsync-cloud-setup .setup-progress-caption { display: block; margin-bottom: 10px; font-size: 12px; font-weight: 600; color: var(--setup-blue); }
+.smartsync-cloud-setup .setup-card-heading h2 { margin: 0 0 9px; color: var(--setup-ink); font-size: 22px; letter-spacing: -.4px; }
+.smartsync-cloud-setup .setup-card-heading p { margin: 0; max-width: 640px; color: var(--setup-muted); font-size: 13px; line-height: 1.7; }
+.smartsync-cloud-setup .setup-guide-jump { display: inline-block; margin-top: 12px; color: #1757a5; font-size: 12px; }
+.smartsync-cloud-setup .setup-card-body { padding: 26px 30px; }
+.smartsync-cloud-setup .setup-field { margin: 0 0 22px; }
+.smartsync-cloud-setup .setup-field > label, .smartsync-cloud-setup .setup-label-row > label { display: block; margin: 0 0 8px; font-weight: 600; color: #24364e; font-size: 13px; }
+.smartsync-cloud-setup .setup-provider-field { padding-bottom: 22px; margin-bottom: 24px; border-bottom: 1px solid #edf0f5; }
+.smartsync-cloud-setup .setup-field input[type="text"], .smartsync-cloud-setup .setup-field input[type="url"], .smartsync-cloud-setup .setup-field input[type="password"], .smartsync-cloud-setup .setup-field select { width: 100%; min-width: 0; min-height: 44px; margin: 0; padding: 9px 12px; border: 1px solid #b8c4d3; border-radius: 8px; background-color: #fbfcfe; color: #24364e; box-shadow: none; font-size: 14px; line-height: 1.5; transition: border-color .15s ease, box-shadow .15s ease, background-color .15s ease; }
+.smartsync-cloud-setup .setup-field input::placeholder { color: #65758c; opacity: 1; }
+.smartsync-cloud-setup .setup-field select { padding-inline-end: 32px; }
+.smartsync-cloud-setup .setup-field input[type="file"] { width: 100%; padding: 16px; border: 1px dashed #aebed1; border-radius: 8px; background: #f8faff; font-size: 13px; }
+.smartsync-cloud-setup .setup-field-help { display: block; margin: 8px 0 0; color: var(--setup-muted); font-size: 12px; font-style: normal; line-height: 1.65; overflow-wrap: anywhere; }
+.smartsync-cloud-setup .setup-p12-fields { margin-top: 20px; padding-top: 2px; }
+.smartsync-cloud-setup .setup-p12-fields > p { margin: 0 0 20px; }
+.smartsync-cloud-setup #new-bucket-help[data-warning="true"] { padding: 10px 12px; border-inline-start: 3px solid #c48b29; border-radius: 6px; background: #fffaed; color: #795315; }
+.smartsync-cloud-setup .setup-upload { position: relative; min-width: 0; }
+.smartsync-cloud-setup .setup-upload input.setup-upload-input { position: absolute; width: 1px; height: 1px; min-height: 0; padding: 0; border: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.smartsync-cloud-setup .setup-upload-dropzone { display: flex; flex-direction: column; align-items: center; gap: 7px; padding: 28px 20px 22px; border: 1px dashed #a8b9cf; border-radius: 10px; background: #f8faff; color: var(--setup-muted); text-align: center; font-size: 12px; transition: background .15s, border-color .15s; }
+.smartsync-cloud-setup .setup-upload-dropzone > strong { margin-top: 3px; color: #24364e; font-size: 15px; font-weight: 600; }
+.smartsync-cloud-setup .setup-upload-symbol { display: grid; place-items: center; width: 46px; height: 46px; margin-bottom: 3px; border: 1px solid #dce7f7; border-radius: 13px; background: #edf4ff; color: #376ba9; }
+.smartsync-cloud-setup .setup-upload-browse { min-height: 38px; margin: 8px 0 3px; padding: 7px 16px; border: 1px solid #b9c9df; border-radius: 7px; background: #fff; color: #1757a5; font: inherit; font-weight: 600; cursor: pointer; }
+.smartsync-cloud-setup .setup-upload-browse:hover { border-color: #6387b9; background: #f0f6ff; }
+.smartsync-cloud-setup .setup-upload-limit { color: #66758a; font-size: 11px; }
+.smartsync-cloud-setup .setup-upload.is-dragover :is(.setup-upload-dropzone, .setup-upload-file) { border-color: #1761c5; background: #edf4ff; box-shadow: inset 0 0 0 1px #1761c5; }
+.smartsync-cloud-setup .setup-upload-file { display: flex; align-items: center; gap: 14px; min-width: 0; padding: 17px; border: 1px solid #d8e2ee; border-radius: 10px; background: #f9fbfe; }
+.smartsync-cloud-setup .setup-upload-filetype { display: grid; place-items: center; flex: 0 0 42px; height: 48px; border: 1px solid #d6e4f8; border-radius: 8px; background: #edf4ff; color: #31649e; font: 600 17px ui-monospace, monospace; }
+.smartsync-cloud-setup .setup-upload-file-info { display: flex; flex: 1; flex-direction: column; min-width: 0; gap: 3px; font-size: 11px; color: var(--setup-muted); }
+.smartsync-cloud-setup .setup-upload-file-info > strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #24364e; font-size: 13px; font-weight: 600; }
+.smartsync-cloud-setup .setup-upload-actions { display: flex; flex-wrap: wrap; gap: 8px 15px; }
+.smartsync-cloud-setup .setup-upload[data-state="ready"] #google-file-status { color: #16704a; }
+.smartsync-cloud-setup .setup-upload[data-state="reading"] #google-file-status { color: #1757a5; }
+.smartsync-cloud-setup .setup-upload-error { margin: 10px 0 0; color: #b42318; font-size: 12px; line-height: 1.65; }
+.smartsync-cloud-setup .setup-upload[data-state="error"] :is(.setup-upload-dropzone, .setup-upload-file) { border-color: #d99e97; }
+.smartsync-cloud-setup .setup-json-preview { margin-top: 16px; overflow: hidden; border: 1px solid #dce4ef; border-radius: 9px; }
+.smartsync-cloud-setup .setup-json-summary { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; margin: 0; padding: 17px; background: #fff; }
+.smartsync-cloud-setup .setup-json-summary dt { margin-bottom: 5px; color: var(--setup-muted); font-size: 11px; }
+.smartsync-cloud-setup .setup-json-summary dd { margin: 0; color: #24364e; font-size: 12px; font-weight: 600; overflow-wrap: anywhere; }
+.smartsync-cloud-setup .setup-json-toolbar { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; padding: 10px 16px; border-top: 1px solid #e3e9f1; background: #f5f8fc; font-size: 11px; }
+.smartsync-cloud-setup .setup-json-toolbar strong { color: #435570; font-weight: 600; }
+.smartsync-cloud-setup .setup-json-toolbar button { padding: 5px 0; border: 0; background: none; color: #1757a5; font-size: 11px; cursor: pointer; text-decoration: underline; }
+.smartsync-cloud-setup .setup-json-preview pre { max-width: 100%; max-height: 280px; margin: 0; padding: 17px; overflow: auto; background: #152337; color: #c8d8eb; text-align: start; tab-size: 2; }
+.smartsync-cloud-setup .setup-json-preview code { padding: 0; background: transparent; color: inherit; font: 12px/1.8 ui-monospace, SFMono-Regular, Consolas, monospace; }
+.smartsync-cloud-setup .setup-json-preview > p { margin: 0; padding: 10px 16px; color: var(--setup-muted); background: #f8fafc; font-size: 11px; line-height: 1.6; }
+.smartsync-cloud-setup .setup-saved-account { padding: 22px; border: 1px solid #cfe0e3; border-radius: 12px; background: linear-gradient(135deg, #f0faf6, #f7faff); }
+.smartsync-cloud-setup .setup-saved-heading { display: flex; align-items: center; gap: 12px; }
+.smartsync-cloud-setup .setup-saved-symbol { display: grid; place-items: center; flex: 0 0 42px; height: 42px; border-radius: 12px; background: #dff2e9; color: #187052; }
+.smartsync-cloud-setup .setup-saved-heading strong { display: block; color: #173a37; font-size: 17px; line-height: 1.4; }
+.smartsync-cloud-setup .setup-saved-heading span:not(.setup-saved-symbol) { display: block; margin-top: 3px; color: #37685b; font-size: 13px; line-height: 1.6; }
+.smartsync-cloud-setup .setup-saved-summary { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr); gap: 18px; margin: 22px 0 14px; }
+.smartsync-cloud-setup .setup-saved-summary dt { margin-bottom: 5px; color: #526779; font-size: 13px; }
+.smartsync-cloud-setup .setup-saved-summary dd { margin: 0; color: #24364e; font-size: 15px; font-weight: 600; line-height: 1.65; overflow-wrap: anywhere; }
+.smartsync-cloud-setup .setup-saved-description { margin: 14px 0; color: #41586a; font-size: 14px; line-height: 1.7; }
+.smartsync-cloud-setup .setup-saved-details { margin-top: 18px; }
+.smartsync-cloud-setup .setup-saved-details summary { width: fit-content; color: #195c9c; font-size: 14px; font-weight: 600; cursor: pointer; }
+.smartsync-cloud-setup .setup-saved-details .setup-json-toolbar { border-top: 0; font-size: 13px; }
+.smartsync-cloud-setup .setup-saved-details .setup-json-toolbar button, .smartsync-cloud-setup .setup-saved-details .setup-json-preview > p { font-size: 13px; }
+.smartsync-cloud-setup .setup-saved-details code { font-size: 13px; line-height: 1.75; }
+.smartsync-cloud-setup .setup-guide-permissions { margin: 0 0 22px; color: #34475f; font-size: 14px; line-height: 1.65; }
+.smartsync-cloud-setup .setup-guide-permissions summary { color: #195c9c; font-weight: 600; cursor: pointer; }
+.smartsync-cloud-setup .setup-guide-permissions ul { margin: 12px 0 0; list-style: none; }
+.smartsync-cloud-setup .setup-guide-permissions li { margin: 5px 0; }
+.smartsync-cloud-setup .setup-guide-permissions code { padding: 2px 0; background: transparent; font-size: 13px; overflow-wrap: anywhere; }
+.smartsync-cloud-setup .setup-saved-actions { display: flex; align-items: center; gap: 14px; margin-top: 20px; padding-top: 16px; border-top: 1px solid #dbe6e8; }
+.smartsync-cloud-setup .setup-saved-actions button { flex-shrink: 0; margin: 0; }
+.smartsync-cloud-setup .setup-saved-actions > span { color: #526779; font-size: 13px; line-height: 1.65; }
+.smartsync-cloud-setup #google-saved-account:not([hidden]) + #google-upload:not([hidden]) { margin-top: 20px; }
+@media (max-width: 600px) {
+    .smartsync-cloud-setup .setup-saved-account { padding: 17px; }
+    .smartsync-cloud-setup .setup-saved-summary { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+    .smartsync-cloud-setup .setup-saved-actions { align-items: flex-start; flex-direction: column; gap: 10px; }
+}
+.smartsync-cloud-setup .setup-secret { display: flex; border: 1px solid #b8c4d3; border-radius: 8px; background: #fbfcfe; transition: border-color .15s ease, box-shadow .15s ease, background-color .15s ease; }
+.smartsync-cloud-setup .setup-secret input { flex: 1; }
+.smartsync-cloud-setup .setup-secret input[type="password"], .smartsync-cloud-setup .setup-secret input[type="text"] { border: 0; min-height: 42px; border-start-end-radius: 0; border-end-end-radius: 0; }
+.smartsync-cloud-setup .setup-reveal { flex: 0 0 60px; margin: 0; padding: 0 12px; border: 0; border-inline-start: 1px solid #e4e9f0; border-radius: 0 7px 7px 0; background: #f8faff; color: #1757a5; cursor: pointer; font-size: 12px; font-weight: 600; }
+.smartsync-cloud-setup .setup-reveal:focus-visible { outline-offset: -4px; }
+/* Keep focus on the control edge; avoid stacking the shared admin outline and shadow. */
+.smartsync-cloud-setup .setup-field :is(input[type="text"], input[type="url"], input[type="password"], input[type="file"], select):enabled:hover:not(:focus) { border-color: #94a6bc; background-color: #fff; }
+.smartsync-cloud-setup .setup-field :is(input[type="text"], input[type="url"], input[type="password"], input[type="file"], select):focus { outline: none; border-color: #6683ac; background-color: #fff; box-shadow: 0 0 0 3px rgb(23 97 197 / 7%); }
+.smartsync-cloud-setup .setup-field :is(input[type="text"], input[type="url"], input[type="password"], input[type="file"], select):focus-visible { border-color: #1761c5; box-shadow: 0 0 0 3px rgb(23 97 197 / 10%); }
+.smartsync-cloud-setup .setup-secret:focus-within { border-color: #6683ac; background: #fff; box-shadow: 0 0 0 3px rgb(23 97 197 / 7%); }
+.smartsync-cloud-setup .setup-secret:has(input:focus-visible) { border-color: #1761c5; box-shadow: 0 0 0 3px rgb(23 97 197 / 10%); }
+.smartsync-cloud-setup .setup-field .setup-secret input:is(:hover, :focus, :focus-visible) { border: 0; outline: none; box-shadow: none; }
+.smartsync-cloud-setup input[aria-invalid="true"], .smartsync-cloud-setup select[aria-invalid="true"], .smartsync-cloud-setup .setup-secret:has(input[aria-invalid="true"]) { border-color: #b42318 !important; box-shadow: none !important; }
+.smartsync-cloud-setup :is(input, select)[aria-invalid="true"]:focus, .smartsync-cloud-setup .setup-secret:has(input[aria-invalid="true"]):focus-within { box-shadow: 0 0 0 3px rgb(180 35 24 / 9%) !important; }
+.smartsync-cloud-setup .setup-secret input[aria-invalid="true"] { border: 0 !important; box-shadow: none !important; }
+@media (forced-colors: active) {
+    .smartsync-cloud-setup .setup-field :is(input[type="text"], input[type="url"], input[type="password"], input[type="file"], select):focus-visible, .smartsync-cloud-setup .setup-secret:focus-within { outline: 2px solid Highlight; outline-offset: 2px; }
+    .smartsync-cloud-setup .setup-field .setup-secret input:focus { outline: none; }
+}
+.smartsync-cloud-setup .setup-inline-note { display: flex; align-items: flex-start; gap: 8px; margin: 24px 0 0; color: var(--setup-muted); font-size: 12px; line-height: 1.65; }
+.smartsync-cloud-setup .setup-inline-note .dashicons { flex: 0 0 16px; width: 16px; height: 16px; font-size: 16px; margin-top: 2px; }
+.smartsync-cloud-setup .setup-card-footer { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px; padding: 19px 30px; border-top: 1px solid #edf0f5; background: #fbfcfe; }
+.smartsync-cloud-setup .setup-footer-hint { color: var(--setup-muted); font-size: 12px; }
+.smartsync-cloud-setup .primary-btn, .smartsync-cloud-setup .secondary-btn { min-height: 44px; gap: 8px; padding: 10px 16px; border-radius: 7px; box-shadow: none; transform: none; font-size: 13px; font-weight: 600; white-space: normal; }
+.smartsync-cloud-setup .primary-btn { background: var(--setup-blue); margin-inline-start: auto; }
+.smartsync-cloud-setup .primary-btn:hover { background: #124f9f; transform: none; }
+.smartsync-cloud-setup .secondary-btn { background: #fff; color: #33445c; border: 1px solid #c4cedb; }
+.smartsync-cloud-setup .secondary-btn:hover { background: #f2f5f9; }
+.smartsync-cloud-setup .setup-guide { position: sticky; top: 52px; padding: 26px 24px 24px; border: 1px solid var(--setup-line); border-radius: 12px; background: #fff; }
+.smartsync-cloud-setup .setup-guide .setup-eyebrow { color: #52627a; font-size: 12px; letter-spacing: .07em; }
+.smartsync-cloud-setup .setup-guide h2 { margin: 0 0 14px; font-size: 21px; line-height: 1.35; color: var(--setup-ink); }
+.smartsync-cloud-setup .setup-provider-name { display: inline-block; padding: 4px 10px; margin-bottom: 24px; border-radius: 5px; background: #edf4ff; color: #164d94; font-size: 13px; font-weight: 600; }
+.smartsync-cloud-setup .setup-guide-steps { padding: 0; margin: 0 0 20px; list-style: none; counter-reset: setup-guide; }
+.smartsync-cloud-setup .setup-guide-steps li { counter-increment: setup-guide; position: relative; margin: 0 0 24px; padding-inline-start: 40px; }
+.smartsync-cloud-setup .setup-guide-steps li::before { content: counter(setup-guide); position: absolute; inset-inline-start: 0; top: 0; display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: #eaf0f7; color: #344b69; font-size: 13px; font-weight: 600; }
+.smartsync-cloud-setup .setup-guide-steps strong { display: block; margin: 0 0 7px; color: #1e3049; font-size: 16px; font-weight: 600; line-height: 1.5; }
+.smartsync-cloud-setup .setup-guide-steps p { margin: 0; color: #34475f; font-size: 16px; line-height: 1.6; }
+.smartsync-cloud-setup .setup-console-link { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 10px 12px; border: 1px solid #b7c9e2; border-radius: 7px; color: #1757a5; font-size: 14px; font-weight: 600; line-height: 1.5; text-decoration: none; text-align: center; }
+.smartsync-cloud-setup .setup-console-link:hover { background: #f2f7ff; color: #124f9f; }
+.smartsync-cloud-setup .setup-console-link .dashicons { font-size: 15px; width: 15px; height: 15px; }
+.smartsync-cloud-setup .setup-docs-link { display: block; margin: 14px 0 20px; color: #1757a5; text-align: center; font-size: 14px; line-height: 1.6; }
+.smartsync-cloud-setup .setup-guide-tip { margin: 0; padding: 14px; background: #f3f6fa; border-radius: 7px; color: #3d4f66; font-size: 14px; line-height: 1.65; }
+.smartsync-cloud-setup .setup-message { margin: 0 0 16px; padding: 14px 16px; border: 1px solid #f0beb8; border-inline-start: 3px solid #b42318; border-radius: 7px; background: #fff6f5; color: #8f2118; font-size: 13px; line-height: 1.6; }
+.smartsync-cloud-setup .setup-message[data-kind="progress"] { border-color: #b8d1ef; border-inline-start-color: #1761c5; background: #f1f7ff; color: #164d94; }
+.smartsync-cloud-setup .setup-message[data-kind="success"] { border-color: #a8d8bd; border-inline-start-color: #16834d; background: #effaf4; color: #16643d; }
+.smartsync-cloud-setup #aws-wizard[data-saving="true"] .wizard-step:not([hidden]) { opacity: .8; }
+.smartsync-cloud-setup .setup-field-error { margin: 8px 0 0; padding: 10px; border-radius: 5px; background: #fff4f2; color: #98291e; font-size: 12px; }
+.smartsync-cloud-setup .setup-storage-choice { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 0 0 24px; padding: 0; border: 0; }
+.smartsync-cloud-setup .setup-storage-choice label { display: flex; align-items: center; gap: 8px; margin: 0; padding: 12px; border: 1px solid #c4cedb; border-radius: 7px; cursor: pointer; font-size: 12px; }
+.smartsync-cloud-setup .setup-storage-choice label:has(input:checked) { border-color: #1761c5; background: #f2f7ff; color: #164d94; }
+.smartsync-cloud-setup .setup-storage-choice input, .smartsync-cloud-setup .setup-manual-choice input { flex: 0 0 auto; margin: 0; }
+.smartsync-cloud-setup .setup-manual-choice { margin: 0 0 24px; }
+.smartsync-cloud-setup .setup-manual-choice label { margin: 0; font-size: 12px; }
+.smartsync-cloud-setup .setup-label-row { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+.smartsync-cloud-setup .setup-text-button { border: 0; padding: 4px 0; background: none; color: #1757a5; text-decoration: underline; font-size: 12px; cursor: pointer; }
+.smartsync-cloud-setup .setup-save-note { display: flex; align-items: flex-start; gap: 10px; padding: 13px; margin-top: 24px; border-radius: 7px; background: #f6f8fb; color: var(--setup-muted); }
+.smartsync-cloud-setup .setup-save-note .dashicons { flex: 0 0 18px; width: 18px; height: 18px; font-size: 18px; margin-top: 2px; }
+.smartsync-cloud-setup .setup-save-note p { margin: 0; font-size: 12px; line-height: 1.65; }
+.smartsync-cloud-setup .setup-empty { padding: 16px; margin-bottom: 20px; background: #f5f8fc; border: 1px dashed #aebed1; border-radius: 8px; }
+.smartsync-cloud-setup .setup-empty h3 { margin: 0 0 5px; font-size: 14px; }
+.smartsync-cloud-setup .setup-empty p { margin: 0; font-size: 12px; color: var(--setup-muted); }
+.smartsync-cloud-setup .setup-review { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; padding: 14px; margin-bottom: 22px; border-radius: 7px; background: #f6f8fb; font-size: 12px; overflow-wrap: anywhere; }
+.smartsync-cloud-setup .setup-review span { color: var(--setup-muted); }
+.smartsync-cloud-setup .setup-delivery-options { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.smartsync-cloud-setup .setup-delivery-choice { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; padding: 20px; border: 1px solid #b9c8db; border-radius: 9px; background: #fff; color: var(--setup-muted); text-align: start; font-size: 13px; line-height: 1.6; cursor: pointer; }
+.smartsync-cloud-setup .setup-delivery-choice:hover { border-color: var(--setup-blue); background: #f6f9ff; }
+.smartsync-cloud-setup .setup-delivery-choice strong { color: var(--setup-ink); font-size: 16px; }
+.smartsync-cloud-setup .setup-delivery-choice .dashicons { color: var(--setup-blue); font-size: 24px; width: 24px; height: 24px; }
+.smartsync-cloud-setup .setup-choice-action { margin-top: auto; color: #1757a5; font-weight: 600; }
+.smartsync-cloud-setup .setup-success-icon { width: 46px; height: 46px; margin-bottom: 12px; color: #16834d; font-size: 46px; }
+.smartsync-cloud-setup .setup-connection-summary { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px; padding: 18px; margin: 0 0 26px; border: 1px solid var(--setup-line); border-radius: 8px; }
+.smartsync-cloud-setup .setup-connection-summary dt { margin-bottom: 5px; color: var(--setup-muted); font-size: 12px; }
+.smartsync-cloud-setup .setup-connection-summary dd { margin: 0; font-size: 13px; font-weight: 600; overflow-wrap: anywhere; }
+.smartsync-cloud-setup .setup-card-body h3 { font-size: 16px; }
+.smartsync-cloud-setup .setup-next-steps { margin: 12px 0 0 20px; }
+.smartsync-cloud-setup .setup-next-steps li { color: var(--setup-muted); font-size: 13px; }
+@media (max-width: 1050px) { .smartsync-cloud-setup .setup-step-description { display: none; } }
+@media (max-width: 1100px) { .smartsync-cloud-setup .setup-workspace { grid-template-columns: minmax(0, 1fr); } .smartsync-cloud-setup .setup-guide { position: static; } }
+@media (max-width: 1050px) { .smartsync-cloud-setup .setup-connection-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 600px) {
+    .smartsync-cloud-setup { margin-top: 18px; padding-inline-end: 10px; }
+    .smartsync-cloud-setup .setup-page-header { display: block; margin-bottom: 22px; }
+    .smartsync-cloud-setup h1 { font-size: 26px; }
+    .smartsync-cloud-setup .stepper { gap: 6px; margin-bottom: 18px; }
+    .smartsync-cloud-setup .setup-step-link { flex-direction: column; align-items: flex-start; gap: 8px; padding: 10px 8px; }
+    .smartsync-cloud-setup .step-label { font-size: 11px; overflow-wrap: anywhere; }
+    .smartsync-cloud-setup .setup-card-heading, .smartsync-cloud-setup .setup-card-body { padding: 22px 18px; }
+    .smartsync-cloud-setup .setup-card-footer { padding: 18px; }
+    .smartsync-cloud-setup .setup-card-heading h2 { font-size: 20px; }
+    .smartsync-cloud-setup .setup-footer-hint { width: 100%; }
+    .smartsync-cloud-setup .setup-card-footer .primary-btn { flex: 1; }
+    .smartsync-cloud-setup .setup-storage-choice, .smartsync-cloud-setup .setup-delivery-options { grid-template-columns: 1fr; }
+    .smartsync-cloud-setup .setup-upload-file { flex-wrap: wrap; }
+    .smartsync-cloud-setup .setup-upload-actions { width: 100%; justify-content: flex-end; }
+    .smartsync-cloud-setup .setup-json-summary { grid-template-columns: minmax(0, 1fr); }
+    .smartsync-cloud-setup .setup-connection-summary { grid-template-columns: minmax(0, 1fr); }
+}
