@@ -196,7 +196,6 @@ jQuery(function ($) {
         const progress = total ? Math.min(100, processed / total * 100) : 0;
         title.text(running ? (data.direction === 'upload' ? text('status_uploading', 'Uploading files') : data.direction === 'download' ? text('status_restoring', 'Restoring files') : text('running', 'Sync in progress')) :
             text(data.status === 'completed' ? 'widget_complete' : data.status === 'stopped' ? 'widget_stopped' : 'widget_failure', data.status === 'completed' ? 'Sync complete' : data.status === 'stopped' ? 'Sync stopped' : 'Sync needs attention'));
-        if (data.status === 'completed' && data.filtered_media_upload) title.text(text('widget_filtered_complete', 'File-type test complete'));
         let countText = total ? processed + ' / ' + total + ' ' + text('files', 'files') : data.status === 'completed' ? text('widget_no_transfers', 'No transfers needed') : text('sync_background', 'Running in the background');
         if (data.direction === 'upload' && number(data.skipped_files) > 0) countText += ' · ' + number(data.skipped_files) + ' ' + text('unchanged', 'unchanged');
         detail.text(countText);

@@ -6,7 +6,7 @@ return static function (SMARL_CloudConfig $config, bool $syncRunning): void {
     $canSetup = $config->serviceProvider === 'aws' && $config->isConfigured() && !preg_match('/^(?:cn-|us-gov-)/', $config->region);
     ?>
     <div class="wrap smartsync-wrap smartsync-domain-page" data-cloudfront-ready="<?php echo $ready ? 'true' : 'false'; ?>">
-        <header class="domain-page-header"><a href="<?php echo esc_url(admin_url('admin.php?page=smarl-smart-sync')); ?>"><?php esc_html_e('← SmartSync settings', 'smartsync-lite-media-offloader-and-assets-cdn'); ?></a><h1><?php esc_html_e('Custom CloudFront URL', 'smartsync-lite-media-offloader-and-assets-cdn'); ?></h1><p><?php esc_html_e('Connect CloudFront, then use your own domain for website files.', 'smartsync-lite-media-offloader-and-assets-cdn'); ?></p></header>
+        <?php $renderHeader = require __DIR__ . '/subpage-header.php'; $renderHeader(__('Custom CloudFront URL', 'smartsync-lite-media-offloader-and-assets-cdn'), 'domain-page-header'); ?>
         <?php if (!$ready && !$canSetup): ?>
             <section class="domain-card notice notice-info"><h2><?php esc_html_e('Connect your AWS storage first', 'smartsync-lite-media-offloader-and-assets-cdn'); ?></h2><p><?php esc_html_e('This flow needs an AWS S3 bucket in a commercial AWS region. Connect your bucket in Cloud Configuration, then return here to set up CloudFront and your custom URL.', 'smartsync-lite-media-offloader-and-assets-cdn'); ?></p><a class="primary-btn" href="<?php echo esc_url(admin_url('admin.php?page=smarl-configuration-wizard')); ?>"><?php esc_html_e('Open Cloud Configuration', 'smartsync-lite-media-offloader-and-assets-cdn'); ?></a></section>
         <?php else: ?>

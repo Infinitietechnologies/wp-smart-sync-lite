@@ -15,19 +15,6 @@ jQuery(function ($) {
         if (event.originalEvent && event.originalEvent.key === statusSignalKey) $(document).trigger('smartsync:refresh-status');
     });
 
-    const page = new URLSearchParams(window.location.search).get('page');
-    if (page === 'custom-cloudfront-url') {
-        const navigation = $('<nav>').addClass('smartsync-breadcrumbs').attr('aria-label', text('breadcrumb', 'Breadcrumb'));
-        navigation.append($('<a>').attr('href', new URL('index.php', window.location.href).href).text(text('dashboard', 'Dashboard')));
-        navigation.append($('<span>').addClass('separator').attr('aria-hidden', 'true').text('›'));
-        if (page !== 'smarl-smart-sync') {
-            navigation.append($('<a>').attr('href', new URL('admin.php?page=smarl-smart-sync', window.location.href).href).text(text('settings_title', 'SmartSync Settings')));
-            navigation.append($('<span>').addClass('separator').attr('aria-hidden', 'true').text('›'));
-        }
-        navigation.append($('<span>').attr('aria-current', 'page').text(wrapper.find('h1').first().text()));
-        wrapper.prepend(navigation);
-    }
-
     // Tabs are owned by this script on every plugin page.
     const tabs = wrapper.find('.tab-button');
     const urlTabs = wrapper.hasClass('smartsync-settings') && tabs.length > 0;

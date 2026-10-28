@@ -16,13 +16,15 @@ const css = ['wizard.css', 'ui-improvements.css', 'enhanced-ui.css', 'custom-dom
     try {
         const page = await browser.newPage({ viewport: { width: 1440, height: 1200 }, reducedMotion: 'reduce' });
         const errors = []; page.on('pageerror', error => errors.push(error.message));
-        await page.route('**/*', route => route.abort());
         const html = render('domain', { service_provider: 'aws', bucket: 'website-media', region: 'eu-north-1', iam_key: 'fixture-key', iam_secret: 'fixture-secret', url: 'website-media.s3.eu-north-1.amazonaws.com' });
         assert.doesNotMatch(html, /fixture-key|fixture-secret/);
-        await page.setContent('<!doctype html><html lang="en"><head><meta charset="utf-8"><style>body{margin:20px;background:#f0f0f1;font-family:system-ui}button,input{font:inherit}' + css + '</style></head><body>' + html + '</body></html>');
+        const fixtureHtml = '<!doctype html><html lang="en"><head><meta charset="utf-8"><style>body{margin:20px;background:#f0f0f1;font-family:system-ui}button,input{font:inherit}' + css + '</style></head><body>' + html + '</body></html>';
+        await page.route('**/*', route => route.request().isNavigationRequest() ? route.fulfill({ contentType: 'text/html', body: fixtureHtml }) : route.abort());
+        await page.goto('https://example.test/wp-admin/admin.php?page=custom-cloudfront-url');
         await page.addScriptTag({ path: require.resolve('jquery') });
         await page.evaluate(() => {
             window.ajax_object = { ajax_url: '/fixture-ajax', nonce: 'fixture-nonce', strings: {} };
+            window.ajaxObject = { settings_strings: {} };
             window.fixtureActions = [];
             window.fixtureDeployed = false;
             window.jQuery.ajax = options => {
@@ -36,6 +38,20 @@ const css = ['wizard.css', 'ui-improvements.css', 'enhanced-ui.css', 'custom-dom
             };
         });
         await page.addScriptTag({ path: path.join(root, 'assets/js/wizard.js') });
+        await page.addScriptTag({ path: path.join(root, 'assets/js/ui-improvements.js') });
+        await page.evaluate(() => new Promise(resolve => window.jQuery(resolve)));
+        assert.equal(await page.locator('.smartsync-breadcrumbs').count(), 0);
+        assert.equal(await page.locator('.smartsync-subpage-header .smartsync-back-link svg').count(), 1);
+        const headerStyles = target => target.evaluate(() => {
+            const title = getComputedStyle(document.querySelector('.smartsync-subpage-header h1'));
+            const link = getComputedStyle(document.querySelector('.smartsync-back-link'));
+            return { title: ['fontSize', 'fontWeight', 'lineHeight', 'color', 'letterSpacing', 'margin', 'padding', 'borderBottomWidth'].map(key => title[key]),
+                link: ['fontSize', 'color', 'gap', 'margin', 'display'].map(key => link[key]) };
+        });
+        const cloudPage = await browser.newPage({ viewport: { width: 1440, height: 1200 } });
+        await cloudPage.setContent('<style>' + css + fs.readFileSync(path.join(root, 'assets/css/cloud-setup.css'), 'utf8') + '</style>' + render('wizard', { service_provider: 'aws' }));
+        assert.deepEqual(await headerStyles(page), await headerStyles(cloudPage), 'Subpage headers use different typography or spacing');
+        await cloudPage.close();
         const capture = async name => {
             for (const width of [320, 390, 768, 1440, 1920]) {
                 await page.setViewportSize({ width, height: 1200 });

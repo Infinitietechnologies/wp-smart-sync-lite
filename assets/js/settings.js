@@ -19,6 +19,7 @@ jQuery(function ($) {
     let activeDirection = '';
     let starting = false;
     let stopping = false;
+    let recovering = false;
     let running = false;
     let statusKnown = false;
     let operationBusy = false;
@@ -70,8 +71,9 @@ jQuery(function ($) {
             button.empty().append(active ? document.createTextNode(text('syncing', 'Syncing...')) : button.data('smartsync-label').clone());
             button.prop('disabled', !statusKnown || operationBusy || isRunning || starting || stopping);
         });
-        $('.smartsync-wrap .sync-mode, .smartsync-wrap .settings-media-test').prop('disabled', !statusKnown || operationBusy || isRunning || starting || stopping);
+        $('.smartsync-wrap .sync-mode').prop('disabled', !statusKnown || operationBusy || isRunning || starting || stopping);
         $('#stop-all-processes').prop('hidden', statusKnown && !isRunning && !starting && !stopping);
+        $('#recover-sync-operation').prop('hidden', !statusKnown || !operationBusy || isRunning || starting || stopping).prop('disabled', recovering);
         if (!statusKnown) activityStatus('unknown');
         else if (stopping) activityStatus('stopping');
         else if (starting) activityStatus('starting');
@@ -145,7 +147,6 @@ jQuery(function ($) {
             retryStatusButton.prop({ hidden: true, disabled: false });
             lastStatusError = '';
             const data = response.data;
-            if (Array.isArray(data.cdn_test_extensions)) updateMediaCdnTestState(data.cdn_test_extensions);
             const status = data.status;
             operationBusy = data.operation_busy === true;
             setRunningState(status === 'processing', data.type, data.direction);
@@ -160,10 +161,7 @@ jQuery(function ($) {
                 lastProgress = progressKey;
                 scheduleStatus(5000);
             } else if ((lastStatus !== status || lastStatusRun !== String(data.run_id || '')) && (status === 'completed' || status === 'failed')) {
-                appendLog(status === 'completed' && data.filtered_media_upload ? text('sync_filtered_completed', 'Selected file types synced successfully.') : text(status === 'completed' ? 'sync_completed' : 'sync_failed'), status === 'failed', status === 'completed' ? 'success' : '', status === 'failed' ? { type: 'error', key: 'sync-failure-' + (data.run_id || 'legacy') } : false);
-                if (status === 'completed' && data.filtered_media_upload && !data.media_cdn_sync_ready) {
-                    appendLog(text('sync_filtered_cdn_help', 'You can now enable media cloud delivery to test these file types. Other formats will stay local.'), false, 'info', { type: 'info', key: 'filtered-media-cdn' });
-                }
+                appendLog(text(status === 'completed' ? 'sync_completed' : 'sync_failed'), status === 'failed', status === 'completed' ? 'success' : '', status === 'failed' ? { type: 'error', key: 'sync-failure-' + (data.run_id || 'legacy') } : false);
                 if (data.direction === 'upload' && Number(data.scanned_files) > 0) appendLog(uploadSummary(data));
                 (Array.isArray(data.successes) ? data.successes : []).forEach(function (file) {
                     appendLog(text(data.direction === 'upload' ? 'uploaded' : 'downloaded') + ': ' + String(file));
@@ -214,14 +212,11 @@ jQuery(function ($) {
         const direction = button.data('direction');
         const mode = $('#sync-mode-' + type + ' input:checked').val() || 'incremental';
         if (!['media', 'assets'].includes(type) || !['upload', 'download'].includes(direction)) return;
-        // TEMP: Format selection applies only to this manual Media upload.
-        const mediaExtensions = type === 'media' && direction === 'upload'
-            ? $('#media-test-filter input:checked').map(function () { return this.value; }).get() : [];
         const destination = $('.settings-destination-provider').length ? $('.settings-destination-provider').text() + ' / ' + $('.settings-destination-storage').text() : '';
         window.smartsyncConfirm({
             kind: direction === 'download' ? 'restore' : (mode === 'full' ? 'full_' : 'upload_') + type,
             message: text(direction === 'upload' ? (mode === 'full' ? 'confirm_full_resync' : 'confirm_sync_local_to_aws') : 'confirm_sync_aws_to_local'),
-            context: destination + (mediaExtensions.length ? ' · ' + text('test_file_types', 'File types') + ': ' + mediaExtensions.join(', ').toUpperCase() : '')
+            context: destination
         }, function () {
             if (!pageActive || !statusKnown || operationBusy || starting || stopping || running || activeType) return;
             // Acquire the UI lock only after confirmation; a canceled dialog must leave it usable.
@@ -234,7 +229,6 @@ jQuery(function ($) {
             appendLog(text('starting_sync'));
             $(document).trigger('smartsync:sync-started');
             const payload = direction === 'upload' ? { type: type, mode: mode } : { type: type };
-            if (mediaExtensions.length) payload.media_test_extensions = mediaExtensions;
             request(direction === 'upload' ? 'sync_local_to_aws' : 'sync_aws_to_local', payload).done(function (response) {
                 if (token !== generation) return;
                 starting = false;
@@ -264,7 +258,7 @@ jQuery(function ($) {
             $(document).trigger('smartsync:stopping', [true]);
             let token = generation;
             buttons.prop('disabled', true);
-            $('.smartsync-wrap .sync-mode, .smartsync-wrap .settings-media-test').prop('disabled', true);
+            $('.smartsync-wrap .sync-mode').prop('disabled', true);
             const button = trigger.prop('disabled', true);
             request('stop_all_processes').done(function (response) {
                 if (token !== generation) return;
@@ -274,9 +268,10 @@ jQuery(function ($) {
                     token = generation;
                     starting = false;
                     statusKnown = true;
+                    operationBusy = response.data.operation_busy === true;
                     setRunningState(false);
                     lastStatus = 'idle';
-                    $(document).trigger('smartsync:status', [{ status: 'idle', stopped: true, processed_files: 0, total_files: 0 }]);
+                    $(document).trigger('smartsync:status', [{ status: 'idle', stopped: !operationBusy, operation_busy: operationBusy, processed_files: 0, total_files: 0 }]);
                     if (operationBusy) scheduleStatus(5000);
                     appendLog(errorMessage(response, text('stopped', 'Sync stopped.')));
                 } else {
@@ -294,12 +289,27 @@ jQuery(function ($) {
         });
     });
 
+    $('#recover-sync-operation').on('click', function () {
+        if (recovering || !statusKnown || !operationBusy || running || starting || stopping) return;
+        recovering = true;
+        const button = $(this).prop('disabled', true);
+        request('recover_sync_operation').done(function (response) {
+            if (!pageActive) return;
+            appendLog(errorMessage(response, text('recovery_failed', 'Unable to recover the operation. Please try again.')), !(response && response.success), response && response.success ? 'success' : '');
+        }).fail(function (xhr) {
+            if (pageActive) appendLog(errorMessage(xhr.responseJSON, text('recovery_failed', 'Unable to recover the operation. Please try again.')), true);
+        }).always(function () {
+            recovering = false;
+            button.prop('disabled', false);
+            if (pageActive) { statusFailures = 0; checkSyncStatus(); }
+        });
+    });
+
     function toggleSetting(element, action, data, successText, failureText) {
         const newState = element.prop('checked');
         element.prop('disabled', true);
         request(action, data).done(function (response) {
             if (response && response.success) {
-                if (action === 'toggle_cdn' && data.type === 'media' && Array.isArray((response.data || {}).cdn_test_extensions)) updateMediaCdnTestState(response.data.cdn_test_extensions);
                 appendLog(successText, false, 'success');
             } else {
                 element.prop('checked', !newState);
@@ -310,12 +320,6 @@ jQuery(function ($) {
             appendLog(errorMessage(xhr.responseJSON, failureText), true);
         }).always(function () { element.prop('disabled', false); });
     }
-    function updateMediaCdnTestState(extensions) {
-        const testing = extensions.length > 0;
-        $('#media-cdn-test-status').text(testing ? text('cdn_test_scope', 'Temporary CDN test: %s. Only confirmed uploads use cloud delivery; local copies are kept.').replace('%s', extensions.join(', ').toUpperCase()) : '').prop('hidden', !testing);
-        $('#auto-delete-media').prop('disabled', testing);
-        if (testing) $('#auto-delete-media').prop('checked', false);
-    }
 
     $('.use-cloudfront-button').on('change', function () {
         const element = $(this);
@@ -324,17 +328,6 @@ jQuery(function ($) {
     $('.sync-mode').on('change', function () {
         const full = $(this).find('input:checked').val() === 'full';
         $('#' + $(this).attr('aria-describedby')).text(full ? text('sync_hint_full', 'Uploads every selected local file again.') : text('sync_hint_incremental', 'Skips unchanged files and retries unsuccessful uploads.'));
-    });
-    const allMediaLabel = $('#media-test-selection').text();
-    function updateMediaTestSelection() {
-        const selected = $('#media-test-filter input:checked').map(function () { return this.value.toUpperCase(); }).get();
-        $('#media-test-selection').text(selected.length ? selected.join(', ') : allMediaLabel);
-        $('#media-test-cdn-note').prop('hidden', !selected.length || selected.length === $('#media-test-filter input').length);
-    }
-    $('#media-test-filter').on('change', 'input', updateMediaTestSelection);
-    $('#media-test-reset').on('click', function () {
-        $('#media-test-filter input').prop('checked', false);
-        updateMediaTestSelection();
     });
     $('#auto-delete-media').on('change', function () {
         const element = $(this);

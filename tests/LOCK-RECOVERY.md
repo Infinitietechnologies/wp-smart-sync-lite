@@ -25,3 +25,17 @@ Verification:
 - The native home-page browser workflow passed at five desktop/mobile widths, including the finishing state. Both PHPStan passes, PHP/JavaScript syntax, translation extraction and whitespace checks passed.
 
 Six runtime/catalog files are synchronized to the installed plugin. The main stylesheet and settings controller use `busy-1` cache versions. No production transfers or provider/configuration writes were performed. The supplied cookies/access token were neither replayed nor saved in project documentation or test fixtures.
+
+## 28 October 2026: restarted server and idle recovery
+
+Status: fixed and installed. The reported idle response had a valid 15-minute lease with no run. Read-only inspection found its recorded local-server PID (21460) no longer existed, while the current server was PID 10816. The earlier recovery check handled abandoned requests only when the built-in server PID matched; it could not recognize a hard-stopped or restarted server with a different PID. The acquiring request was not recorded, so its exact interruption reason is unknown.
+
+| Issue | Cause | Fixed | Change |
+| --- | --- | --- | --- |
+| Idle page stays locked for the remaining lease lifetime after a server interruption | A database expiry/PID alone cannot prove whether a different process still owns the request | Yes | New leases hold a request-owned OS file lock. A released guard on the same host proves abandonment; compare-and-delete removes only that exact lease. Live, missing-proof and other-host guards are preserved. Shutdown still releases ordinary leases. |
+| No usable action in the idle-but-busy Activity card | Stop was hidden whenever progress was idle | Yes | Add Recover operation beside Clear logs. Its authorized, nonce-protected endpoint checks for abandonment without resetting a processing run or forcing an active request to unlock. Controls unlock only after fresh status confirms readiness. |
+| Stop temporarily retains stale busy state | The response omitted the actual operation lease state | Yes | Stop returns the current busy/expiry information. A finishing request keeps recovery available until its lease releases. |
+
+The diagnosed legacy lease was removed with an exact SQL compare-and-delete after confirming its PID was absent and progress was idle. Cloud configuration, upload history, queued work and progress were preserved. New guard files are host-local and contain no provider credentials. If filesystem ownership cannot be established, expiry remains the fallback.
+
+Verification: 285 isolated PHP checks passed, including real hard process termination and preservation of a concurrent successor. Three focused admin recovery tests and the maintained settings browser workflow passed; the browser checks overview/media/assets at five widths and exercises rejected/successful recovery. Both PHPStan passes and six native WordPress sync/AJAX integration groups passed with mocked cloud operations. Focused recovery checks were repeated after final error-handling changes. No live cloud transfers were started. Nothing was committed or staged.

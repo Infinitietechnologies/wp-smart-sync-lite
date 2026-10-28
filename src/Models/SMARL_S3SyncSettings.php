@@ -108,9 +108,6 @@ class SMARL_S3SyncSettings {
             'run_id' => $this->runId, 'started_at' => $this->startedAt, 'finished_at' => $this->finishedAt,
             'server_time' => time(), 'failed_files' => $this->failedFiles, 'current_file' => '',
             'skipped_files' => $this->skippedFiles, 'scanned_files' => $this->scannedFiles, 'mode' => $this->syncMode,
-            'filtered_media_upload' => $this->s3SyncDirection === 'upload' && $this->syncType === 'media' && $this->extensions !== [] && (bool) array_diff(\SmartSyncS3\Helpers\SMARL_Helper::getExtension('media'), $this->extensions),
-            'media_cdn_sync_ready' => $config !== null && ($config->canEnableMediaCDN || $config->hasMediaCdnTestScope()),
-            'cdn_test_extensions' => $config !== null && $config->useCdnForMedia && $config->hasMediaCdnTestScope() ? $config->mediaCdnTestExtensions : [],
             'provider' => $this->syncProvider ?: ($this->s3SyncStatus === 'processing' && $config !== null ? $config->serviceProvider : ''),
             'storage' => $this->syncStorage ?: ($this->s3SyncStatus === 'processing' && $config !== null ? $config->bucket : '')];
     }

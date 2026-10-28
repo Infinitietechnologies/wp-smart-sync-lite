@@ -464,13 +464,6 @@ class SMARL_SmartSync
         if ($keyPath === '' || preg_match('~(?:^|/)[.]{1,2}(?:/|$)~', rawurldecode($keyPath)) || strpos(rawurldecode($keyPath), '\\') !== false || preg_match('/[\x00-\x1f\x7f]/', rawurldecode($keyPath))) {
             return $url;
         }
-        if ($media && ($this->config->mediaCdnTestExtensions !== [] || $this->config->mediaCdnTestTarget !== '')) {
-            $key = rawurldecode($keyPath);
-            if (!$this->config->hasMediaCdnTestScope() || !in_array(strtolower(pathinfo($key, PATHINFO_EXTENSION)), $this->config->mediaCdnTestExtensions, true)) return $url;
-            try {
-                if (!SMARL_UploadHistory::confirmsLocalFile($this->config, $key, SMARL_Helper::resolveLocalPath($key))) return $url;
-            } catch (Throwable $error) { return $url; }
-        }
         $base = $this->generateUrlFromBase($this->config->getPublicBaseUrl());
         if ($base === '') {
             return $url;
@@ -561,19 +554,19 @@ class SMARL_SmartSync
             'smartsync-enhanced-ui-css',
             plugin_dir_url($this->pluginRoot) . 'assets/css/enhanced-ui.css',
             ['smartsync-ui-improvements-css'],
-            SMARL_ASSET_VERSION_CODE . '-container-md-1'
+            SMARL_ASSET_VERSION_CODE . '-readability-1'
         );
         if ($page === 'smarl-configuration-wizard') {
-            wp_enqueue_style('smartsync-cloud-setup-css', plugin_dir_url($this->pluginRoot) . 'assets/css/cloud-setup.css', ['smartsync-enhanced-ui-css'], SMARL_ASSET_VERSION_CODE . '-cloudfront-guide-1');
+            wp_enqueue_style('smartsync-cloud-setup-css', plugin_dir_url($this->pluginRoot) . 'assets/css/cloud-setup.css', ['smartsync-enhanced-ui-css'], SMARL_ASSET_VERSION_CODE . '-readability-1');
         }
         if ($page === 'smarl-smart-sync') {
-            wp_enqueue_style('smartsync-settings-home-css', plugin_dir_url($this->pluginRoot) . 'assets/css/settings-home.css', ['smartsync-enhanced-ui-css'], SMARL_ASSET_VERSION_CODE . '-media-test-1');
+            wp_enqueue_style('smartsync-settings-home-css', plugin_dir_url($this->pluginRoot) . 'assets/css/settings-home.css', ['smartsync-enhanced-ui-css'], SMARL_ASSET_VERSION_CODE . '-readability-1');
         }
         if ($page === 'custom-cloudfront-url') {
-            wp_enqueue_style('smartsync-custom-domain-css', plugin_dir_url($this->pluginRoot) . 'assets/css/custom-domain.css', ['smartsync-enhanced-ui-css'], SMARL_ASSET_VERSION_CODE . '-inline-cloudfront-1');
+            wp_enqueue_style('smartsync-custom-domain-css', plugin_dir_url($this->pluginRoot) . 'assets/css/custom-domain.css', ['smartsync-enhanced-ui-css'], SMARL_ASSET_VERSION_CODE . '-readability-1');
         }
-        wp_enqueue_style('smartsync-notifications-css', plugin_dir_url($this->pluginRoot) . 'assets/css/notifications.css', [], SMARL_ASSET_VERSION_CODE . '-notice-countdown-1');
-        wp_enqueue_style('smartsync-confirmations-css', plugin_dir_url($this->pluginRoot) . 'assets/css/confirmations.css', ['smartsync-enhanced-ui-css'], SMARL_ASSET_VERSION_CODE . '-dialog-inline-1');
+        wp_enqueue_style('smartsync-notifications-css', plugin_dir_url($this->pluginRoot) . 'assets/css/notifications.css', [], SMARL_ASSET_VERSION_CODE . '-readability-1');
+        wp_enqueue_style('smartsync-confirmations-css', plugin_dir_url($this->pluginRoot) . 'assets/css/confirmations.css', ['smartsync-enhanced-ui-css'], SMARL_ASSET_VERSION_CODE . '-readability-1');
         wp_enqueue_script('smartsync-confirmations-js', plugin_dir_url($this->pluginRoot) . 'assets/js/confirmations.js', [], SMARL_ASSET_VERSION_CODE . '-dialog-1', true);
         wp_localize_script('smartsync-confirmations-js', 'smarlDialogs', [
             'cancel' => __('Cancel', 'smartsync-lite-media-offloader-and-assets-cdn'),
@@ -720,7 +713,7 @@ class SMARL_SmartSync
             'aws-settings-js',
             plugin_dir_url($this->pluginRoot) . 'assets/js/settings.js',
             ['jquery', 'smartsync-notifications-js', 'smartsync-confirmations-js'],
-            SMARL_ASSET_VERSION_CODE . '-scoped-cdn-test-1',
+            SMARL_ASSET_VERSION_CODE . '-request-lock-1',
             true
         );
 
@@ -729,7 +722,7 @@ class SMARL_SmartSync
             'smartsync-ui-improvements-js',
             plugin_dir_url($this->pluginRoot) . 'assets/js/ui-improvements.js',
             ['jquery', 'aws-admin-js', 'aws-settings-js'],
-            SMARL_ASSET_VERSION_CODE . '-polling-1',
+            SMARL_ASSET_VERSION_CODE . '-subpage-header-1',
             true
         );
 
@@ -742,8 +735,8 @@ class SMARL_SmartSync
             true
         );
 
-        wp_enqueue_style('smartsync-sync-widget-css', plugin_dir_url($this->pluginRoot) . 'assets/css/sync-widget.css', ['smartsync-enhanced-ui-css'], SMARL_ASSET_VERSION_CODE . '-polling-1');
-        wp_enqueue_script('smartsync-sync-widget-js', plugin_dir_url($this->pluginRoot) . 'assets/js/sync-widget.js', ['jquery', 'smartsync-ui-improvements-js', 'smartsync-confirmations-js'], SMARL_ASSET_VERSION_CODE . '-filtered-cdn-1', true);
+        wp_enqueue_style('smartsync-sync-widget-css', plugin_dir_url($this->pluginRoot) . 'assets/css/sync-widget.css', ['smartsync-enhanced-ui-css'], SMARL_ASSET_VERSION_CODE . '-readability-1');
+        wp_enqueue_script('smartsync-sync-widget-js', plugin_dir_url($this->pluginRoot) . 'assets/js/sync-widget.js', ['jquery', 'smartsync-ui-improvements-js', 'smartsync-confirmations-js'], SMARL_ASSET_VERSION_CODE . '-media-release-1', true);
         $syncOption = get_option('smarl_sync_settings', []);
         $syncSeed = SMARL_S3SyncSettings::fromArray(is_array($syncOption) ? $syncOption : []);
         $providerNames = array_map(static fn(array $guide): string => $guide['name'], SMARL_ProviderGuides::all());
@@ -784,7 +777,6 @@ class SMARL_SmartSync
                 'widget_restore_media' => __('Restoring media', 'smartsync-lite-media-offloader-and-assets-cdn'),
                 'widget_restore_assets' => __('Restoring assets', 'smartsync-lite-media-offloader-and-assets-cdn'),
                 'widget_complete' => __('Sync complete', 'smartsync-lite-media-offloader-and-assets-cdn'),
-                'widget_filtered_complete' => __('File-type test complete', 'smartsync-lite-media-offloader-and-assets-cdn'),
                 'widget_failure' => __('Sync needs attention', 'smartsync-lite-media-offloader-and-assets-cdn'),
                 'widget_stopped' => __('Sync stopped', 'smartsync-lite-media-offloader-and-assets-cdn'),
                 'widget_logs' => __('View logs', 'smartsync-lite-media-offloader-and-assets-cdn'),
@@ -817,7 +809,6 @@ class SMARL_SmartSync
                 'activity_stopped' => __('Sync stopped', 'smartsync-lite-media-offloader-and-assets-cdn'),
                 'sync_hint_incremental' => __('Skips unchanged files and retries unsuccessful uploads.', 'smartsync-lite-media-offloader-and-assets-cdn'),
                 'sync_hint_full' => __('Uploads every selected local file again.', 'smartsync-lite-media-offloader-and-assets-cdn'),
-                'test_file_types' => __('File types', 'smartsync-lite-media-offloader-and-assets-cdn'),
                 'request_error' => __('The request failed. Please try again.', 'smartsync-lite-media-offloader-and-assets-cdn'),
                 'clear_logs' => __('Clear logs', 'smartsync-lite-media-offloader-and-assets-cdn'),
                 'no_logs' => __('No log messages yet.', 'smartsync-lite-media-offloader-and-assets-cdn'),
@@ -832,10 +823,6 @@ class SMARL_SmartSync
                 'sync' => __('Sync', 'smartsync-lite-media-offloader-and-assets-cdn'),
                 'progress' => __('Progress', 'smartsync-lite-media-offloader-and-assets-cdn'),
                 'sync_completed' => __('Sync completed successfully.', 'smartsync-lite-media-offloader-and-assets-cdn'),
-                'sync_filtered_completed' => __('Selected file types synced successfully.', 'smartsync-lite-media-offloader-and-assets-cdn'),
-                'sync_filtered_cdn_help' => __('You can now enable media cloud delivery to test these file types. Other formats will stay local.', 'smartsync-lite-media-offloader-and-assets-cdn'),
-                /* translators: %s: selected file extensions. */
-                'cdn_test_scope' => __('Temporary CDN test: %s. Only confirmed uploads use cloud delivery; local copies are kept.', 'smartsync-lite-media-offloader-and-assets-cdn'),
                 'sync_failed' => __('Sync failed. Check errors below.', 'smartsync-lite-media-offloader-and-assets-cdn'),
                 'starting_sync' => __('Starting sync process...', 'smartsync-lite-media-offloader-and-assets-cdn'),
                 'starting_sync_of' => __('Starting sync of', 'smartsync-lite-media-offloader-and-assets-cdn'),
@@ -849,6 +836,7 @@ class SMARL_SmartSync
                 'stopping' => __('Stopping...', 'smartsync-lite-media-offloader-and-assets-cdn'),
                 'stopping_processes' => __('Stopping all processes...', 'smartsync-lite-media-offloader-and-assets-cdn'),
                 'failed_to_stop_processes' => __('Failed to stop processes.', 'smartsync-lite-media-offloader-and-assets-cdn'),
+                'recovery_failed' => __('Unable to recover the operation. Please try again.', 'smartsync-lite-media-offloader-and-assets-cdn'),
                 'clearing_cache' => __('Clearing CloudFront cache...', 'smartsync-lite-media-offloader-and-assets-cdn'),
                 'cache_cleared' => __('CloudFront cache refresh requested.', 'smartsync-lite-media-offloader-and-assets-cdn'),
                 'failed_to_clear_cache' => __('Failed to clear CloudFront cache.', 'smartsync-lite-media-offloader-and-assets-cdn'),
@@ -1100,7 +1088,7 @@ class SMARL_SmartSync
 
     private function canCleanLocalMedia(): bool
     {
-        if (!$this->config->mediaAutoDelete || !$this->config->useCdnForMedia || $this->config->mediaCdnTestExtensions !== [] || $this->config->mediaCdnTestTarget !== '') {
+        if (!$this->config->mediaAutoDelete || !$this->config->useCdnForMedia) {
             return false;
         }
         try {

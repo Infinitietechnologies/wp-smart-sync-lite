@@ -1,6 +1,5 @@
 <?php
 use SmartSyncS3\Models\SMARL_CloudConfig;
-use SmartSyncS3\Helpers\SMARL_Helper;
 if (!defined('ABSPATH')) exit;
 
 return static function (SMARL_CloudConfig $config, string $providerName, bool $configured, array $compatibility): void {
@@ -92,11 +91,7 @@ $icon = static function (string $name, string $class = 'settings-section-icon'):
                             <input type="checkbox" role="switch" id="<?php echo esc_attr($toggleId); ?>" class="settings-toggle use-cloudfront-button" data-type="<?php echo esc_attr($type); ?>" aria-labelledby="<?php echo esc_attr($toggleId); ?>-label" aria-describedby="<?php echo esc_attr($toggleId); ?>-help"<?php if ($media ? $config->useCdnForMedia : $config->useCdnForAssets) echo ' checked'; ?>>
                         </div>
                         <?php if ($media): ?>
-                            <p id="media-cdn-test-status" class="settings-help" role="status"<?php if (!$config->useCdnForMedia || !$config->hasMediaCdnTestScope()) echo ' hidden'; ?>><?php if ($config->useCdnForMedia && $config->hasMediaCdnTestScope()) {
-                                /* translators: %s: selected file extensions. */
-                                echo esc_html(sprintf(__('Temporary CDN test: %s. Only confirmed uploads use cloud delivery; local copies are kept.', 'smartsync-lite-media-offloader-and-assets-cdn'), strtoupper(implode(', ', $config->mediaCdnTestExtensions))));
-                            } ?></p>
-                            <div class="settings-toggle-row"><div><label id="auto-delete-media-label" for="auto-delete-media"><?php esc_html_e('Remove local copies', 'smartsync-lite-media-offloader-and-assets-cdn'); ?></label><p id="auto-delete-media-help" class="settings-help"><?php esc_html_e('Only after all attachment files upload successfully and cloud delivery is enabled.', 'smartsync-lite-media-offloader-and-assets-cdn'); ?></p></div><input type="checkbox" role="switch" id="auto-delete-media" class="settings-toggle" aria-labelledby="auto-delete-media-label" aria-describedby="auto-delete-media-help"<?php if ($config->mediaAutoDelete) echo ' checked'; if ($config->mediaCdnTestExtensions !== [] || $config->mediaCdnTestTarget !== '') echo ' disabled'; ?>></div>
+                            <div class="settings-toggle-row"><div><label id="auto-delete-media-label" for="auto-delete-media"><?php esc_html_e('Remove local copies', 'smartsync-lite-media-offloader-and-assets-cdn'); ?></label><p id="auto-delete-media-help" class="settings-help"><?php esc_html_e('Only after all attachment files upload successfully and cloud delivery is enabled.', 'smartsync-lite-media-offloader-and-assets-cdn'); ?></p></div><input type="checkbox" role="switch" id="auto-delete-media" class="settings-toggle" aria-labelledby="auto-delete-media-label" aria-describedby="auto-delete-media-help"<?php if ($config->mediaAutoDelete) echo ' checked'; ?>></div>
                         <?php endif; ?>
                     </section>
                     <section class="settings-card settings-sync-card" aria-labelledby="settings-sync-<?php echo esc_attr($type); ?>">
@@ -111,24 +106,6 @@ $icon = static function (string $name, string $class = 'settings-section-icon'):
                             </fieldset>
                             <p id="sync-mode-help-<?php echo esc_attr($type); ?>" class="settings-help"><?php esc_html_e('Skips unchanged files and retries unsuccessful uploads.', 'smartsync-lite-media-offloader-and-assets-cdn'); ?></p>
                         </div>
-                        <?php if ($media): // TEMP: Manual media format isolation for upload testing. ?>
-                            <fieldset id="media-test-filter" class="settings-media-test" disabled>
-                                <legend><?php esc_html_e('File types', 'smartsync-lite-media-offloader-and-assets-cdn'); ?> <span class="settings-test-badge"><?php esc_html_e('Temporary testing', 'smartsync-lite-media-offloader-and-assets-cdn'); ?></span></legend>
-                                <details class="settings-test-picker">
-                                    <summary><span id="media-test-selection"><?php esc_html_e('All supported media', 'smartsync-lite-media-offloader-and-assets-cdn'); ?></span></summary>
-                                    <div class="settings-test-picker-body">
-                                        <div class="settings-test-extensions">
-                                            <?php foreach (SMARL_Helper::getExtension('media') as $extension): ?>
-                                                <label><input type="checkbox" value="<?php echo esc_attr($extension); ?>"><span><?php echo esc_html(strtoupper($extension)); ?></span></label>
-                                            <?php endforeach; ?>
-                                        </div>
-                                        <button type="button" id="media-test-reset" class="settings-text-link"><?php esc_html_e('Reset to all', 'smartsync-lite-media-offloader-and-assets-cdn'); ?></button>
-                                    </div>
-                                </details>
-                                <p class="settings-help"><?php esc_html_e('Choose formats to test this upload. Leave all unselected to upload every supported media type.', 'smartsync-lite-media-offloader-and-assets-cdn'); ?></p>
-                                <p id="media-test-cdn-note" class="settings-help" hidden><?php esc_html_e('After a successful test, enable cloud delivery for these formats. Only confirmed uploads use the CDN; local copies are kept.', 'smartsync-lite-media-offloader-and-assets-cdn'); ?></p>
-                            </fieldset>
-                        <?php endif; ?>
                         <button type="button" id="<?php echo $media ? 'sync-local-to-aws' : 'sync-local-to-aws-plugin'; ?>" data-type="<?php echo esc_attr($type); ?>" data-direction="upload" class="primary-btn settings-button sync-button"><?php echo esc_html($media ? __('Upload media', 'smartsync-lite-media-offloader-and-assets-cdn') : __('Upload assets', 'smartsync-lite-media-offloader-and-assets-cdn')); ?></button>
                         <details class="settings-disclosure settings-sync-help"><summary><?php esc_html_e('How syncing works', 'smartsync-lite-media-offloader-and-assets-cdn'); ?></summary><p class="settings-help"><?php esc_html_e('Untracked files upload once to establish history. Before skipping unchanged files, SmartSync checks their cloud copies. Missing or size-mismatched copies upload again. Full resync uploads every selected local file without checking existing copies.', 'smartsync-lite-media-offloader-and-assets-cdn'); ?></p></details>
                         <?php if ($media): ?>
@@ -144,6 +121,7 @@ $icon = static function (string $name, string $class = 'settings-section-icon'):
             <div class="settings-activity-title"><h2 id="settings-activity-title"><?php $icon('activity'); ?><?php esc_html_e('Activity', 'smartsync-lite-media-offloader-and-assets-cdn'); ?></h2><span id="settings-activity-status" class="settings-activity-status" data-state="checking" role="status"><?php esc_html_e('Checking status…', 'smartsync-lite-media-offloader-and-assets-cdn'); ?></span></div>
             <div class="settings-activity-actions">
                 <button type="button" id="stop-all-processes" class="settings-button settings-button-danger" hidden><?php $icon('stop', 'settings-action-icon'); ?><?php esc_html_e('Stop sync', 'smartsync-lite-media-offloader-and-assets-cdn'); ?></button>
+                <button type="button" id="recover-sync-operation" class="settings-button settings-button-secondary" hidden><?php $icon('refresh', 'settings-action-icon'); ?><?php esc_html_e('Recover operation', 'smartsync-lite-media-offloader-and-assets-cdn'); ?></button>
                 <button type="button" id="clear-logs-button" class="settings-button settings-button-secondary"><?php $icon('clear', 'settings-action-icon'); ?><?php esc_html_e('Clear logs', 'smartsync-lite-media-offloader-and-assets-cdn'); ?></button>
             </div>
         </div>

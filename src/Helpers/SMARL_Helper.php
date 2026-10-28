@@ -22,6 +22,8 @@ class SMARL_Helper
 {
     /** Request-owned leases, including their original blog's options table. */
     private static array $requestSyncLocks = [];
+    /** Open OS locks prove that a request is still alive, even after the PHP server restarts. */
+    private static array $requestSyncGuards = [];
     private static bool $syncLockCleanupRegistered = false;
 
     /** Keep SDK requests verified, using WordPress's CA bundle when PHP has no configured trust store. */
@@ -434,16 +436,30 @@ class SMARL_Helper
         // Request-local option caches can outlive another request's lease. The database is authoritative.
         $raw = $wpdb->get_var($wpdb->prepare("SELECT option_value FROM {$wpdb->options} WHERE option_name = %s", $name));
         $existing = maybe_unserialize($raw);
-        if ($raw !== null && (!is_array($existing) || !is_string($existing['token'] ?? null) || (int) ($existing['expires'] ?? 0) <= $now || self::isPreviousLocalServerLock($existing))) {
-            $wpdb->query($wpdb->prepare("DELETE FROM {$wpdb->options} WHERE option_name = %s AND option_value = %s", $name, $raw));
+        if ($raw !== null && (!is_array($existing) || !is_string($existing['token'] ?? null) || $existing['token'] === '' || (int) ($existing['expires'] ?? 0) <= $now || self::isAbandonedSyncLock($existing))) {
+            $deleted = $wpdb->query($wpdb->prepare("DELETE FROM {$wpdb->options} WHERE option_name = %s AND option_value = %s", $name, $raw));
+            if ($deleted > 0 && is_array($existing)) self::removeAbandonedGuard($existing);
         }
         wp_cache_delete($name, 'options');
         wp_cache_delete('notoptions', 'options');
         $token = bin2hex(random_bytes(16));
         $lease = ['token' => $token, 'expires' => $now + $ttl];
         if (PHP_SAPI === 'cli-server') $lease['server_pid'] = getmypid();
-        if (!add_option($name, $lease, '', false)) return null;
+        $guard = self::createRequestSyncGuard($token);
+        if ($guard !== null) $lease['request_guard'] = self::syncGuardHost();
+        try { $added = add_option($name, $lease, '', false); }
+        catch (\Throwable $error) {
+            // An option hook can throw after the row is written. Keep the closed
+            // guard file so another request can prove that this owner is gone.
+            if ($guard !== null) fclose($guard[0]);
+            throw $error;
+        }
+        if (!$added) {
+            if ($guard !== null) { fclose($guard[0]); @unlink($guard[1]); }
+            return null;
+        }
         self::$requestSyncLocks[$token] = $wpdb->options;
+        if ($guard !== null) self::$requestSyncGuards[$token] = $guard;
         if (!self::$syncLockCleanupRegistered) {
             // exit()/fatal errors can bypass finally. Run before other WordPress
             // shutdown work, and again after it for leases acquired during shutdown.
@@ -470,6 +486,12 @@ class SMARL_Helper
         } else {
             unset(self::$requestSyncLocks[$token]);
         }
+        if (!isset(self::$requestSyncLocks[$token]) && isset(self::$requestSyncGuards[$token])) {
+            [$handle, $path] = self::$requestSyncGuards[$token];
+            fclose($handle);
+            @unlink($path);
+            unset(self::$requestSyncGuards[$token]);
+        }
         if ($table === $wpdb->options) {
             wp_cache_delete($name, 'options');
             wp_cache_delete('notoptions', 'options');
@@ -489,11 +511,11 @@ class SMARL_Helper
         global $wpdb;
         $raw = $wpdb->get_var($wpdb->prepare("SELECT option_value FROM {$wpdb->options} WHERE option_name = %s", 'smarl_sync_lock'));
         $lock = maybe_unserialize($raw);
-        if (is_array($lock) && self::isPreviousLocalServerLock($lock)) {
-            // The built-in server handles one request at a time per process. An
-            // unowned lease from this same process belongs to an earlier request.
+        if (is_array($lock) && self::isAbandonedSyncLock($lock)) {
+            // Reap only a provably abandoned owner, comparing the exact SQL snapshot.
             $deleted = $wpdb->query($wpdb->prepare("DELETE FROM {$wpdb->options} WHERE option_name = %s AND option_value = %s", 'smarl_sync_lock', $raw));
             if ($deleted > 0) {
+                self::removeAbandonedGuard($lock);
                 wp_cache_delete('smarl_sync_lock', 'options');
                 wp_cache_delete('notoptions', 'options');
                 $lock = null;
@@ -507,6 +529,43 @@ class SMARL_Helper
     private static function isPreviousLocalServerLock(array $lock): bool {
         return PHP_SAPI === 'cli-server' && isset($lock['server_pid']) && $lock['server_pid'] === getmypid()
             && is_string($lock['token'] ?? null) && !isset(self::$requestSyncLocks[$lock['token']]);
+    }
+
+    private static function syncGuardHost(): string {
+        return hash('sha256', php_uname('n') . '|' . str_replace('\\', '/', sys_get_temp_dir()));
+    }
+    private static function syncGuardPath(string $token): string {
+        return rtrim(sys_get_temp_dir(), '/\\') . '/smartsync-request-locks/' . $token . '.lock';
+    }
+    private static function createRequestSyncGuard(string $token): ?array {
+        $path = self::syncGuardPath($token);
+        $directory = dirname($path);
+        if (is_link($directory) || (!is_dir($directory) && !@mkdir($directory, 0700, true) && !is_dir($directory))) return null;
+        $handle = @fopen($path, 'x+b');
+        if ($handle === false) return null;
+        @chmod($path, 0600);
+        if (!flock($handle, LOCK_EX | LOCK_NB)) { fclose($handle); @unlink($path); return null; }
+        return [$handle, $path];
+    }
+    private static function isAbandonedSyncLock(array $lock): bool {
+        if (self::isPreviousLocalServerLock($lock)) return true;
+        if (($lock['request_guard'] ?? '') !== self::syncGuardHost() || !is_string($lock['token'] ?? null)
+            || !preg_match('/^[a-f0-9]{32}$/D', $lock['token']) || isset(self::$requestSyncLocks[$lock['token']])) return false;
+        $path = self::syncGuardPath($lock['token']);
+        // Missing/unreadable files and leases from other hosts are inconclusive.
+        // Retain their lease until expiry rather than unlocking a live request.
+        if (is_link(dirname($path)) || is_link($path) || !is_file($path)) return false;
+        $handle = @fopen($path, 'r+b');
+        if ($handle === false) return false;
+        try { return flock($handle, LOCK_EX | LOCK_NB); }
+        finally { fclose($handle); }
+    }
+    private static function removeAbandonedGuard(array $lock): void {
+        if (($lock['request_guard'] ?? '') === self::syncGuardHost() && is_string($lock['token'] ?? null)
+            && preg_match('/^[a-f0-9]{32}$/D', $lock['token']) && self::isAbandonedSyncLock($lock)) {
+            $path = self::syncGuardPath($lock['token']);
+            if (!is_link(dirname($path)) && !is_link($path)) @unlink($path);
+        }
     }
 
     public static function formatBytes(int $bytes): string {

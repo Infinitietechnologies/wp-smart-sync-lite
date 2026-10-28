@@ -36,9 +36,6 @@ class SMARL_CloudConfig
     public bool $mediaAutoDelete = false;
     public bool $useCdnForMedia = false;
     public bool $useCdnForAssets = false;
-    /** TEMP: Restrict CDN testing to confirmed uploads from selected formats and this destination. */
-    public array $mediaCdnTestExtensions = [];
-    public string $mediaCdnTestTarget = '';
     public string $cloudflareEndpoint = '';
     public string $googleServicePath = '';
     public string $cloudflareUrl = '';
@@ -59,7 +56,6 @@ class SMARL_CloudConfig
         'cloudflareEndpoint' => 'cloudflareEndpoint', 'cloudflareUrl' => 'cloudflareUrl',
         'bunnyStoragePassword' => 'bunnyStoragePassword',
         'bunnyStorageEndpoint' => 'bunnyStorageEndpoint',
-        'mediaCdnTestTarget' => 'mediaCdnTestTarget',
     ];
     private const BOOLEAN_FIELDS = [
         'useCloudFront' => 'use_cloudfront', 'useCdnForAssets' => 'use_cdn_for_assets',
@@ -77,8 +73,9 @@ class SMARL_CloudConfig
         foreach (self::BOOLEAN_FIELDS as $property => $key) {
             if (array_key_exists($key, $data)) $config->$property = filter_var($data[$key], FILTER_VALIDATE_BOOLEAN);
         }
-        if (is_array($data['mediaCdnTestExtensions'] ?? null)) {
-            $config->mediaCdnTestExtensions = array_values(array_unique(array_filter($data['mediaCdnTestExtensions'], static fn($extension): bool => is_string($extension) && in_array($extension, SMARL_Helper::getExtension('media'), true))));
+        // Retire old restricted-delivery settings without promoting partial uploads to full-library delivery.
+        if (!empty($data['mediaCdnTestExtensions']) || !empty($data['mediaCdnTestTarget'])) {
+            $config->useCdnForMedia = $config->canEnableMediaCDN = $config->mediaAutoDelete = false;
         }
         if ($config->serviceProvider === 'bunny' && str_contains($config->iamSecret, '|')) {
             [$config->iamSecret, $legacyPassword] = explode('|', $config->iamSecret, 2);
@@ -91,12 +88,7 @@ class SMARL_CloudConfig
     {
         $data = [];
         foreach (self::FIELDS + self::BOOLEAN_FIELDS as $property => $key) $data[$key] = $this->$property;
-        $data['mediaCdnTestExtensions'] = $this->mediaCdnTestExtensions;
         return $data;
-    }
-    public function hasMediaCdnTestScope(): bool {
-        return $this->mediaCdnTestExtensions !== [] && $this->mediaCdnTestTarget !== ''
-            && hash_equals($this->mediaCdnTestTarget, SMARL_Helper::storageTargetFingerprint($this));
     }
 
     public function save(): void
@@ -117,7 +109,8 @@ class SMARL_CloudConfig
         $config->customUrl = SMARL_CustomUrl::load();
         try { $needsMigration = $config->serviceProvider === 'google' && $config->googleServicePath !== '' && SMARLI_GoogleService::credentialsNeedMigration($config->googleServicePath); }
         catch (\Throwable $error) { $needsMigration = false; }
-        if ($needsMigration) {
+        $retiredSettings = is_array($data) && (array_key_exists('mediaCdnTestExtensions', $data) || array_key_exists('mediaCdnTestTarget', $data));
+        if ($needsMigration || $retiredSettings) {
             $lock = SMARL_Helper::acquireSyncLock();
             if ($lock === null) return $config;
             try {
@@ -126,6 +119,7 @@ class SMARL_CloudConfig
                 $fresh = self::fromArray(is_array($current) ? $current : []);
                 $fresh->customUrl = $config->customUrl;
                 $config = $fresh;
+                if (is_array($current) && (array_key_exists('mediaCdnTestExtensions', $current) || array_key_exists('mediaCdnTestTarget', $current))) $config->save();
                 if ($config->serviceProvider !== 'google' || !SMARLI_GoogleService::credentialsNeedMigration($config->googleServicePath)) return $config;
                 $oldPath = $config->googleServicePath;
                 $path = SMARLI_GoogleService::migrateCredentials($oldPath, false);

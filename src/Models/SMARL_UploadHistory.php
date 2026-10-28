@@ -6,16 +6,6 @@ use SmartSyncS3\Helpers\SMARL_Helper;
 
 /** Successful byte receipts, scoped to the current blog and stable storage address. */
 class SMARL_UploadHistory {
-    /** TEMP: Only unchanged, successfully uploaded local bytes qualify for scoped CDN tests. */
-    public static function confirmsLocalFile(SMARL_CloudConfig $config, string $key, string $path): bool {
-        global $wpdb;
-        $receipt = $wpdb->get_row($wpdb->prepare("SELECT relative_path, content_hash, size FROM {$wpdb->prefix}smarl_upload_history WHERE target_hash = %s AND key_hash = %s", SMARL_Helper::storageTargetFingerprint($config), hash('sha256', $key)), ARRAY_A);
-        if ($wpdb->last_error !== '' || !is_array($receipt) || $receipt['relative_path'] !== $key) return false;
-        try {
-            $signature = self::signature($path);
-            return $receipt['content_hash'] === $signature['content_hash'] && (int) $receipt['size'] === $signature['size'];
-        } catch (\Throwable $error) { return false; }
-    }
     /** Hash streams from disk; timestamps and file sizes alone cannot prove unchanged contents. */
     public static function signature(string $path): array {
         clearstatcache(true, $path);

@@ -1,8 +1,8 @@
 /* Viewport notifications are independent of the plugin's page layout. */
-.smartsync-notifications { position: fixed; inset-block-start: calc(var(--wp-admin--admin-bar--height, 32px) + 18px); inset-inline-end: 24px; width: 420px; max-width: calc(100vw - 32px); max-height: calc(100dvh - 100px); overflow-y: auto; scrollbar-width: thin; z-index: 10010; pointer-events: none; font: 13px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+.smartsync-notifications { position: fixed; inset-block-start: calc(var(--wp-admin--admin-bar--height, 32px) + 18px); inset-inline-end: 24px; width: 420px; max-width: calc(100vw - 32px); max-height: calc(100dvh - 100px); overflow-y: auto; scrollbar-width: thin; z-index: 10010; pointer-events: none; font: 400 14px/1.6 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-synthesis: none; }
 .smartsync-notifications:empty { display: none; }
 .smartsync-notifications * { box-sizing: border-box; }
-.smartsync-notifications .smartsync-notice-item { --notice-color: #2464b9; --notice-background: #f1f7ff; display: grid; grid-template-rows: 1fr; margin-bottom: 10px; opacity: 1; transform: translateY(0); transition: grid-template-rows 200ms ease, margin-bottom 200ms ease, opacity 180ms ease, transform 200ms ease; }
+.smartsync-notifications .smartsync-notice-item { --notice-color: #2464b9; --notice-background: #f1f7ff; display: grid; grid-template-rows: 1fr; margin-bottom: 10px; opacity: 1; transform: none; transition: grid-template-rows 200ms ease, margin-bottom 200ms ease, opacity 180ms ease, transform 200ms ease; }
 .smartsync-notifications .smartsync-notice-item[data-type="error"] { --notice-color: #b23e31; --notice-background: #fff5f2; }
 .smartsync-notifications .smartsync-notice-item[data-type="warning"] { --notice-color: #95620b; --notice-background: #fffaed; }
 .smartsync-notifications .smartsync-notice-item[data-type="success"] { --notice-color: #267657; --notice-background: #eff9f3; }

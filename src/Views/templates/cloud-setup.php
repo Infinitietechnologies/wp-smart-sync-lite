@@ -10,15 +10,14 @@ $secretValue = in_array($cloudConfig->serviceProvider, ['bunny', 'google'], true
 $hasSavedGoogle = $cloudConfig->serviceProvider === 'google' && $cloudConfig->googleServicePath !== '';
 ?>
 <div class="wrap smartsync-wrap smartsync-cloud-setup">
-    <header class="setup-page-header">
-        <a class="setup-settings-link" href="<?php echo esc_url(admin_url('admin.php?page=smarl-smart-sync')); ?>"><span class="dashicons dashicons-arrow-left-alt" aria-hidden="true"></span><?php esc_html_e('SmartSync settings', 'smartsync-lite-media-offloader-and-assets-cdn'); ?></a>
-        <h1><?php esc_html_e('Cloud setup', 'smartsync-lite-media-offloader-and-assets-cdn'); ?></h1>
+    <?php $renderHeader = require __DIR__ . '/subpage-header.php';
+    $renderHeader(__('Cloud setup', 'smartsync-lite-media-offloader-and-assets-cdn'), 'setup-page-header', static function () use ($cloudConfig, $providerGuides): void { ?>
         <p class="setup-connection-context"<?php if ($cloudConfig->bucket === '') echo ' hidden'; ?>>
             <span><?php esc_html_e('Currently connected:', 'smartsync-lite-media-offloader-and-assets-cdn'); ?></span>
             <strong id="setup-active-provider"><?php echo esc_html($cloudConfig->bucket !== '' ? ($providerGuides[$cloudConfig->serviceProvider]['name'] ?? $cloudConfig->serviceProvider) : ''); ?></strong>
             <span id="setup-active-storage"><?php echo esc_html($cloudConfig->bucket); ?></span>
         </p>
-    </header>
+    <?php }); ?>
     <div id="setup-sync-lock" class="setup-sync-lock" role="status"<?php if (!$syncRunning) echo ' hidden'; ?>><div><strong><?php esc_html_e('Configuration is locked during sync', 'smartsync-lite-media-offloader-and-assets-cdn'); ?></strong><p><?php esc_html_e('Wait for the transfer to finish, or stop it in settings before changing providers or storage.', 'smartsync-lite-media-offloader-and-assets-cdn'); ?></p></div><a href="<?php echo esc_url(admin_url('admin.php?page=smarl-smart-sync')); ?>"><?php esc_html_e('View sync status', 'smartsync-lite-media-offloader-and-assets-cdn'); ?></a></div>
 
     <nav id="wizard-stepper" aria-label="<?php esc_attr_e('Cloud setup progress', 'smartsync-lite-media-offloader-and-assets-cdn'); ?>">

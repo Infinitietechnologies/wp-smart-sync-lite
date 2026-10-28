@@ -24,6 +24,7 @@ class SMARL_AjaxHandler {
         $this->s3SyncSettings = new SMARL_S3SyncSettings();
     }
     public function initializeActions(): void {
+        add_action('wp_ajax_recover_sync_operation', [$this, 'recoverSyncOperation']);
         foreach (['clear_cloudfront_cache' => 'clearCloudFrontCache', 'toggle_cdn' => 'toggleCdn', 'toggle_media_auto_delete' => 'toggleMediaAutoDelete', 'sync_local_to_aws' => 'syncLocalToAws', 'stop_all_processes' => 'stopAllProcesses', 'sync_aws_to_local' => 'syncAwsToLocal', 'set_sync_state' => 'setSyncState', 'get_sync_state' => 'getSyncState', 'check_sync_status' => 'checkSyncStatus', 'fetch_cloud_analytics' => 'fetchCloudAnalytics', 'fetch_aws_analytics' => 'fetchAwsAnalytics'] as $action => $method) {
             add_action('wp_ajax_' . $action, [$this, $method]);
         }
@@ -121,20 +122,8 @@ class SMARL_AjaxHandler {
             if (!is_string($mode) || !in_array($mode, ['incremental', 'full'], true)) {
                 throw new \InvalidArgumentException(__('Choose incremental sync or full resync.', 'smartsync-lite-media-offloader-and-assets-cdn'));
             }
-            // TEMP: A per-request allowlist for manually testing media upload formats.
-            $selectedExtensions = null;
             if (array_key_exists('media_test_extensions', $_POST)) {
-                $requested = wp_unslash($_POST['media_test_extensions']);
-                $allowed = SMARL_Helper::getExtension('media');
-                if ($direction !== 'upload' || $type !== 'media' || !is_array($requested) || !$requested || count($requested) > count($allowed)) {
-                    throw new \InvalidArgumentException(__('Choose one or more supported media file types.', 'smartsync-lite-media-offloader-and-assets-cdn'));
-                }
-                foreach ($requested as $extension) {
-                    if (!is_string($extension) || !in_array($extension, $allowed, true)) {
-                        throw new \InvalidArgumentException(__('Choose one or more supported media file types.', 'smartsync-lite-media-offloader-and-assets-cdn'));
-                    }
-                }
-                $selectedExtensions = array_values(array_unique($requested));
+                throw new \InvalidArgumentException(__('The temporary file-type option has been removed. Refresh this page before starting a normal media upload.', 'smartsync-lite-media-offloader-and-assets-cdn'));
             }
             if ($direction === 'download' && $type === 'assets' && is_multisite() && !current_user_can('manage_network_options')) {
                 throw new \InvalidArgumentException(__('Network administrator permission is required to restore shared assets.', 'smartsync-lite-media-offloader-and-assets-cdn'), 403);
@@ -168,7 +157,7 @@ class SMARL_AjaxHandler {
             $s->s3SyncDirection = $direction;
             $s->syncState = 'syncing';
             $s->s3SyncStatus = 'processing';
-            $s->extensions = $selectedExtensions ?? SMARL_Helper::getExtension($type);
+            $s->extensions = SMARL_Helper::getExtension($type);
             if ($direction === 'download' && is_multisite() && !current_user_can('manage_network_options')) {
                 $allowedMimes = get_allowed_mime_types();
                 $s->extensions = array_values(array_filter($s->extensions, static fn(string $extension): bool => wp_check_filetype('smartsync.' . $extension, $allowedMimes)['ext'] !== false));
@@ -328,7 +317,7 @@ class SMARL_AjaxHandler {
         $counts = SMARL_Helper::queueStatusCounts($s->runId);
         $s->s3SyncProcessedFiles = $counts['completed'] + $counts['failed'];
         $ok = $counts['pending'] === 0 && $counts['in_progress'] === 0 && $counts['failed'] === 0 && $counts['completed'] === $s->s3SyncTotalFiles && !$s->s3SyncErrors;
-        if ($ok && $s->s3SyncDirection === 'upload' && $s->syncType === 'media' && !$this->isFilteredMediaUpload()) SMARL_Helper::bindCompletedOffloadedFiles($this->configured(), $s->runId);
+        if ($ok && $s->s3SyncDirection === 'upload' && $s->syncType === 'media' && $this->hasCompleteMediaCoverage()) SMARL_Helper::bindCompletedOffloadedFiles($this->configured(), $s->runId);
         $s->syncState = 'default';
         $s->s3SyncStatus = $ok ? 'completed' : 'failed';
         $s->failedFiles = $counts['failed'];
@@ -337,24 +326,39 @@ class SMARL_AjaxHandler {
     }
     private function setEligibility(bool $eligible): void {
         if (!$this->appConfig || $this->s3SyncSettings->s3SyncDirection !== 'upload') { return; }
-        // A successful format test cannot establish that the entire Media library is ready for CDN delivery.
-        if ($this->isFilteredMediaUpload()) { return; }
+        // Older queued runs may cover only part of the library. They cannot establish full CDN eligibility.
+        if (!$this->hasCompleteMediaCoverage()) { return; }
         $config = SMARL_CloudConfig::load();
         if ($this->fingerprint($config) !== $this->s3SyncSettings->cloudFingerprint) { return; }
-        if ($this->s3SyncSettings->syncType === 'media') { $config->canEnableMediaCDN = $eligible; $config->mediaCdnTestExtensions = []; $config->mediaCdnTestTarget = ''; if (!$eligible) { $config->useCdnForMedia = false; } }
+        if ($this->s3SyncSettings->syncType === 'media') { $config->canEnableMediaCDN = $eligible; if (!$eligible) { $config->useCdnForMedia = false; } }
         else { $config->canEnableAssetCDN = $eligible; if (!$eligible) { $config->useCdnForAssets = false; } }
         $config->save();
     }
-    private function isFilteredMediaUpload(): bool {
+    private function hasCompleteMediaCoverage(): bool {
         $s = $this->s3SyncSettings;
-        return $s->s3SyncDirection === 'upload' && $s->syncType === 'media'
-            && (bool) array_diff(SMARL_Helper::getExtension('media'), $s->extensions);
+        return $s->syncType !== 'media' || !array_diff(SMARL_Helper::getExtension('media'), $s->extensions);
     }
     public function stopAllProcesses(): void {
         $this->authorize();
-        try { self::resetSyncState($this->s3SyncSettings); }
+        try { self::resetSyncState($this->s3SyncSettings); $lock = SMARL_Helper::syncLockStatus(); }
         catch (Throwable $e) { wp_send_json_error(esc_html__('Unable to confirm the sync has stopped. Check the WordPress database and try again.', 'smartsync-lite-media-offloader-and-assets-cdn'), 400); }
-        wp_send_json_success(['message' => esc_html__('Stopped all queued sync processes. An active file transfer may finish before stopping.', 'smartsync-lite-media-offloader-and-assets-cdn')]);
+        wp_send_json_success(['message' => esc_html__('Stopped all queued sync processes. An active file transfer may finish before stopping.', 'smartsync-lite-media-offloader-and-assets-cdn'), 'operation_busy' => $lock['busy'], 'retry_after' => $lock['retry_after']]);
+    }
+    public function recoverSyncOperation(): void {
+        $this->authorize();
+        try {
+            $this->s3SyncSettings->load();
+            if ($this->s3SyncSettings->s3SyncStatus === 'processing') {
+                wp_send_json_error(__('A sync is running. Use Stop sync before recovering an interrupted operation.', 'smartsync-lite-media-offloader-and-assets-cdn'), 409);
+            }
+            $lock = SMARL_Helper::syncLockStatus();
+        } catch (Throwable $error) {
+            wp_send_json_error(__('Unable to recover the operation. Check the WordPress database and try again.', 'smartsync-lite-media-offloader-and-assets-cdn'), 400);
+        }
+        if ($lock['busy']) {
+            wp_send_json_error(__('The operation is still locked. Let its current request finish, then try recovery again.', 'smartsync-lite-media-offloader-and-assets-cdn'), 409);
+        }
+        wp_send_json_success(['message' => __('The operation is unlocked. You can start a new sync.', 'smartsync-lite-media-offloader-and-assets-cdn')]);
     }
     public static function resetSyncState(SMARL_S3SyncSettings $s3SyncSettings): void {
         try { $s3SyncSettings->reset(); }
@@ -368,34 +372,20 @@ class SMARL_AjaxHandler {
             $this->changeConfiguration(function (SMARL_CloudConfig $config) use ($type, $enabled): void {
                 if (!$enabled && $type === 'media' && SMARL_Helper::hasMissingOffloadedFiles()) { throw new \RuntimeException(__('Restore offloaded media locally before disabling its CDN.', 'smartsync-lite-media-offloader-and-assets-cdn')); }
                 $eligible = $type === 'media' ? $config->canEnableMediaCDN : $config->canEnableAssetCDN;
-                if ($enabled && !$eligible && $type === 'media' && $config->getPublicBaseUrl() !== '') {
-                    $this->s3SyncSettings->load();
-                    if ($this->s3SyncSettings->s3SyncStatus === 'completed' && $this->isFilteredMediaUpload()
-                        && $this->s3SyncSettings->cloudFingerprint === $this->fingerprint($config) && !$this->s3SyncSettings->s3SyncErrors) {
-                        if (SMARL_Helper::hasMissingOffloadedFiles()) throw new \RuntimeException(__('Restore offloaded media locally before enabling temporary CDN testing.', 'smartsync-lite-media-offloader-and-assets-cdn'));
-                        $config->mediaCdnTestExtensions = array_values(array_intersect(SMARL_Helper::getExtension('media'), $this->s3SyncSettings->extensions));
-                        if (!$config->mediaCdnTestExtensions) throw new \RuntimeException(__('Complete a selected-format Media upload before enabling temporary CDN testing.', 'smartsync-lite-media-offloader-and-assets-cdn'));
-                        $config->mediaCdnTestTarget = SMARL_Helper::storageTargetFingerprint($config);
-                        $config->mediaAutoDelete = false;
-                        $eligible = true;
-                    }
-                }
                 if ($enabled && (!$eligible || $config->getPublicBaseUrl() === '')) { throw new \RuntimeException(__('Complete a successful sync and configure a public URL before enabling CDN.', 'smartsync-lite-media-offloader-and-assets-cdn')); }
                 if ($type === 'media') {
                     $config->useCdnForMedia = $enabled;
-                    if (!$enabled || $config->canEnableMediaCDN) { $config->mediaCdnTestExtensions = []; $config->mediaCdnTestTarget = ''; }
                 }
                 else { $config->useCdnForAssets = $enabled; }
             });
         } catch (Throwable $e) { wp_send_json_error($e->getMessage(), $e->getCode() === 409 ? 409 : 400); }
-        wp_send_json_success(['message' => esc_html__('CDN setting updated successfully.', 'smartsync-lite-media-offloader-and-assets-cdn'), 'cdn_test_extensions' => $type === 'media' && $enabled ? $this->appConfig->mediaCdnTestExtensions : []]);
+        wp_send_json_success(['message' => esc_html__('CDN setting updated successfully.', 'smartsync-lite-media-offloader-and-assets-cdn')]);
     }
     public function toggleMediaAutoDelete(): void {
         $this->authorize();
         try {
             $enabled = $this->requestBoolean('state');
             $this->changeConfiguration(static function (SMARL_CloudConfig $config) use ($enabled): void {
-                if ($enabled && ($config->mediaCdnTestExtensions !== [] || $config->mediaCdnTestTarget !== '')) throw new \RuntimeException(__('Local copies are kept during temporary CDN testing.', 'smartsync-lite-media-offloader-and-assets-cdn'));
                 $config->mediaAutoDelete = $enabled;
             });
         } catch (Throwable $e) { wp_send_json_error($e->getMessage(), $e->getCode() === 409 ? 409 : 400); }
