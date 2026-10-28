@@ -2,7 +2,7 @@
 /**
  * Plugin Name: SmartSync
  * Description: Offload WordPress media and assets to cloud storage and serve them through a CDN.
- * Version: 1.7.3
+ * Version: 1.8.0
  * Requires at least: 6.5
  * Requires PHP: 8.1
  * Author: Infinitietech
@@ -20,7 +20,7 @@ if (!defined('ABSPATH')) {
 }
 
 if (!defined('SMARL_TEXT_DOMAIN')) define('SMARL_TEXT_DOMAIN', 'smartsync-lite-media-offloader-and-assets-cdn');
-if (!defined('SMARL_VERSION')) define('SMARL_VERSION', '1.7.3');
+if (!defined('SMARL_VERSION')) define('SMARL_VERSION', '1.8.0');
 if (!defined('SMARL_ASSET_VERSION_CODE')) define('SMARL_ASSET_VERSION_CODE', SMARL_VERSION);
 if (!defined('SMARL_DB_VERSION')) define('SMARL_DB_VERSION', '3');
 

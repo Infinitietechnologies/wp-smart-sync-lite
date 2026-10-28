@@ -24,6 +24,7 @@ final class SmartSyncTestDatabase {
     public function __construct() {
         $this->pdo = new PDO('sqlite::memory:', null, null, [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
         $this->pdo->exec('CREATE TABLE wp_smarl_file_sync_queue (id INTEGER PRIMARY KEY AUTOINCREMENT, path TEXT, relative_path TEXT, run_id TEXT DEFAULT \'\', status TEXT DEFAULT \'pending\', size INTEGER DEFAULT -1, created_at TEXT, updated_at TEXT)');
+        $this->pdo->exec('CREATE TABLE wp_smarl_upload_history (target_hash TEXT NOT NULL, key_hash TEXT NOT NULL, relative_path TEXT NOT NULL, content_hash TEXT NOT NULL, size INTEGER NOT NULL, updated_at TEXT DEFAULT CURRENT_TIMESTAMP, PRIMARY KEY (target_hash, key_hash))');
         $this->pdo->exec('CREATE TABLE wp_options (option_id INTEGER PRIMARY KEY AUTOINCREMENT, option_name TEXT UNIQUE, option_value TEXT, autoload TEXT)');
     }
     public function prepare(string $sql, ...$args): string {
@@ -178,6 +179,7 @@ function is_main_site(): bool { return get_current_blog_id() === 1; }
 function check_ajax_referer(string $action, mixed $queryArg = false, bool $stop = true): int|false { if (!$GLOBALS['smartsync_test_valid_nonce']) { wp_send_json_error('Invalid nonce', 403); } return 1; }
 function wp_send_json_success(mixed $data = null, ?int $statusCode = null, int $flags = 0): void { Fiber::suspend(['success' => true, 'data' => $data, 'status' => $statusCode ?? 200]); }
 function wp_send_json_error(mixed $data = null, ?int $statusCode = null, int $flags = 0): void { Fiber::suspend(['success' => false, 'data' => $data, 'status' => $statusCode ?? 200]); }
+function nocache_headers(): void { $GLOBALS['smartsync_test_nocache'] = true; }
 function wp_die(mixed $message = '', mixed ...$args): void { wp_send_json_error($message, 403); }
 function sanitize_text_field(mixed $v): string { return is_scalar($v) ? trim(strip_tags((string) $v)) : ''; }
 function sanitize_key(string $v): string { return preg_replace('/[^a-z0-9_\-]/', '', strtolower($v)); }

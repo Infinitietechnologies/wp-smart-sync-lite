@@ -4,7 +4,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { pathToFileURL } = require('node:url');
 const { JSDOM } = require('jsdom');
-const { boot, render } = require('./harness.cjs');
+const { boot, render, chooseGoogleFile } = require('./harness.cjs');
 
 const credentials = { service_provider: 'aws', iam_key: 'fixture-key', iam_secret: 'fixture-secret' };
 const certificateArn = 'arn:aws:acm:us-east-1:123456789012:certificate/audit2';
@@ -51,7 +51,7 @@ test('UI-003 transient status failure retains the last known running lock and re
     app.latest('check_sync_status').resolve({ status: 'processing', type: 'media', direction: 'upload', total_files: 5, processed_files: 1 });
     app.runTimer();
     app.latest('check_sync_status').fail({ message: 'Temporary status failure' });
-    assert.equal(app.timers.size, 1);
+    assert.equal(app.pollingTimers.size, 1);
     assert.ok(app.$('.sync-button').toArray().every(button => button.disabled));
     assert.equal(app.$('.smartsync-progress-container').prop('hidden'), false);
     app.runTimer();
@@ -69,7 +69,7 @@ test('UI-004 an uncertain failed start rediscovers a server job that actually be
     assert.equal(app.requests.filter(request => request.action === 'check_sync_status').length, 2);
     app.latest('check_sync_status').resolve({ status: 'processing', type: 'media', direction: 'upload', total_files: 3, processed_files: 1 });
     assert.equal(app.$('#current-sync-state').val(), 'media');
-    assert.equal(app.timers.size, 1);
+    assert.equal(app.pollingTimers.size, 1);
 });
 
 test('UI-005 BFCache restoration resumes status polling and ignores pre-navigation responses', async t => {
@@ -117,11 +117,11 @@ test('UI-008 resumed ETA uses progress observed since this page opened', async t
     now += 5000;
     app.runTimer();
     app.latest('check_sync_status').resolve({ status: 'processing', type: 'media', direction: 'upload', total_files: 100, processed_files: 90 });
-    assert.equal(app.$('#progress-time').text(), '--:--');
+    assert.equal(app.$('#progress-time').text(), 'Calculating…');
     now += 5000;
     app.runTimer();
-    app.latest('check_sync_status').resolve({ status: 'processing', type: 'media', direction: 'upload', total_files: 100, processed_files: 91 });
-    assert.equal(app.$('#progress-time').text(), '1:30');
+    app.latest('check_sync_status').resolve({ status: 'processing', type: 'media', direction: 'upload', total_files: 100, processed_files: 93 });
+    assert.equal(app.$('#progress-time').text(), '<1 min');
 });
 
 test('UI-009 docs retain a manually opened mobile menu on same-breakpoint resizes and restore focus when hiding', () => {
@@ -180,31 +180,28 @@ test('UI-012 discovery announces its loading state and clears it when credential
     t.after(() => app.close());
     app.$('#step-1-next').trigger('click');
     assert.equal(app.$('#aws-wizard').attr('aria-busy'), 'true');
-    assert.equal(app.$('#wizard-message').prop('hidden'), false);
-    assert.equal(app.$('#wizard-message').text(), 'Loading buckets...');
+    assert.equal(app.$('#step-1-next').prop('disabled'), true);
+    assert.match(app.$('#step-1-next').text(), /Connecting/);
     app.$('#aws_iam_secret').val('new-fixture-secret').trigger('input');
     assert.equal(app.$('#aws-wizard').attr('aria-busy'), 'false');
 });
 
-test('UI-013 the active background indicator overrides WordPress default hidden spinner visibility', async t => {
+test('UI-013 the active background indicator remains visible beside WordPress default hidden spinners', async t => {
     const app = await boot('settings', { baseStyles: '.spinner { visibility: hidden; float: right; }' });
     t.after(() => app.close());
     app.latest('check_sync_status').resolve({ status: 'processing', type: 'media', direction: 'upload', total_files: 2, processed_files: 1 });
-    const spinner = app.$('.smartsync-background-indicator .spinner')[0];
-    assert.equal(app.window.getComputedStyle(spinner).visibility, 'visible');
-    assert.equal(app.window.getComputedStyle(spinner).float, 'none');
+    const indicator = app.$('.smartsync-background-indicator')[0];
+    assert.equal(indicator.hidden, false);
+    assert.notEqual(app.window.getComputedStyle(indicator).visibility, 'hidden');
 });
 
 test('PRV-006 latest accepted Google discovery token binds configuration despite a late old response', async t => {
     const app = await boot('wizard', { data: { service_provider: 'google' } });
     t.after(() => app.close());
-    const fileInput = app.$('#service-json')[0];
-    Object.defineProperty(fileInput, 'files', { value: [new app.window.File(['{}'], 'account-a.json')], configurable: true });
-    app.$('#service-json').trigger('change');
+    await chooseGoogleFile(app, undefined, 'account-a.json');
     app.$('#step-1-next').trigger('click');
     const old = app.latest('list_s3_buckets');
-    Object.defineProperty(fileInput, 'files', { value: [new app.window.File(['{}'], 'account-b.json')], configurable: true });
-    app.$('#service-json').trigger('change');
+    await chooseGoogleFile(app, undefined, 'account-b.json');
     app.$('#step-1-next').trigger('click');
     app.latest('list_s3_buckets').resolve({ buckets: [{ name: 'account-b-bucket', region: 'US' }], selectionToken: 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb' });
     old.resolve({ buckets: [{ name: 'account-a-bucket', region: 'US' }], selectionToken: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' });

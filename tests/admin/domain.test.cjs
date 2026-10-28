@@ -1,6 +1,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { boot, render } = require('./harness.cjs');
+const { boot: bootView, render } = require('./harness.cjs');
+const boot = (view, options = {}) => bootView(view, { ...options, widget: false, scripts: ['wizard.js', 'ui-improvements.js'] });
 const configuration = { service_provider: 'aws', use_cloudfront: true };
 const certificateArn = 'arn:aws:acm:us-east-1:123456789012:certificate/fixture';
 const record = { DomainName: 'cdn.example.test', Type: 'CNAME', Name: '_verify.cdn.example.test', Value: '_fixture.acm-validations.aws', systemGenerated: false };

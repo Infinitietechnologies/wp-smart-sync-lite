@@ -125,7 +125,7 @@ function smarl_provider_ajax(string $action, array $post = [], bool $fresh = tru
     if ($fresh) smarl_provider_register();
     $_POST = $post + ['nonce' => $nonce ?? wp_create_nonce('smarl_nonce')];
     $_REQUEST = $_POST;
-    http_response_code(200);
+    status_header(200);
     ob_start();
     try {
         $fiber = new Fiber(static fn() => do_action('wp_ajax_' . $action));
@@ -258,7 +258,7 @@ try {
     require_once ABSPATH . 'wp-admin/includes/image.php';
     $imagePath = $directory . '/attachment-original.jpg';
     $files[] = $imagePath;
-    $image = imagecreatetruecolor(800, 600); imagefill($image, 0, 0, imagecolorallocate($image, 30, 90, 150)); imagejpeg($image, $imagePath, 90); imagedestroy($image);
+    $image = imagecreatetruecolor(800, 600); imagefill($image, 0, 0, imagecolorallocate($image, 30, 90, 150)); imagejpeg($image, $imagePath, 90); unset($image);
     $core->switchBlogConfiguration(get_current_blog_id());
     $attachmentId = wp_insert_attachment(['post_mime_type' => 'image/jpeg', 'post_title' => 'Native Bunny fixture', 'post_status' => 'inherit'], $imagePath, 0, true);
     smarl_provider_assert(!is_wp_error($attachmentId), 'Fixture attachment insertion failed.');
@@ -301,7 +301,7 @@ try {
     WP_CLI::log('PASS invalid account/storage/endpoint/pull-zone requests preserve working configuration and valid credential repair retains delivery'); $passed++;
 
     $http->failUploadKey = SMARL_Helper::relativeKeyForPath($files[0]);
-    $failedUpload = smarl_provider_ajax('sync_local_to_aws', ['type' => 'media']);
+    $failedUpload = smarl_provider_ajax('sync_local_to_aws', ['type' => 'media', 'mode' => 'full']);
     smarl_provider_assert(($failedUpload['json']['success'] ?? false) === true, 'Failure regression did not start its native upload run.');
     smarl_provider_drain();
     $failedProgress = smarl_provider_progress();

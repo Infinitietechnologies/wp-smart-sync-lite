@@ -81,7 +81,7 @@ for (const view of ['settings', 'wizard', 'domain']) {
         const app = await boot(view); t.after(() => app.close());
         if (view === 'wizard') app.runTimer();
         const delays = []; const schedule = app.window.setTimeout;
-        app.window.setTimeout = (callback, delay, ...args) => { if (delay >= 1000) delays.push(delay); return schedule(callback, delay, ...args); };
+        app.window.setTimeout = (callback, delay, ...args) => { if (['checkSyncStatus', 'checkSetupSync', 'poll'].includes(callback.name)) delays.push(delay); return schedule(callback, delay, ...args); };
         for (let i = 0; i < 5; i++) {
             app.latest('check_sync_status').fail('Connection unavailable');
             if (i < 4) app.runTimer();

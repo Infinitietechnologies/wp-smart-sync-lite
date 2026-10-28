@@ -4,7 +4,7 @@ Tags: aws, s3, cloudfront, cdn, sync
 Requires at least: 6.5
 Tested up to: 7.1.3
 Requires PHP: 8.1
-Stable tag: 1.7.3
+Stable tag: 1.8.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -62,6 +62,16 @@ No, you can use the plugin with S3 alone, but CloudFront improves performance.
 2. **AWS Integration Panel** – Enter IAM credentials for authentication.
 
 == Changelog ==
+= 1.8.0 =
+* Add incremental synchronization with persistent upload history to skip unchanged files and retry unsuccessful uploads.
+* Improve synchronization progress, recovery controls, notifications, provider guides, and cloud-setup screens.
+* Improve provider credential verification, Google credential migration, Bunny transfers, and CloudFront provisioning recovery.
+* Protect shared cloud objects and changed local files during attachment cleanup and storage changes.
+* Harden interrupted-sync recovery, cancellation, request locks, configuration persistence, and stale admin polling.
+* Upgrade the database schema to version 3 automatically and remove retired test settings safely.
+* Include WordPress 7.1.3 compatibility fixes, including deferred translation during legacy progress recovery.
+* Verify 32 supported WordPress/PHP combinations across WordPress 6.5 through 7.1.3 and PHP 8.1 through 8.5; repair outdated test fixtures.
+
 = 1.7.3 =
 * Preserve cloud-object ownership across storage changes and shared attachments; protect changed local files during cleanup.
 * Repair interrupted sync recovery, cancellation, coordination caches, cyclic listings and bounded progress logs.
@@ -88,6 +98,9 @@ No, you can use the plugin with S3 alone, but CloudFront improves performance.
 - Initial release with S3 and CloudFront support.
 
 == Upgrade Notice ==
+= 1.8.0 =
+Adds incremental synchronization and improved setup/recovery controls. Database schema upgrades automatically to version 3. WordPress 6.5+ and PHP 8.1+ remain required.
+
 = 1.0 =
 - First stable version.
 
@@ -104,7 +117,7 @@ php wp-cli.phar i18n make-pot . languages/wp-smartsync.pot --exclude=vendor,test
 
 == Requirements and data handling ==
 
-WordPress 6.5 or later is required. This release has been tested with WordPress 7.1.3, the latest stable release verified on 24 October 2026. Compatibility checks also track the latest stable WordPress version in CI.
+WordPress 6.5 or later is required. This release has been tested with WordPress 7.1.3, the latest stable release verified on 28 October 2026. Compatibility checks cover 32 supported combinations across WordPress 6.5 through 7.1.3 and PHP 8.1 through 8.5.
 
 PHP 8.1 or later and the bundled Composer dependencies are required. For a source checkout, run `composer install` using the included lockfile before installing the plugin.
 

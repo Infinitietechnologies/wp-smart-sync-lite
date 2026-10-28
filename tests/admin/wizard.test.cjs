@@ -1,6 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { boot, render } = require('./harness.cjs');
+const { boot, render, chooseGoogleFile } = require('./harness.cjs');
 const credentials = { iam_key: 'fixture-key', iam_secret: 'fixture-secret' };
 
 async function providerApp(provider, extra = {}) {
@@ -50,8 +50,7 @@ test('Google file is required and appended exactly once; plain object names are 
     t.after(() => app.close());
     app.$('#step-1-next').trigger('click');
     assert.equal(app.requests.length, 0);
-    const file = new app.window.File(['{}'], 'fixture.json', { type: 'application/json' });
-    Object.defineProperty(app.$('#service-json')[0], 'files', { value: [file], configurable: true });
+    await chooseGoogleFile(app, undefined, 'fixture.json');
     app.$('#step-1-next').trigger('click');
     const listing = app.latest('list_s3_buckets');
     assert.equal(listing.options.data.getAll('service_json').length, 1);
@@ -97,7 +96,7 @@ test('Bunny restricts pullzones to the selected bucket and never posts a storage
     assert.ok(!JSON.stringify(data).includes('|'));
 });
 
-test('listing data is rendered as text and stale provider responses cannot replace current choices', async t => {
+test('listing data is rendered as text and stale credential responses cannot replace current choices', async t => {
     const app = await providerApp('aws');
     t.after(() => app.close());
     app.$('#step-1-next').trigger('click');
@@ -108,6 +107,7 @@ test('listing data is rendered as text and stale provider responses cannot repla
     app.$('#step-1-next').trigger('click');
     const old = app.latest('list_s3_buckets');
     app.$('#service_provider').val('digitalocean').trigger('change');
+    app.$('#aws_iam_key').val('replacement-key').trigger('input');
     old.resolve({ buckets: [{ name: 'stale-bucket', region: 'us-east-1' }] });
     assert.doesNotMatch(app.$('#aws_bucket_list').text(), /stale-bucket/);
 });
@@ -147,6 +147,7 @@ test('R2 bucket-scoped credentials can connect when account-wide bucket discover
     t.after(() => app.close());
     app.$('#step-1-next').trigger('click');
     app.latest('list_s3_buckets').fail('Access denied to account-wide bucket listing');
+    app.$('#setup-manual-continue').trigger('click');
     assert.equal(app.$('#manual-bucket-entry').prop('checked'), true);
     app.$('#manual_bucket_name').val('scoped-existing-bucket');
     app.$('#step-2-next').trigger('click');

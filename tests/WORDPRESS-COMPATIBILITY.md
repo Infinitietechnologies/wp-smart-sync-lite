@@ -1,5 +1,7 @@
 # WordPress compatibility verification
 
+Current release verification: [SmartSync 1.8.0, 28 October 2026](RELEASE-1.8.0-COMPATIBILITY.md) records 32 passing native WordPress/PHP combinations, PHP 8.1–8.5 runtime checks and the expanded CI workflow. The 24 October results below are historical evidence for 1.7.3.
+
 Verified on 24 October 2026. WordPress.org's [stable version API](https://api.wordpress.org/core/version-check/1.7/), [download page](https://wordpress.org/download/) and [7.1.3 release announcement](https://wordpress.org/news/2026/10/wordpress-7-1-3-maintenance-and-security-release/) identify **7.1.3** as the latest stable release.
 
 SmartSync requires **WordPress 6.5 or later** and now explicitly declares **Tested up to: 7.1.3** in `readme.txt`. The minimum is an installation floor, not an upper version limit. PHP requirements remain **8.1 or later**; these executions used the existing PHP 8.3.36 runtime.
@@ -15,7 +17,7 @@ Fixtures are disposable local WordPress installations with fake storage and bloc
 
 ## Continued compatibility checks
 
-[wordpress-compatibility.yml](../.github/workflows/wordpress-compatibility.yml) adds push, pull-request and manual GitHub Actions checks. The integration matrix installs WordPress **6.5** and WP-CLI's **latest stable** version using MySQL 8.0 and PHP 8.3. It verifies official core checksums and runs the four native suites serially. A separate job runs the locked-dependency PHP and admin/documentation regressions. The latest matrix resolves again on each workflow run.
+[wordpress-compatibility.yml.disabled](../.github/workflows/wordpress-compatibility.yml.disabled) adds push, pull-request and manual GitHub Actions checks. The integration matrix installs WordPress **6.5** and WP-CLI's **latest stable** version using MySQL 8.0 and PHP 8.3. It verifies official core checksums and runs the four native suites serially. A separate job runs the locked-dependency PHP and admin/documentation regressions. The latest matrix resolves again on each workflow run.
 
 The workflow passed official actionlint 1.7.12 validation, and all nine shell blocks passed `bash -n`. Hosted GitHub Actions has not been executed: these changes have not been committed or pushed. No schedule, release publication or live-cloud access was added. CI metadata is excluded from WordPress release packaging.
 

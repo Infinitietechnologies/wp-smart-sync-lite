@@ -30,7 +30,7 @@ function smarl_core_audit2_bind($core, SmartSyncAudit2IntegrationStorage $storag
 }
 function smarl_core_audit2_image(string $directory, array &$attachments): array {
     $path = $directory . '/photo-' . wp_generate_password(8, false) . '.jpg';
-    $image = imagecreatetruecolor(800, 600); imagefill($image, 0, 0, imagecolorallocate($image, 60, 110, 150)); imagejpeg($image, $path, 90); imagedestroy($image);
+    $image = imagecreatetruecolor(800, 600); imagefill($image, 0, 0, imagecolorallocate($image, 60, 110, 150)); imagejpeg($image, $path, 90); unset($image);
     $id = wp_insert_attachment(['post_mime_type' => 'image/jpeg', 'post_title' => 'Core audit2 fixture', 'post_status' => 'inherit'], $path, 0, true);
     if (is_wp_error($id)) throw new RuntimeException($id->get_error_message());
     $attachments[] = $id;

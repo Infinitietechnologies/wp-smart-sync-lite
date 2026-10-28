@@ -45,7 +45,7 @@ test('real status polling drives localized progress, timestamps, completion, and
     assert.equal(app.$('#progress-remaining').text(), '3');
     assert.equal(app.$('.smartsync-background-indicator').hasClass('active'), true);
     assert.equal(app.$('#sync-log-container .log-timestamp').length, 1);
-    assert.equal(app.timers.size, 1);
+    assert.equal(app.pollingTimers.size, 1);
     app.runTimer();
     app.latest('check_sync_status').resolve({
         status: 'completed', type: 'media', direction: 'upload', total_files: 4, processed_files: 4,
@@ -54,8 +54,8 @@ test('real status polling drives localized progress, timestamps, completion, and
     assert.equal(app.$('#sync-log-container img').length, 0);
     assert.match(app.$('#sync-log-container').text(), /<img src=x onerror=alert\(1\)>.jpg/);
     assert.equal(app.$('.smartsync-progress-container').prop('hidden'), true);
-    assert.equal(app.$('.smartsync-background-indicator').hasClass('active'), false);
-    assert.equal(app.timers.size, 0);
+    assert.equal(app.$('.smartsync-background-indicator').hasClass('is-completed'), true);
+    assert.equal(app.pollingTimers.size, 0);
     assert.ok(app.$('.sync-button').toArray().every(button => !button.disabled));
 });
 
@@ -70,9 +70,9 @@ test('zero-total status stays finite and stop ignores late polling responses', a
     app.$('#stop-all-processes').trigger('click');
     app.latest('stop_all_processes').resolve({ message: 'Stopped' });
     staleStatus.resolve({ status: 'processing', type: 'media', direction: 'download', total_files: 5, processed_files: 1 });
-    assert.equal(app.timers.size, 0);
+    assert.equal(app.pollingTimers.size, 0);
     assert.equal(app.$('#current-sync-state').val(), '');
-    assert.equal(app.$('.smartsync-background-indicator').hasClass('active'), false);
+    assert.equal(app.$('.smartsync-background-indicator').hasClass('is-stopped'), true);
     assert.ok(app.$('.sync-button').toArray().every(button => !button.disabled));
 });
 
@@ -127,14 +127,15 @@ test('analytics distinguishes unknown billing from zero and resets every field o
     t.after(() => app.close());
     idle(app);
     app.$('#fetch-analytics-button').trigger('click');
-    app.latest('fetch_aws_analytics').resolve({ total_files: 0, total_storage: '0 B', price_in_dollars: null });
+    app.latest('fetch_cloud_analytics').resolve({ total_files: 0, total_storage: '0 B', price_in_dollars: null });
     assert.equal(app.$('#total-price').text(), 'Unavailable');
     app.$('#fetch-analytics-button').trigger('click');
-    app.latest('fetch_aws_analytics').resolve({ total_files: 1, total_storage: '1 B', price_in_dollars: 0 });
+    app.latest('fetch_cloud_analytics').resolve({ total_files: 1, total_storage: '1 B', price_in_dollars: 0 });
     assert.equal(app.$('#total-price').text(), '~ 0.00 USD');
     app.$('#fetch-analytics-button').trigger('click');
-    app.latest('fetch_aws_analytics').fail();
-    ['#total-files', '#total-storage', '#total-price'].forEach(field => assert.equal(app.$(field).text(), 'Error'));
+    app.latest('fetch_cloud_analytics').fail();
+    ['#total-files', '#total-storage'].forEach(field => assert.equal(app.$(field).text(), 'Error'));
+    assert.equal(app.$('#total-price').text(), 'Unavailable');
     assert.equal(app.$('#fetch-analytics-button').prop('disabled'), false);
 });
 

@@ -15,7 +15,7 @@ test('idle busy state offers recovery and unlocks controls only after a fresh id
     assert.equal(app.$('#recover-sync-operation').prop('hidden'), true);
     assert.equal(app.$('#sync-local-to-aws').prop('disabled'), false);
     assert.equal(app.$('#settings-activity-status').text(), 'Ready');
-    assert.equal(app.timers.size, 0);
+    assert.equal(app.pollingTimers.size, 0);
 });
 
 test('recovery rejection preserves the busy state and shows the server explanation', async t => {

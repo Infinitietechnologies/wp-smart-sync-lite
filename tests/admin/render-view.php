@@ -22,16 +22,29 @@ function selected($value, $expected, $echo = true) {
     return $result;
 }
 function admin_url($path) { return 'https://example.test/wp-admin/' . $path; }
-function get_option($key, $default = []) { return $default; }
+function get_option($key, $default = []) {
+    if ($key === 'smarl_aws_discovery_region') return $GLOBALS['smartsync_view_data']['__aws_discovery_region'] ?? $default;
+    return $key === 'smarl_sync_settings' && !empty($GLOBALS['smartsync_view_data']['__sync_running']) ? ['s3SyncStatus' => 'processing'] : $default;
+}
+function wp_salt($scheme = 'auth') { return 'isolated-render-fixture-salt'; }
 function plugin_dir_url($file) { return 'https://example.test/wp-content/plugins/smartsync/'; }
 function wp_die($message) { throw new RuntimeException($message); }
 
 require ABSPATH . 'src/Models/SMARL_CustomUrl.php';
 require ABSPATH . 'src/Models/SMARL_CloudConfig.php';
 require ABSPATH . 'src/Helpers/SMARL_Helper.php';
+require ABSPATH . 'src/Views/SMARL_ProviderGuides.php';
+require ABSPATH . 'src/Services/SMARLI_GoogleService.php';
 $data = isset($argv[2]) ? json_decode(base64_decode($argv[2]), true, 512, JSON_THROW_ON_ERROR) : [];
+$GLOBALS['smartsync_view_data'] = $data;
 $GLOBALS['smartsync_view_allowed'] = ($data['__can_manage'] ?? true) === true;
 $config = \SmartSyncS3\Models\SMARL_CloudConfig::fromArray($data);
+if (isset($data['__google_credentials'])) {
+    $credentialFile = tempnam(sys_get_temp_dir(), 'smartsync-render-');
+    file_put_contents($credentialFile, json_encode($data['__google_credentials'], JSON_THROW_ON_ERROR));
+    $config->googleServicePath = $credentialFile;
+    register_shutdown_function(static function () use ($credentialFile) { unlink($credentialFile); });
+}
 $config->customUrl = \SmartSyncS3\Models\SMARL_CustomUrl::fromArray($data['__custom'] ?? []);
 $views = [
     'settings' => ['SMARL_SettingsPage', 'renderSettingsPage'],

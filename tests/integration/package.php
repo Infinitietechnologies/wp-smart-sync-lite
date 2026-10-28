@@ -10,7 +10,7 @@ $root = realpath(WP_PLUGIN_DIR . '/smartsync-packaged');
 if (!$root || !str_contains(str_replace('\\', '/', $root), '/smartsync-package-smoke-')) throw new RuntimeException('The packaged plugin must resolve to a separate temporary extraction.');
 $root = rtrim(str_replace('\\', '/', $root), '/') . '/';
 $metadata = get_plugin_data(WP_PLUGIN_DIR . '/' . $slug, false, false);
-if (($metadata['Version'] ?? '') !== '1.7.3' || !defined('SMARL_VERSION') || SMARL_VERSION !== '1.7.3') throw new RuntimeException('The packaged metadata/runtime version must both be 1.7.3.');
+if (($metadata['Version'] ?? '') !== '1.8.0' || !defined('SMARL_VERSION') || SMARL_VERSION !== '1.8.0') throw new RuntimeException('The packaged metadata/runtime version must both be 1.8.0.');
 if (get_option('active_plugins') !== [$slug]) throw new RuntimeException('Only the extracted package should be active during package smoke.');
 if (!is_readable($root . 'vendor/autoload.php')) throw new RuntimeException('Runtime Composer autoload is absent from the package.');
 foreach ([\SmartSyncS3\SMARL_SmartSync::class, \SmartSyncS3\Models\SMARL_CloudConfig::class, \Aws\S3\S3Client::class, \Google\Cloud\Storage\StorageClient::class, \GuzzleHttp\Client::class, \ActionScheduler::class] as $class) {
@@ -37,4 +37,4 @@ foreach (($GLOBALS['wp_filter']['process_s3_sync_batch']->callbacks ?? []) as $c
     if (is_array($callback['function']) && $callback['function'][0] instanceof \SmartSyncS3\Ajax\SMARL_AjaxHandler && $callback['accepted_args'] === 5) $worker = true;
 }
 if (!$worker || get_option('smarl_db_version') !== SMARL_DB_VERSION) throw new RuntimeException('Packaged scheduler or activation schema did not initialize.');
-WP_CLI::success('Package 1.7.3 activation, Composer SDK origins, core hooks, AJAX, scheduler and schema verified from ' . $root);
+WP_CLI::success('Package 1.8.0 activation, Composer SDK origins, core hooks, AJAX, scheduler and schema verified from ' . $root);

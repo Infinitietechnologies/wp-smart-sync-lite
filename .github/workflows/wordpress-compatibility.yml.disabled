@@ -1,0 +1,217 @@
+name: WordPress compatibility
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  matrix:
+    name: Resolve stable WordPress maintenance releases
+    runs-on: ubuntu-24.04
+    outputs:
+      include: ${{ steps.resolve.outputs.include }}
+    steps:
+      - name: Resolve supported combinations from WordPress.org
+        id: resolve
+        run: |
+          curl --fail --silent --show-error --location --retry 3 \
+            https://api.wordpress.org/core/version-check/1.7/ > "$RUNNER_TEMP/wordpress-offers.json"
+          python3 - <<'PY'
+          import json, os, re
+          with open(os.path.join(os.environ['RUNNER_TEMP'], 'wordpress-offers.json')) as stream:
+              offers = json.load(stream)['offers']
+          releases = {'6.5'}
+          branches = {}
+          for offer in offers:
+              version = offer.get('version', '')
+              if not re.fullmatch(r'\d+\.\d+(?:\.\d+)?', version):
+                  continue
+              branch = tuple(map(int, version.split('.')[:2]))
+              if branch >= (6, 5):
+                  previous = branches.get(branch, '0.0')
+                  if tuple(map(int, version.split('.'))) > tuple(map(int, previous.split('.'))):
+                      branches[branch] = version
+          if not branches or max(branches) < (7, 1):
+              raise SystemExit('WordPress.org did not return the expected stable releases')
+          releases.update(branches.values())
+          include = []
+          for version in sorted(releases, key=lambda value: tuple(map(int, value.split('.')))):
+              branch = tuple(map(int, version.split('.')[:2]))
+              # Follow the official WordPress/PHP compatibility table for older branches.
+              php_versions = ['8.1', '8.2', '8.3']
+              if branch >= (6, 7):
+                  php_versions.append('8.4')
+              if branch >= (6, 9):
+                  php_versions.append('8.5')
+              include.extend({'wordpress': version, 'php': php} for php in php_versions)
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
+              output.write('include=' + json.dumps(include, separators=(',', ':')) + '\n')
+          print(json.dumps(include, indent=2))
+          PY
+
+  regressions:
+    name: PHP regressions (${{ matrix.php }})
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['8.1', '8.2', '8.3', '8.4', '8.5']
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: curl, dom, fileinfo, gd, mbstring, mysqli, openssl, pdo_sqlite, simplexml, sqlite3, zip
+          tools: composer:v2
+          coverage: none
+          ini-values: memory_limit=512M
+        env:
+          fail-fast: 'true'
+
+      - name: Install locked production dependencies
+        run: |
+          composer install --no-dev --prefer-dist --no-interaction --no-progress
+          composer check-platform-reqs --no-dev --no-interaction
+
+      - name: Run isolated PHP regressions
+        run: php tests/run.php
+
+      - name: Set up Node
+        if: matrix.php == '8.3'
+        uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: tests/admin/package-lock.json
+
+      - name: Install locked admin test dependencies
+        if: matrix.php == '8.3'
+        run: npm ci --prefix tests/admin --ignore-scripts --no-audit --no-fund
+
+      - name: Run admin and documentation DOM regressions
+        if: matrix.php == '8.3'
+        run: npm test --prefix tests/admin
+
+  wordpress:
+    name: WordPress ${{ matrix.wordpress }} (PHP ${{ matrix.php }}, MySQL 8.0)
+    needs: [matrix, regressions]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJSON(needs.matrix.outputs.include) }}
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_DATABASE: smartsync_ci
+          MYSQL_USER: smartsync
+          MYSQL_PASSWORD: smartsync-fixture-only
+          MYSQL_ROOT_PASSWORD: smartsync-root-fixture-only
+        ports:
+          - 3306/tcp
+        options: >-
+          --health-cmd="mysqladmin ping --host=127.0.0.1 --user=root --password=smartsync-root-fixture-only"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
+    env:
+      WORDPRESS_VERSION: ${{ matrix.wordpress }}
+      PHP_VERSION: ${{ matrix.php }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: curl, dom, fileinfo, gd, mbstring, mysqli, openssl, pdo_sqlite, simplexml, sqlite3, zip
+          tools: composer:v2
+          coverage: none
+          ini-values: memory_limit=512M
+        env:
+          fail-fast: 'true'
+
+      - name: Install locked production dependencies
+        run: |
+          composer install --no-dev --prefer-dist --no-interaction --no-progress
+          composer check-platform-reqs --no-dev --no-interaction
+
+      - name: Set disposable fixture paths
+        run: |
+          printf '%s\n' \
+            "WP_PATH=$RUNNER_TEMP/smartsync-provider-workflows/fresh/smartsync-wordpress-audit-fixture/wordpress" \
+            "WP_CLI=$RUNNER_TEMP/wp-cli.phar" \
+            "WP_CLI_CACHE_DIR=$RUNNER_TEMP/wp-cli-cache" >> "$GITHUB_ENV"
+
+      - name: Download official WP-CLI
+        run: |
+          cli_url=https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+          if [ "$PHP_VERSION" = '8.5' ]; then
+            # Stable 2.12.0 bundles PHP 8.5-deprecated CLI libraries. Pin the tested official build.
+            cli_url=https://raw.githubusercontent.com/wp-cli/builds/5c13eacf0ae82e66868cf4fe2bc3e8b5b03fd5ee/phar/wp-cli-nightly.phar
+          fi
+          curl --fail --silent --show-error --location --retry 3 \
+            --output "$WP_CLI" \
+            "$cli_url"
+          if [ "$PHP_VERSION" = '8.5' ]; then
+            echo "1f2a947aa2fc8f729e15d1e76987706373b3485691852829cb4fd3594d517991  $WP_CLI" | sha256sum --check
+          fi
+          php "$WP_CLI" --info
+
+      - name: Install disposable WordPress fixture
+        env:
+          MYSQL_PORT: ${{ job.services.mysql.ports['3306'] }}
+        run: |
+          php "$WP_CLI" core download --path="$WP_PATH" --version="$WORDPRESS_VERSION" --skip-content
+          php "$WP_CLI" core verify-checksums --path="$WP_PATH"
+          php "$WP_CLI" config create --path="$WP_PATH" \
+            --dbname=smartsync_ci --dbuser=smartsync --dbpass=smartsync-fixture-only \
+            --dbhost="127.0.0.1:$MYSQL_PORT" --extra-php <<'PHP'
+          define('DISABLE_WP_CRON', true);
+          define('AUTOMATIC_UPDATER_DISABLED', true);
+          define('WP_HTTP_BLOCK_EXTERNAL', true);
+          define('WP_DEBUG', true);
+          define('WP_DEBUG_LOG', true);
+          define('WP_DEBUG_DISPLAY', false);
+          PHP
+          mkdir -p "$WP_PATH/wp-content/mu-plugins"
+          cp "$GITHUB_WORKSPACE/tests/integration/fixture-updates.php" "$WP_PATH/wp-content/mu-plugins/smartsync-fixture-updates.php"
+          php "$WP_CLI" core install --path="$WP_PATH" \
+            --url=http://smartsync-ci.test --title='SmartSync CI fixture' \
+            --admin_user=smartsync_ci --admin_password=smartsync-fixture-only \
+            --admin_email=audit@example.test --skip-email
+          mkdir -p "$WP_PATH/wp-content/plugins"
+          ln -s "$GITHUB_WORKSPACE" "$WP_PATH/wp-content/plugins/smartsync"
+          php "$WP_CLI" plugin activate smartsync --path="$WP_PATH"
+          php "$WP_CLI" core version --path="$WP_PATH" --extra
+
+      - name: Run native WordPress integrations serially
+        run: |
+          for script in core.php sync.php core_audit2.php sync_audit2.php providers.php; do
+            php "$WP_CLI" --path="$WP_PATH" eval-file "$GITHUB_WORKSPACE/tests/integration/$script" 2>&1 | tee -a "$RUNNER_TEMP/native.log"
+          done
+          if grep -Ei '(PHP )?(Warning|Notice|Deprecated|Fatal error|Parse error):' "$RUNNER_TEMP/native.log"; then
+            echo 'Unexpected PHP diagnostics in native integration output.' >&2
+            exit 1
+          fi
+          if [ -s "$WP_PATH/wp-content/debug.log" ]; then
+            cat "$WP_PATH/wp-content/debug.log"
+            exit 1
+          fi

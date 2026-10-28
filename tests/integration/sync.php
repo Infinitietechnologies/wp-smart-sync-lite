@@ -49,7 +49,7 @@ function smarl_sql_assert(bool $condition, string $message): void { if (!$condit
 function smarl_sql_ajax(string $action, array $post = [], ?string $nonce = null): array {
     $_POST = $post + ['nonce' => $nonce ?? wp_create_nonce('smarl_nonce')];
     $_REQUEST = $_POST;
-    http_response_code(200);
+    status_header(200);
     ob_start();
     try {
         $fiber = new Fiber(static fn() => do_action('wp_ajax_' . $action));

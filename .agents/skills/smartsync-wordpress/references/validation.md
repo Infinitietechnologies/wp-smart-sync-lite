@@ -2,7 +2,7 @@
 
 Read `tests/README.md` for commands, `tests/AUDIT.md` for audit results, and `tests/admin/README.md` for browser setup. Tests/development tools are excluded from release archives by `.distignore`.
 
-Read `tests/WORDPRESS-COMPATIBILITY.md` for current minimum/latest stable WordPress verification. The compatibility workflow runs PHP/admin regressions and native MySQL integrations for exact WordPress 6.5 and WP-CLI's `latest` stable target. Validate the workflow locally with actionlint when editing it; a local YAML check does not mean GitHub-hosted jobs ran. Check native logs with WordPress debugging enabled, including a language pack and legacy progress when changing initialization or translated recovery messages.
+Read `tests/WORDPRESS-COMPATIBILITY.md` for current minimum/latest stable WordPress verification. The compatibility workflow runs PHP regressions on PHP 8.1-8.5, admin regressions on PHP 8.3, and native MySQL integrations for exact WordPress 6.5 plus stable maintenance releases resolved from WordPress.org. Follow the official WordPress/PHP support table when selecting combinations. Validate the workflow locally with actionlint when editing it; a local YAML check does not mean GitHub-hosted jobs ran. Check native logs with WordPress debugging enabled, including a language pack and legacy progress when changing initialization or translated recovery messages.
 
 Read `tests/PROVIDER-WORKFLOWS.md` for the connection follow-up and release verification. `tests/cases/provider_contract_review.php` exercises actual SDK serialization; `provider_workflows.php` covers complete provider setup/operations and stale configuration writes. Keep these checks beyond request-shaped mock success cases.
 

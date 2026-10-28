@@ -47,7 +47,7 @@ function smarl_integration_image(string $suffix): array
     $image = imagecreatetruecolor(800, 600);
     imagefill($image, 0, 0, imagecolorallocate($image, 30, 80, 130));
     imagejpeg($image, $file, 90);
-    imagedestroy($image);
+    unset($image);
     $id = wp_insert_attachment(['post_mime_type' => 'image/jpeg', 'post_title' => 'SmartSync audit fixture', 'post_status' => 'inherit'], $file, 0, true);
     if (is_wp_error($id)) throw new RuntimeException($id->get_error_message());
     $metadata = wp_generate_attachment_metadata($id, $file);
@@ -93,6 +93,10 @@ try {
         smarl_integration_assert(in_array($column, $columns, true), 'Schema upgrade omitted ' . $column);
     }
     smarl_integration_assert(get_option('smarl_db_version') === SMARL_DB_VERSION, 'Schema version was not persisted.');
+    $historyColumns = $wpdb->get_col('DESCRIBE `' . $wpdb->prefix . 'smarl_upload_history`', 0);
+    foreach (['target_hash', 'key_hash', 'relative_path', 'content_hash', 'size', 'updated_at'] as $column) {
+        smarl_integration_assert(in_array($column, $historyColumns, true), 'Upload history schema upgrade omitted ' . $column);
+    }
     smarl_maybe_upgrade_schema();
     smarl_integration_assert($wpdb->last_error === '', 'Repeated schema upgrade must be harmless.');
     WP_CLI::log('PASS actual WordPress dbDelta upgrades the legacy queue and is repeatable');
