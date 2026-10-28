@@ -85,17 +85,6 @@ test('UI-005 BFCache restoration resumes status polling and ignores pre-navigati
     assert.ok(app.$('.sync-button').toArray().every(button => !button.disabled));
 });
 
-test('UI-006 domain attachment freezes competing domain and certificate controls until it finishes', async t => {
-    const app = await boot('domain', { data: { service_provider: 'aws', use_cloudfront: true, __custom: certificate } });
-    t.after(() => app.close());
-    app.latest('check_dns_record').resolve({ verified: true, records: [] });
-    app.$('#cloudfront-attachment-button').trigger('click');
-    assert.equal(app.$('#custom-domain').prop('disabled'), true);
-    assert.equal(app.$('#generate-certificate').prop('disabled'), true);
-    app.latest('attach_to_cloudfront').reject('Fixture attach failure');
-    assert.equal(app.$('#custom-domain').prop('disabled'), false);
-    assert.equal(app.$('#generate-certificate').prop('disabled'), false);
-});
 
 test('UI-007 settings transport errors preserve actionable server messages safely', async t => {
     const app = await boot('settings', { data: { use_cdn_for_media: true } });
@@ -144,36 +133,7 @@ test('UI-009 docs retain a manually opened mobile menu on same-breakpoint resize
     } finally { dom.window.close(); }
 });
 
-test('UI-010 BFCache restoration revalidates DNS and releases pending generation controls', async t => {
-    const app = await boot('domain', { data: { service_provider: 'aws', use_cloudfront: true, __custom: certificate } });
-    t.after(() => app.close());
-    const stale = app.latest('check_dns_record');
-    lifecycle(app, 'pagehide');
-    lifecycle(app, 'pageshow');
-    assert.equal(app.requests.filter(request => request.action === 'check_dns_record').length, 2);
-    stale.resolve({ verified: true, records: [] });
-    assert.equal(app.$('#cloudfront-attachment-button').prop('disabled'), true);
-    app.latest('check_dns_record').resolve({ verified: true, records: [] });
-    assert.equal(app.$('#cloudfront-attachment-button').prop('disabled'), false);
-    app.$('#custom-domain').val('new.example.test').trigger('input');
-    app.$('#generate-certificate').trigger('click');
-    lifecycle(app, 'pagehide');
-    lifecycle(app, 'pageshow');
-    assert.equal(app.$('#generate-certificate').prop('disabled'), false);
-});
 
-test('UI-011 a rejected domain attachment requires a fresh DNS check before retry', async t => {
-    const app = await boot('domain', { data: { service_provider: 'aws', use_cloudfront: true, __custom: certificate } });
-    t.after(() => app.close());
-    app.latest('check_dns_record').resolve({ verified: true, records: [] });
-    app.$('#cloudfront-attachment-button').trigger('click');
-    app.latest('attach_to_cloudfront').fail({ message: 'The certificate is no longer issued.' });
-    assert.equal(app.$('#cloudfront-attachment-button').prop('disabled'), true);
-    assert.equal(app.$('#check-dns-records').prop('hidden'), false);
-    app.$('#check-dns-records').trigger('click');
-    app.latest('check_dns_record').resolve({ verified: false, records: [] });
-    assert.equal(app.$('#cloudfront-attachment-button').prop('disabled'), true);
-});
 
 test('UI-012 discovery announces its loading state and clears it when credentials change', async t => {
     const app = await boot('wizard', { data: credentials, translations: { loading_buckets: 'Loading buckets...' } });
@@ -195,20 +155,6 @@ test('UI-013 the active background indicator remains visible beside WordPress de
     assert.notEqual(app.window.getComputedStyle(indicator).visibility, 'hidden');
 });
 
-test('PRV-006 latest accepted Google discovery token binds configuration despite a late old response', async t => {
-    const app = await boot('wizard', { data: { service_provider: 'google' } });
-    t.after(() => app.close());
-    await chooseGoogleFile(app, undefined, 'account-a.json');
-    app.$('#step-1-next').trigger('click');
-    const old = app.latest('list_s3_buckets');
-    await chooseGoogleFile(app, undefined, 'account-b.json');
-    app.$('#step-1-next').trigger('click');
-    app.latest('list_s3_buckets').resolve({ buckets: [{ name: 'account-b-bucket', region: 'US' }], selectionToken: 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb' });
-    old.resolve({ buckets: [{ name: 'account-a-bucket', region: 'US' }], selectionToken: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' });
-    app.$('#step-2-next').trigger('click');
-    assert.equal(app.latest('configure_aws').options.data.google_selection_token, 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb');
-    assert.equal(app.latest('configure_aws').options.data.bucket_name, 'account-b-bucket');
-});
 
 test('reviewed wizard back buttons and BFCache ignore a pre-navigation save completion', async t => {
     const app = await boot('wizard', { data: credentials });
@@ -216,12 +162,8 @@ test('reviewed wizard back buttons and BFCache ignore a pre-navigation save comp
     app.$('#step-1-next').trigger('click');
     app.latest('list_s3_buckets').resolve({ buckets: [{ name: 'fixture-bucket', region: 'us-east-1' }] });
     app.$('#step-2-next').trigger('click');
-    app.$('#step-3-back').trigger('click');
-    assert.equal(app.$('#wizard-step-2').prop('hidden'), false);
-    app.$('#step-2-next').trigger('click');
-    app.$('#use-cloudfront-no').trigger('click');
     const stale = app.latest('configure_aws');
-    assert.equal(stale.options.data.use_cloudfront, false);
+    assert.equal(stale.options.data.use_cloudfront, undefined);
     lifecycle(app, 'pagehide');
     lifecycle(app, 'pageshow');
     stale.resolve();
@@ -229,40 +171,7 @@ test('reviewed wizard back buttons and BFCache ignore a pre-navigation save comp
     assert.equal(app.$('#service_provider').prop('disabled'), false);
 });
 
-test('reviewed terminal sync errors and CloudFront invalidation controls preserve observable results', async t => {
-    const app = await boot('settings', { data: { service_provider: 'aws', use_cloudfront: true, distribution_id: 'FIXTURE' }, translations: { cache_cleared: 'Cache requested' } });
-    t.after(() => app.close());
-    app.latest('check_sync_status').resolve({ status: 'failed', direction: 'upload', successes: [], errors: ['Fixture object failed'] });
-    assert.match(app.$('#sync-log-container').text(), /Fixture object failed/);
-    app.confirm(false);
-    app.$('#clear-cloudfront-cache-button').trigger('click');
-    assert.equal(app.latest('clear_cloudfront_cache'), undefined);
-    app.confirm(true);
-    app.$('#clear-cloudfront-cache-button').trigger('click');
-    assert.equal(app.latest('clear_cloudfront_cache').options.data.nonce, 'fixture-nonce');
-    app.latest('clear_cloudfront_cache').resolve();
-    assert.match(app.$('#sync-log-container').text(), /Cache requested/);
-    app.$('#clear-cloudfront-cache-button').trigger('click');
-    app.latest('clear_cloudfront_cache').fail({ message: 'Fixture invalidation permission denied' });
-    assert.match(app.$('#sync-log-container').text(), /Fixture invalidation permission denied/);
-    assert.equal(app.$('#clear-cloudfront-cache-button').prop('disabled'), false);
-});
 
-test('reviewed domain generation transport errors and missing-certificate responses permit safe retry', async t => {
-    const app = await boot('domain', { data: { service_provider: 'aws', use_cloudfront: true } });
-    t.after(() => app.close());
-    app.$('#custom-domain').val('cdn.example.test');
-    app.$('#generate-certificate').trigger('click');
-    app.latest('generate_ssl_certificate').fail({ message: 'Fixture ACM temporarily unavailable' });
-    assert.equal(app.$('#generate-certificate').prop('disabled'), false);
-    assert.equal(app.$('#cloudfront-attachment-button').prop('disabled'), true);
-    assert.match(app.$('#domain-message').text(), /temporarily unavailable/);
-    app.$('#generate-certificate').trigger('click');
-    app.latest('generate_ssl_certificate').resolve({ certificateArn, records: [] });
-    app.latest('check_dns_record').reject({ message: 'Fixture certificate unavailable' });
-    assert.equal(app.$('#check-dns-records').prop('hidden'), false);
-    assert.match(app.$('#domain-message').text(), /certificate unavailable/);
-});
 
 test('reviewed view constructors/menu hooks enforce registration capability and deny unauthorized rendering before secrets', () => {
     for (const view of ['settings', 'wizard', 'domain']) {

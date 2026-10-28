@@ -32,8 +32,7 @@ test('settings uses its own localized AJAX config; canceled confirmation never a
     assert.equal(app.$('#current-sync-state').val(), '');
     assert.ok(app.$('.sync-button').toArray().every(button => !button.disabled));
     assert.match(app.$('#sync-log-container').text(), /Permission denied/);
-    app.$('#sync-local-to-aws-plugin').trigger('click');
-    assert.equal(app.latest('sync_local_to_aws').options.data.type, 'assets');
+    assert.equal(app.$('#sync-local-to-aws-plugin').length, 0);
 });
 
 test('real status polling drives localized progress, timestamps, completion, and safe filename logs', async t => {
@@ -148,7 +147,7 @@ test('actual completion logs are capped, decorated once, and clear without remov
     app.$('#clear-logs-button').trigger('click');
     assert.equal(app.$('#sync-log-container p').length, 1);
     assert.equal(app.$('#sync-log-placeholder').length, 1);
-    assert.equal(app.$('.sync-button').length, 3);
+    assert.equal(app.$('.sync-button').length, 2);
 });
 
 test('tabs support click and keyboard selection with matching accessibility state', async t => {

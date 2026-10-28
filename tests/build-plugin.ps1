@@ -6,7 +6,7 @@ $pluginRoot = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
 $bootstrap = Get-Content -Raw -LiteralPath (Join-Path $pluginRoot 'aws-s3-smartsync-wp.php')
 $version = [regex]::Match($bootstrap, 'Version:\s*([0-9]+(?:\.[0-9]+)+)').Groups[1].Value
 if (!$version) { throw 'Plugin version is missing.' }
-if (!$OutputPath) { $OutputPath = Join-Path $pluginRoot ('dist/smartsync-' + $version + '.zip') }
+if (!$OutputPath) { $OutputPath = Join-Path $pluginRoot ('dist/smartsync-lite-' + $version + '.zip') }
 $archivePath = [IO.Path]::GetFullPath($OutputPath)
 foreach ($requiredFile in @('vendor/autoload.php', 'vendor/woocommerce/action-scheduler/action-scheduler.php', 'composer.lock')) {
     if (!(Test-Path -LiteralPath (Join-Path $pluginRoot $requiredFile))) { throw ('Install Composer dependencies before packaging: ' + $requiredFile) }

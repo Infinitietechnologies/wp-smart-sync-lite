@@ -7,7 +7,7 @@ smartsync_test('SDK clients use WordPress CA bundle without disabling verificati
     $config = new SMARL_CloudConfig(); $config->serviceProvider = 'aws'; $config->region = 'eu-north-1';
     $config->iamKey = 'fixture-key'; $config->iamSecret = 'fixture-secret';
     $unconfigured = !ini_get('curl.cainfo') && !ini_get('openssl.cafile') && !ini_get('openssl.capath') && !getenv('SSL_CERT_FILE') && !getenv('SSL_CERT_DIR');
-    foreach ([[$config->getS3Client(), 'ListBuckets'], [$config->getCloudfrontClient(), 'ListDistributions'], [$config->getStsClient(), 'GetCallerIdentity'], [$config->getAcmClient(), 'ListCertificates']] as [$client, $operation]) {
+    foreach ([[$config->getS3Client(), 'ListBuckets']] as [$client, $operation]) {
         $http = $client->getCommand($operation)['@http'];
         smartsync_assert_same($unconfigured ? $bundle : null, $http['verify'] ?? null);
         smartsync_assert_true(($http['verify'] ?? true) !== false);

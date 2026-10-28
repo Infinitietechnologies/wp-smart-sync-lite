@@ -25,7 +25,7 @@ async function boot(view, { data = {}, scripts, translations = {}, baseStyles = 
         style.textContent = baseStyles;
         window.document.head.append(style);
     }
-    for (const file of ['wizard.css', 'ui-improvements.css', 'enhanced-ui.css', 'settings-home.css', 'cloud-setup.css', 'sync-widget.css', 'notifications.css', 'confirmations.css']) {
+    for (const file of ['wizard.css', 'ui-improvements.css', 'enhanced-ui.css', 'settings-home.css', 'cloud-setup.css', 'sync-widget.css', 'notifications.css', 'confirmations.css', 'pro-preview.css']) {
         const style = window.document.createElement('style');
         style.textContent = fs.readFileSync(path.join(root, 'assets/css', file), 'utf8');
         window.document.head.append(style);

@@ -5,6 +5,8 @@ description: Maintain the SmartSync WordPress media-offloading and CDN plugin us
 
 # SmartSync WordPress
 
+This checkout's `lite` branch is SmartSync Lite. Only Amazon S3, DigitalOcean Spaces, Wasabi and Bunny media operations are functional. Google Cloud Storage, Cloudflare R2, CloudFront/certificate provisioning and JS/CSS asset synchronization are Pro-only previews. Historical references describe the full edition; do not reintroduce those implementations or dependencies into Lite. Keep server, background-worker and UI restrictions consistent.
+
 Use this skill to make scoped changes in the SmartSync plugin while following its actual PHP, database, scheduler, and JavaScript contracts.
 
 ## Locate the plugin and choose context

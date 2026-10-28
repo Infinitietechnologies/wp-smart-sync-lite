@@ -2,16 +2,11 @@
 
 namespace SmartSyncS3\Views;
 if (!defined('ABSPATH')) exit;
-use SmartSyncS3\Models\SMARL_CloudConfig;
 
 class SMARL_CustomUrl
 {
-    private SMARL_CloudConfig $config;
 
-    public function __construct(SMARL_CloudConfig $config)
-    {
-        $this->config = $config;
-    }
+
 
     public function loadView(): void
     {
@@ -22,8 +17,8 @@ class SMARL_CustomUrl
     {
         add_submenu_page(
             'smarl-smart-sync',
-            esc_html__('Custom CloudFront URL', 'smartsync-lite-media-offloader-and-assets-cdn'),
-            esc_html__('Custom CloudFront URL', 'smartsync-lite-media-offloader-and-assets-cdn'),
+            esc_html__('CloudFront — Pro only', 'smartsync-lite-media-offloader-and-assets-cdn'),
+            esc_html__('CloudFront — Pro only', 'smartsync-lite-media-offloader-and-assets-cdn'),
             'manage_options',
             'custom-cloudfront-url',
             [$this, 'renderCustomUrlPage']
@@ -35,11 +30,11 @@ class SMARL_CustomUrl
         if (!current_user_can('manage_options')) {
             wp_die(esc_html__('You are not allowed to manage SmartSync settings.', 'smartsync-lite-media-offloader-and-assets-cdn'));
         }
-        $config = $this->config;
-        $config->customUrl ??= \SmartSyncS3\Models\SMARL_CustomUrl::load();
-        $sync = get_option('smarl_sync_settings', []);
-        $syncRunning = is_array($sync) && ($sync['s3SyncStatus'] ?? '') === 'processing';
-        $render = require __DIR__ . '/templates/custom-domain.php';
-        $render($config, $syncRunning);
+        echo '<div class="wrap smartsync-wrap">';
+        $header = require __DIR__ . '/templates/subpage-header.php';
+        $header(__('Amazon CloudFront CDN', 'smartsync-lite-media-offloader-and-assets-cdn'));
+        $preview = require __DIR__ . '/templates/pro-features.php';
+        $preview(['cloudfront']);
+        echo '</div>';
     }
 }

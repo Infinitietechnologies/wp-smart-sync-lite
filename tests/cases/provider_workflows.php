@@ -200,7 +200,7 @@ smartsync_test('CDN and cleanup settings preserve newer provider configuration a
 smartsync_test('CDN and cleanup writes cannot race a locked provider change or worker', function () {
     [$storage, $handler] = smartsync_sync_fixture(); $original = get_option('smarl_settings');
     $lock = \SmartSyncS3\Helpers\SMARL_Helper::acquireSyncLock();
-    $_POST = ['type' => 'assets', 'useCdn' => 'false'];
+    $_POST = ['type' => 'media', 'useCdn' => 'false'];
     smartsync_assert_same(409, smartsync_capture_json(fn() => $handler->toggleCdn())['status']);
     $_POST = ['state' => 'true'];
     smartsync_assert_same(409, smartsync_capture_json(fn() => $handler->toggleMediaAutoDelete())['status']);
@@ -242,7 +242,7 @@ smartsync_test('AWS dotted-bucket URL correction preserves CDN settings when loc
     smartsync_assert_true($saved->useCdnForMedia && $saved->canEnableMediaCDN);
 });
 
-foreach (['aws' => 'eu-west-1', 'digitalocean' => 'nyc3', 'wasabi' => 'eu-central-1', 'cloudflare' => 'auto'] as $provider => $region) {
+foreach (['aws' => 'eu-west-1', 'digitalocean' => 'nyc3', 'wasabi' => 'eu-central-1'] as $provider => $region) {
     foreach (['existing', 'new'] as $type) {
         smartsync_test('complete provider configuration and object operations: ' . $provider . ' ' . $type, function () use ($provider, $region, $type) {
             $config = smartsync_provider_config($provider); $commands = []; $objects = [];
@@ -283,29 +283,5 @@ foreach (['aws' => 'eu-west-1', 'digitalocean' => 'nyc3', 'wasabi' => 'eu-centra
 }
 
 foreach (['existing', 'new'] as $type) {
-    smartsync_test('Google configuration uses uniform bucket access and merges public IAM membership: ' . $type, function () use ($type) {
-        $credentialPath = ABSPATH . 'workflow-google.json';
-        file_put_contents($credentialPath, json_encode(['type' => 'service_account', 'project_id' => 'fixture-project', 'client_email' => 'fixture@fixture-project.iam.gserviceaccount.com',
-            'private_key' => "-----BEGIN PRIVATE KEY-----\nfixture\n-----END PRIVATE KEY-----", 'token_uri' => 'https://oauth2.googleapis.com/token']));
-        set_transient('smarl_google_credentials_1', $credentialPath, 3600);
-        $config = smartsync_provider_config('google'); $requests = []; $policyBody = null;
-        $config->fakeGoogle = new \Google\Cloud\Storage\StorageClient(['projectId' => 'fixture-project', 'credentialsFetcher' => new \Google\Cloud\Core\AnonymousCredentials(),
-            'httpHandler' => function ($request) use (&$requests, &$policyBody) {
-                $method = $request->getMethod(); $uri = (string) $request->getUri(); $body = (string) $request->getBody(); $requests[] = [$method, $uri, $body];
-                if ($method === 'GET' && str_contains($uri, '/iam')) return new \GuzzleHttp\Psr7\Response(200, ['Content-Type' => 'application/json'], '{"version":1,"etag":"fixture-etag","bindings":[{"role":"roles/storage.objectViewer","members":["user:existing@example.test"]}]}');
-                if ($method === 'PUT' && str_contains($uri, '/iam')) { $policyBody = json_decode($body, true); return new \GuzzleHttp\Psr7\Response(200, ['Content-Type' => 'application/json'], $body); }
-                return new \GuzzleHttp\Psr7\Response(200, ['Content-Type' => 'application/json'], '{"name":"workflow-google","location":"US","iamConfiguration":{"uniformBucketLevelAccess":{"enabled":true}}}');
-            }]);
-        $ajax = new SmartSyncProviderAjax(null); $ajax->nextConfig = $config;
-        $_POST = ['service_provider' => 'google', 'bucket_type' => $type, 'bucket_name' => 'workflow-google', 'bucket_region' => 'US', 'use_cloudfront' => 'false'];
-        $response = smartsync_capture_json(fn() => $ajax->configureAws());
-        smartsync_assert_same(true, $response['success']);
-        smartsync_assert_same('https://storage.googleapis.com/workflow-google', SMARL_CloudConfig::load()->getPublicBaseUrl());
-        smartsync_assert_same(1, count($policyBody['bindings']));
-        smartsync_assert_same(['user:existing@example.test', 'allUsers'], $policyBody['bindings'][0]['members']);
-        smartsync_assert_same('fixture-etag', $policyBody['etag']);
-        $creation = array_values(array_filter($requests, fn($request) => $request[0] === 'POST'));
-        smartsync_assert_same($type === 'new' ? 1 : 0, count($creation));
-        if ($creation) smartsync_assert_same(true, json_decode($creation[0][2], true)['iamConfiguration']['uniformBucketLevelAccess']['enabled']);
-    });
+
 }

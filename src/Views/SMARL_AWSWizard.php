@@ -2,7 +2,6 @@
 namespace SmartSyncS3\Views;
 
 use SmartSyncS3\Models\SMARL_CloudConfig;
-use SmartSyncS3\Services\SMARLI_GoogleService;
 
 if (!defined('ABSPATH')) exit;
 
@@ -33,21 +32,17 @@ class SMARL_AWSWizard
             wp_die(esc_html__('You are not allowed to manage SmartSync settings.', 'smartsync-lite-media-offloader-and-assets-cdn'));
         }
         $cloudConfig = $this->config;
+        if (!$cloudConfig->supportsLiteFeatures()) {
+            echo '<div class="notice notice-warning"><p>' . esc_html__('This saved configuration uses Pro only features. Use SmartSync Pro to restore offloaded media before changing storage providers.', 'smartsync-lite-media-offloader-and-assets-cdn') . '</p></div>';
+            $cloudConfig = new SMARL_CloudConfig();
+        }
         $providerGuides = SMARL_ProviderGuides::all();
         $selectedProvider = isset($providerGuides[$cloudConfig->serviceProvider]) ? $cloudConfig->serviceProvider : 'aws';
         $sync = get_option('smarl_sync_settings', []);
         $syncRunning = is_array($sync) && ($sync['s3SyncStatus'] ?? '') === 'processing';
-        $savedGoogle = [];
-        if ($cloudConfig->serviceProvider === 'google' && $cloudConfig->googleServicePath !== '') {
-            $credentials = SMARLI_GoogleService::getServiceJSON($cloudConfig->googleServicePath);
-            if (is_array($credentials)) $savedGoogle = [
-                'preview' => SMARLI_GoogleService::redactedPreview($credentials),
-                'reference' => SMARLI_GoogleService::credentialReference($cloudConfig->googleServicePath),
-            ];
-        }
         $render = require __DIR__ . '/templates/cloud-setup.php';
         $regionPreference = get_option('smarl_aws_discovery_region', '');
         $regionPreference = is_string($regionPreference) && preg_match('/^[a-z]{2}(?:-[a-z]+)+-\d+$/', $regionPreference) ? $regionPreference : '';
-        $render($cloudConfig, $providerGuides, $selectedProvider, $syncRunning, $savedGoogle, $regionPreference);
+        $render($cloudConfig, $providerGuides, $selectedProvider, $syncRunning, $regionPreference);
     }
 }

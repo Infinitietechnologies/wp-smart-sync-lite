@@ -7,74 +7,9 @@ async function providerApp(provider, extra = {}) {
     return boot('wizard', { data: { ...credentials, service_provider: provider, ...extra } });
 }
 
-test('AWS keeps the CloudFront choice and submits the nonce and structured bucket selection', async t => {
-    const app = await providerApp('aws');
-    t.after(() => app.close());
-    app.$('#step-1-next').trigger('click');
-    const listing = app.latest('list_s3_buckets');
-    assert.equal(listing.options.data.get('nonce'), 'fixture-nonce');
-    listing.resolve({ buckets: [{ name: 'fixture-bucket', region: 'us-east-1' }] });
-    app.$('#step-2-next').trigger('click');
-    assert.equal(app.latest('configure_aws'), undefined);
-    assert.equal(app.$('#wizard-step-3').prop('hidden'), false);
-    app.$('#use-cloudfront-yes').trigger('click');
-    const saving = app.latest('configure_aws');
-    assert.equal(saving.options.data.use_cloudfront, true);
-    assert.equal(saving.options.data.bucket_name, 'fixture-bucket');
-    assert.equal(saving.options.data.bucket_region, 'us-east-1');
-    assert.equal(saving.options.data.nonce, 'fixture-nonce');
-    app.$('#use-cloudfront-yes').trigger('click');
-    assert.equal(app.requests.filter(request => request.action === 'configure_aws').length, 1);
-    saving.resolve();
-    assert.equal(app.$('#wizard-step-final').prop('hidden'), false);
-    assert.match(app.$('#complete-setup').attr('href'), /page=smarl-smart-sync/);
-});
 
-test('all six providers are available; Wasabi and Cloudflare can create buckets without CloudFront', async t => {
-    const app = await providerApp('wasabi');
-    t.after(() => app.close());
-    assert.deepEqual(app.$('#service_provider option').toArray().map(option => option.value).sort(), ['aws', 'bunny', 'cloudflare', 'digitalocean', 'google', 'wasabi']);
-    app.$('#step-1-next').trigger('click');
-    assert.equal(app.latest('list_s3_buckets').options.data.get('bucket_region'), 'us-east-1');
-    app.latest('list_s3_buckets').resolve({ buckets: [] });
-    app.$('input[name="bucket_type"][value="new"]').prop('checked', true).trigger('change');
-    app.$('#new_bucket_name').val('fixture-new-bucket');
-    app.$('#wasabi_bucket_region').val('us-east-1');
-    app.$('#step-2-next').trigger('click');
-    assert.equal(app.latest('configure_aws').options.data.bucket_region, 'us-east-1');
-    assert.equal(app.latest('configure_aws').options.data.use_cloudfront, false);
-});
 
-test('Google file is required and appended exactly once; plain object names are used without a fake region', async t => {
-    const app = await providerApp('google');
-    t.after(() => app.close());
-    app.$('#step-1-next').trigger('click');
-    assert.equal(app.requests.length, 0);
-    await chooseGoogleFile(app, undefined, 'fixture.json');
-    app.$('#step-1-next').trigger('click');
-    const listing = app.latest('list_s3_buckets');
-    assert.equal(listing.options.data.getAll('service_json').length, 1);
-    listing.resolve({ buckets: [{ name: 'fixture-google-bucket' }], selectionToken: '11111111111111111111111111111111' });
-    assert.doesNotMatch(app.$('#aws_bucket_list').text(), /undefined/);
-    app.$('#step-2-next').trigger('click');
-    assert.equal(app.latest('configure_aws').options.data.bucket_region, 'US');
-    assert.equal(app.latest('configure_aws').options.data.iam_secret, '');
-});
 
-test('Google can reuse a saved service account and accepts its provider-specific new bucket names', async t => {
-    const app = await providerApp('google', { googleServicePath: 'fixture-private-path.json' });
-    t.after(() => app.close());
-    assert.doesNotMatch(app.window.document.body.textContent, /fixture-private-path/);
-    app.$('#step-1-next').trigger('click');
-    const listing = app.latest('list_s3_buckets');
-    assert.equal(listing.options.data.has('service_json'), false);
-    listing.resolve({ buckets: [] });
-    app.$('input[name="bucket_type"][value="new"]').prop('checked', true).trigger('change');
-    app.$('#new_bucket_name').val('fixture_google_bucket');
-    app.$('#step-2-next').trigger('click');
-    assert.equal(app.latest('configure_aws').options.data.bucket_name, 'fixture_google_bucket');
-    assert.equal(app.latest('configure_aws').options.data.bucket_region, 'US');
-});
 
 test('Bunny restricts pullzones to the selected bucket and never posts a storage password', async t => {
     const app = await providerApp('bunny', { iam_secret: 'fixture-api-key' });
@@ -113,12 +48,11 @@ test('listing data is rendered as text and stale credential responses cannot rep
 });
 
 test('provider, credential, endpoint, bucket and pullzone validation prevent invalid requests', async t => {
-    const app = await providerApp('cloudflare', { cloudflareEndpoint: '', cloudflareUrl: '' });
+    const app = await providerApp('aws', { iam_key: '' });
     t.after(() => app.close());
     app.$('#step-1-next').trigger('click');
     assert.equal(app.requests.length, 0);
-    app.$('#cloudflare-endpoint').val('https://fixture.r2.cloudflarestorage.com');
-    app.$('#cloudflare-url').val('cdn.example.test');
+    app.$('#aws_iam_key').val('fixture-id');
     app.$('#step-1-next').trigger('click');
     app.latest('list_s3_buckets').resolve({ buckets: [] });
     app.$('input[name="bucket_type"][value="new"]').prop('checked', true).trigger('change');
@@ -127,14 +61,14 @@ test('provider, credential, endpoint, bucket and pullzone validation prevent inv
     assert.equal(app.latest('configure_aws'), undefined);
     app.$('#new_bucket_name').val('fixture-r2-bucket');
     app.$('#step-2-next').trigger('click');
-    assert.equal(app.latest('configure_aws').options.data.bucket_region, 'auto');
+    assert.equal(app.latest('configure_aws').options.data.bucket_region, 'us-east-1');
     app.latest('configure_aws').fail('<img src=x onerror=alert(1)>');
     assert.equal(app.$('#wizard-message img').length, 0);
     assert.equal(app.$('#step-2-next').prop('disabled'), false);
 });
 
 test('persisted endpoint/public URL and password inputs are escaped in rendered markup', () => {
-    const html = render('wizard', { ...credentials, service_provider: 'cloudflare', cloudflareEndpoint: '"><img src=x>', cloudflareUrl: '" onfocus="alert(1)' });
+    const html = render('wizard', { ...credentials, service_provider: 'aws', iam_key: '"><img src=x>', iam_secret: '" onfocus="alert(1)' });
     assert.doesNotMatch(html, /value=""><img src=x>/);
     assert.doesNotMatch(html, /value="" onfocus=/);
     assert.match(html, /&quot;/);
@@ -142,21 +76,6 @@ test('persisted endpoint/public URL and password inputs are escaped in rendered 
     assert.doesNotMatch(bunny, /fixture-password/);
 });
 
-test('R2 bucket-scoped credentials can connect when account-wide bucket discovery is forbidden', async t => {
-    const app = await providerApp('cloudflare', { cloudflareEndpoint: 'https://' + 'a'.repeat(32) + '.r2.cloudflarestorage.com', cloudflareUrl: 'cdn.example.test' });
-    t.after(() => app.close());
-    app.$('#step-1-next').trigger('click');
-    app.latest('list_s3_buckets').fail('Access denied to account-wide bucket listing');
-    app.$('#setup-manual-continue').trigger('click');
-    assert.equal(app.$('#manual-bucket-entry').prop('checked'), true);
-    app.$('#manual_bucket_name').val('scoped-existing-bucket');
-    app.$('#step-2-next').trigger('click');
-    const saving = app.latest('configure_aws');
-    assert.ok(saving, 'Existing bucket access must not depend on permission to list the entire account');
-    assert.equal(saving.options.data.bucket_type, 'existing');
-    assert.equal(saving.options.data.bucket_name, 'scoped-existing-bucket');
-    assert.equal(saving.options.data.bucket_region, 'auto');
-});
 
 test('Bunny connection failures return to credentials and unusable pull zones explain the fix safely', async t => {
     const app = await providerApp('bunny', { iam_secret: 'fixture-account-key' });
@@ -171,16 +90,4 @@ test('Bunny connection failures return to credentials and unusable pull zones ex
     assert.equal(app.$('#bunny-pull-zone-help script').length, 0);
     app.$('#step-2-next').trigger('click');
     assert.equal(app.latest('configure_aws'), undefined);
-});
-
-test('China and GovCloud buckets use direct S3 setup without offering commercial CloudFront provisioning', async t => {
-    for (const region of ['cn-north-1', 'us-gov-west-1']) {
-        const app = await providerApp('aws');
-        t.after(() => app.close());
-        app.$('#step-1-next').trigger('click');
-        app.latest('list_s3_buckets').resolve({ buckets: [{ name: 'partition-bucket', region }] });
-        app.$('#step-2-next').trigger('click');
-        assert.equal(app.latest('configure_aws').options.data.use_cloudfront, false);
-        assert.equal(app.latest('configure_aws').options.data.bucket_region, region);
-    }
 });

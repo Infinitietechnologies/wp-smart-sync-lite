@@ -5,15 +5,19 @@ if (!defined('WP_CLI') || !WP_CLI || !str_contains(str_replace('\\', '/', ABSPAT
 }
 add_filter('pre_http_request', static fn() => new WP_Error('package_fixture_http_blocked', 'External HTTP is blocked in the package smoke test.'), PHP_INT_MAX);
 require_once ABSPATH . 'wp-admin/includes/plugin.php';
-$slug = 'smartsync-packaged/aws-s3-smartsync-wp.php';
-$root = realpath(WP_PLUGIN_DIR . '/smartsync-packaged');
+$slug = 'smartsync-lite-packaged/aws-s3-smartsync-wp.php';
+$root = realpath(WP_PLUGIN_DIR . '/smartsync-lite-packaged');
 if (!$root || !str_contains(str_replace('\\', '/', $root), '/smartsync-package-smoke-')) throw new RuntimeException('The packaged plugin must resolve to a separate temporary extraction.');
 $root = rtrim(str_replace('\\', '/', $root), '/') . '/';
 $metadata = get_plugin_data(WP_PLUGIN_DIR . '/' . $slug, false, false);
-if (($metadata['Version'] ?? '') !== '1.8.0' || !defined('SMARL_VERSION') || SMARL_VERSION !== '1.8.0') throw new RuntimeException('The packaged metadata/runtime version must both be 1.8.0.');
+if (($metadata['Name'] ?? '') !== 'SmartSync Lite' || ($metadata['Version'] ?? '') !== '1.8.0' || !defined('SMARL_VERSION') || SMARL_VERSION !== '1.8.0') throw new RuntimeException('The packaged metadata/runtime version must both be 1.8.0.');
 if (get_option('active_plugins') !== [$slug]) throw new RuntimeException('Only the extracted package should be active during package smoke.');
 if (!is_readable($root . 'vendor/autoload.php')) throw new RuntimeException('Runtime Composer autoload is absent from the package.');
-foreach ([\SmartSyncS3\SMARL_SmartSync::class, \SmartSyncS3\Models\SMARL_CloudConfig::class, \Aws\S3\S3Client::class, \Google\Cloud\Storage\StorageClient::class, \GuzzleHttp\Client::class, \ActionScheduler::class] as $class) {
+if (class_exists('Google\\Cloud\\Storage\\StorageClient') || class_exists('SmartSyncS3\\Services\\SMARLI_GoogleService')) throw new RuntimeException('The Pro Google implementation was included in the Lite package.');
+foreach (['getCloudfrontClient', 'getAcmClient', 'getStsClient', 'getGoogleStorageClient'] as $method) {
+    if (method_exists(\SmartSyncS3\Models\SMARL_CloudConfig::class, $method)) throw new RuntimeException('Pro client remains in the Lite package: ' . $method);
+}
+foreach ([\SmartSyncS3\SMARL_SmartSync::class, \SmartSyncS3\Models\SMARL_CloudConfig::class, \Aws\S3\S3Client::class, \GuzzleHttp\Client::class, \ActionScheduler::class] as $class) {
     if (!class_exists($class)) throw new RuntimeException('Required packaged class missing: ' . $class);
     $file = str_replace('\\', '/', (new ReflectionClass($class))->getFileName());
     if (!str_starts_with($file, $root)) throw new RuntimeException('A packaged runtime class loaded outside the extracted package: ' . $class);

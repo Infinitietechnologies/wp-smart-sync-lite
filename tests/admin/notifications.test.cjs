@@ -89,15 +89,9 @@ test('progress and file details do not flood notifications, while a new failed r
     assert.equal(app.$('.smartsync-notice-item').length, 1);
 });
 
-test('wizard and custom-domain validation use the same notification bars', async t => {
+test('wizard validation uses notification bars', async t => {
     const wizard = await boot('wizard', { data: { service_provider: 'bunny' } }); t.after(() => wizard.close());
     wizard.$('#step-1-next').trigger('click');
     assert.equal(wizard.$('.smartsync-notice-item[data-type="error"]').length, 1);
-    const domain = await boot('domain', { data: { service_provider: 'aws', use_cloudfront: true } }); t.after(() => domain.close());
-    domain.$('#custom-domain').val('https://invalid.example/path'); domain.$('#generate-certificate').trigger('click');
-    assert.equal(domain.$('.smartsync-notice-item[data-type="warning"]').length, 1);
-    domain.$('#custom-domain').val('cdn.example.test'); domain.$('#generate-certificate').trigger('click');
-    domain.latest('generate_ssl_certificate').reject('Certificate request failed.');
-    assert.equal(domain.$('.smartsync-notice-item').length, 1);
-    assert.equal(domain.$('.smartsync-notice-message').text(), 'Certificate request failed.');
+
 });

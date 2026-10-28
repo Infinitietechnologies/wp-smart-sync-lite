@@ -59,7 +59,7 @@ foreach ([0, 1, 10, 11, 15, 16, 31] as $count) {
         foreach ($storage->objects as $key => $bytes) { smartsync_assert_same($bytes, file_get_contents(ABSPATH . $key)); }
     });
 }
-foreach (['aws', 'cloudflare', 'digitalocean', 'wasabi', 'google', 'bunny'] as $provider) {
+foreach (['aws', 'digitalocean', 'wasabi', 'bunny'] as $provider) {
     smartsync_test('bulk upload processes every queued file through provider API: ' . $provider, function () use ($provider) {
         [$storage, $handler] = smartsync_sync_fixture($provider);
         for ($i = 0; $i < 16; $i++) { file_put_contents(wp_upload_dir()['basedir'] . '/upload-' . $i . '.JPG', 'bytes-' . $i); }
@@ -119,7 +119,7 @@ smartsync_test('stop during a transfer cannot overwrite the reset progress or st
 });
 smartsync_test('all runtime AJAX actions enforce capability and nonce before any state change', function () {
     [$storage, $handler] = smartsync_sync_fixture();
-    foreach (['fetchAwsAnalytics', 'checkSyncStatus', 'getSyncState', 'setSyncState', 'syncLocalToAws', 'syncAwsToLocal', 'stopAllProcesses', 'toggleCdn', 'toggleMediaAutoDelete', 'clearCloudFrontCache'] as $method) {
+    foreach (['fetchAwsAnalytics', 'checkSyncStatus', 'getSyncState', 'setSyncState', 'syncLocalToAws', 'syncAwsToLocal', 'stopAllProcesses', 'toggleCdn', 'toggleMediaAutoDelete', 'proOnly'] as $method) {
         $GLOBALS['smartsync_test_can_manage'] = false;
         smartsync_assert_same(403, smartsync_capture_json(fn() => $handler->$method())['status'], $method);
         $GLOBALS['smartsync_test_can_manage'] = true; $GLOBALS['smartsync_test_valid_nonce'] = false;
@@ -317,11 +317,11 @@ smartsync_test('multisite asset restore requires network permission before confi
     smartsync_assert_same([], $GLOBALS['smartsync_test_jobs']); smartsync_assert_true(!file_exists(ABSPATH . 'wp-includes/shared.js'));
 });
 
-smartsync_test('multisite network administrators can restore shared assets and their current-blog SVG media', function () {
+smartsync_test('multisite network administrators restore their SVG media while shared assets remain Pro only', function () {
     $directory = smartsync_multisite_upload_root(2); $GLOBALS['smartsync_test_can_manage_network'] = true;
     [$storage, $handler] = smartsync_sync_fixture(); $storage->objects = ['wp-includes/shared.js' => 'network-authorized'];
-    $_POST = ['type' => 'assets']; smartsync_assert_same(true, smartsync_capture_json(fn() => $handler->syncAwsToLocal())['success']); smartsync_run_jobs($handler);
-    smartsync_assert_same('network-authorized', file_get_contents(ABSPATH . 'wp-includes/shared.js'));
+    $_POST = ['type' => 'assets']; smartsync_assert_same(403, smartsync_capture_json(fn() => $handler->syncAwsToLocal())['status']);
+    smartsync_assert_true(!is_file(ABSPATH . 'wp-includes/shared.js'));
     $storage->objects = ['wp-content/uploads/sites/2/2026/10/own.svg' => '<svg></svg>', 'wp-content/uploads/sites/3/foreign.svg' => '<svg>foreign</svg>'];
     $_POST = ['type' => 'media']; smartsync_capture_json(fn() => $handler->syncAwsToLocal()); smartsync_run_jobs($handler);
     smartsync_assert_same('<svg></svg>', file_get_contents($directory . '/2026/10/own.svg'));

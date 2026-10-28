@@ -1,4 +1,8 @@
 <?php
+set_error_handler(static function (int $severity, string $message, string $file, int $line): bool {
+    if (!(error_reporting() & $severity)) return false;
+    throw new ErrorException($message, 0, $severity, $file, $line);
+});
 // Isolated WordPress rendering fixture. No bootstrap, credentials, storage, or network calls.
 define('ABSPATH', dirname(__DIR__, 2) . '/');
 function current_user_can($capability) { return $GLOBALS['smartsync_view_allowed'] ?? true; }
@@ -30,11 +34,11 @@ function wp_salt($scheme = 'auth') { return 'isolated-render-fixture-salt'; }
 function plugin_dir_url($file) { return 'https://example.test/wp-content/plugins/smartsync/'; }
 function wp_die($message) { throw new RuntimeException($message); }
 
+require ABSPATH . 'src/SMARL_Edition.php';
 require ABSPATH . 'src/Models/SMARL_CustomUrl.php';
 require ABSPATH . 'src/Models/SMARL_CloudConfig.php';
 require ABSPATH . 'src/Helpers/SMARL_Helper.php';
 require ABSPATH . 'src/Views/SMARL_ProviderGuides.php';
-require ABSPATH . 'src/Services/SMARLI_GoogleService.php';
 $data = isset($argv[2]) ? json_decode(base64_decode($argv[2]), true, 512, JSON_THROW_ON_ERROR) : [];
 $GLOBALS['smartsync_view_data'] = $data;
 $GLOBALS['smartsync_view_allowed'] = ($data['__can_manage'] ?? true) === true;
@@ -54,7 +58,7 @@ $views = [
 [$view, $method] = $views[$argv[1]];
 require ABSPATH . 'src/Views/' . $view . '.php';
 $class = '\\SmartSyncS3\\Views\\' . $view;
-$instance = new $class($config);
+$instance = $argv[1] === 'domain' ? new $class() : new $class($config);
 if (!empty($data['__inspect_menu'])) {
     $instance->loadView();
     foreach ($GLOBALS['smartsync_view_actions']['admin_menu'] ?? [] as $callback) $callback();

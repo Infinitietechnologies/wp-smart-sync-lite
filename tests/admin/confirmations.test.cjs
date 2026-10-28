@@ -81,19 +81,3 @@ test('unsupported dialogs fail closed with an actionable notification', async t 
     assert.equal(app.latest('sync_local_to_aws'), undefined);
     assert.match(app.$('.smartsync-notice-message').text(), /Refresh the page/);
 });
-
-test('CloudFront cache refresh uses its custom confirmation and cancellation makes no request', async t => {
-    const app = await boot('settings', { confirmations: 'manual', data: { service_provider: 'aws', use_cloudfront: true, distribution_id: 'D-FIXTURE' } });
-    t.after(() => app.close());
-    app.latest('check_sync_status').resolve({ status: 'idle' });
-    assert.equal(app.$('#clear-cloudfront-cache-button').length, 1);
-    app.$('#clear-cloudfront-cache-button').trigger('click');
-    assert.equal(app.$('.smartsync-confirm-title').text(), 'Refresh CloudFront cache?');
-    app.$('.smartsync-confirm-cancel')[0].click();
-    assert.equal(app.latest('clear_cloudfront_cache'), undefined);
-    app.$('#clear-cloudfront-cache-button').trigger('click');
-    app.$('.smartsync-confirm-accept')[0].click();
-    assert.equal(app.latest('clear_cloudfront_cache').options.data.nonce, 'fixture-nonce');
-    app.latest('clear_cloudfront_cache').resolve();
-    assert.equal(app.$('#clear-cloudfront-cache-button').prop('disabled'), false);
-});

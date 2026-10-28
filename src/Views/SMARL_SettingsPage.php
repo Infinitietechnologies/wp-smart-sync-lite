@@ -23,7 +23,7 @@ class SMARL_SettingsPage
     {
         add_menu_page(
             page_title: esc_html__('Cloud Configuration', 'smartsync-lite-media-offloader-and-assets-cdn'),
-            menu_title: esc_html__('SmartSync Settings', 'smartsync-lite-media-offloader-and-assets-cdn'),
+            menu_title: esc_html__('SmartSync Lite', 'smartsync-lite-media-offloader-and-assets-cdn'),
             capability: 'manage_options',               // Capability
             menu_slug: 'smarl-smart-sync',                // Menu slug
             callback: [$this, 'renderSettingsPage'],     // Callback function

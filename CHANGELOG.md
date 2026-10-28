@@ -1,5 +1,17 @@
 # Changelog
 
+## SmartSync Lite 1.8.0
+
+- Create the separate lite edition, branded SmartSync Lite.
+- Retain Amazon S3, DigitalOcean Spaces, Wasabi and Bunny media offloading, restoration and delivery.
+- Display Google Cloud Storage, Cloudflare R2, Amazon CloudFront and JS/CSS synchronization as disabled **Pro only** previews with upgrade links.
+- Remove Google integration/dependencies, R2 connection logic, CloudFront provisioning/certificate/DNS/cache implementations, asset sync controls and script/style URL rewriting.
+- Reject Pro requests, inherited asset jobs and injected JS/CSS rows before transfers. Preserve old Pro configuration without activating it.
+- Keep the 1.8.0 media reliability fixes. Lite validation is recorded separately in tests/LITE.md.
+
+The entries below describe the historical full edition and its verification, before the Lite branch was created.
+
+
 ## 1.8.0
 
 This release consolidates the changes since the initial Git commit (`feb1f97`, version 1.7.1), including the 1.7.2 and 1.7.3 fixes recorded in `readme.txt`.

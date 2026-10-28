@@ -1,3 +1,5 @@
+> This is the SmartSync Lite branch. See [LITE.md](LITE.md) for current edition scope and verification. Historical full-edition reports and Pro-only fixtures do not establish Lite behavior. CI remains disabled.
+
 # SmartSync verification
 
 Run commands from the plugin root unless another directory is shown. The isolated PHP suite needs PHP 8.1+, PDO SQLite, and installed root Composer dependencies. The audit executed PHP on 8.3.36.

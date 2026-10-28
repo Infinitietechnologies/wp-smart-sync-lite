@@ -2,7 +2,7 @@
 use SmartSyncS3\Models\SMARL_UploadHistory;
 use SmartSyncS3\Helpers\SMARL_Helper;
 
-foreach (['aws', 'digitalocean', 'wasabi', 'cloudflare', 'google', 'bunny'] as $provider) {
+foreach (['aws', 'digitalocean', 'wasabi', 'bunny'] as $provider) {
     smartsync_test('incremental repairs external deletions and size changes while preserving real skips: ' . $provider, function () use ($provider) {
         [$storage, $handler] = smartsync_sync_fixture($provider);
         foreach (['kept', 'deleted', 'changed'] as $name) file_put_contents(wp_upload_dir()['basedir'] . '/' . $name . '.png', 'data');
@@ -71,19 +71,4 @@ smartsync_test('Bunny verification limits directory access to the selected prefi
     };
     smartsync_assert_same([], $storage->verifyUploadCandidates(['wp-content/uploads/2026/deleted.png']));
     smartsync_assert_same(1, count($GLOBALS['smartsync_test_http_requests']));
-});
-
-smartsync_test('Google verification uses the object-list prefix with a bounded SDK request', function () {
-    $storage = new class extends SmartSyncProviderConfig { public function isConfigured(): bool { return true; } };
-    $storage->serviceProvider = 'google'; $storage->bucket = 'fixture-google';
-    $calls = 0;
-    $storage->fakeGoogle = new \Google\Cloud\Storage\StorageClient(['projectId' => 'fixture-project', 'credentialsFetcher' => new \Google\Cloud\Core\AnonymousCredentials(),
-        'httpHandler' => static function ($request, $options) use (&$calls) {
-            $calls++; parse_str($request->getUri()->getQuery(), $query);
-            smartsync_assert_same('wp-content/uploads/', $query['prefix']);
-            smartsync_assert_true($options['timeout'] <= 10);
-            return new \GuzzleHttp\Psr7\Response(200, ['Content-Type' => 'application/json'], json_encode(['items' => [['name' => 'wp-content/uploads/kept.png', 'size' => '4']]]));
-        }]);
-    smartsync_assert_same(['wp-content/uploads/kept.png' => 4], $storage->verifyUploadCandidates(['wp-content/uploads/kept.png']));
-    smartsync_assert_same(1, $calls);
 });

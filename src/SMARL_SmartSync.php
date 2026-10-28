@@ -118,8 +118,6 @@ class SMARL_SmartSync
      */
     public function initializeFilters(): void
     {
-        add_filter('script_loader_src', [$this, 'replaceBaseUrl']);
-        add_filter('style_loader_src', [$this, 'replaceBaseUrl']);
         add_filter('wp_get_attachment_url', [$this, 'getAttachmentUrl'], 10, 2);
         add_filter('wp_calculate_image_srcset', [$this, 'rewriteImageSources'], 10, 5);
         add_filter('wp_delete_file', [$this, 'deleteFromS3']);
@@ -177,7 +175,7 @@ class SMARL_SmartSync
             $settingsPage->loadView();
             $awsWizardPage = new SMARL_AWSWizard($cloudConfig);
             $awsWizardPage->loadView();
-            $customUrlPage = new SMARL_CustomUrl($cloudConfig);
+            $customUrlPage = new SMARL_CustomUrl();
             $customUrlPage->loadView();
         });
     }
@@ -388,23 +386,6 @@ class SMARL_SmartSync
         return rtrim($baseUrl, '/');
     }
 
-    /**
-     * Replaces the base URL of scripts and styles with the CloudFront URL.
-     *
-     * @param string $src The original source URL.
-     * @return string The modified source URL or the original on failure.
-     * @developer Jay Parmar
-     */
-    public function replaceBaseUrl(string $src): string
-    {
-        try {
-            return $this->config->useCdnForAssets && in_array(strtolower(SMARL_Helper::getFileExtensionFromUrl($src)), SMARL_Helper::getExtension('assets'), true) ? $this->rewriteLocalUrl($src) : $src;
-        }catch (Throwable $error){
-            return $src;
-        }
-
-    }
-
     private function rewriteLocalUrl(string $url, bool $media = false): string
     {
         $source = wp_parse_url($url);
@@ -565,6 +546,7 @@ class SMARL_SmartSync
         if ($page === 'custom-cloudfront-url') {
             wp_enqueue_style('smartsync-custom-domain-css', plugin_dir_url($this->pluginRoot) . 'assets/css/custom-domain.css', ['smartsync-enhanced-ui-css'], SMARL_ASSET_VERSION_CODE . '-readability-1');
         }
+        wp_enqueue_style('smartsync-pro-preview-css', plugin_dir_url($this->pluginRoot) . 'assets/css/pro-preview.css', [], SMARL_ASSET_VERSION_CODE);
         wp_enqueue_style('smartsync-notifications-css', plugin_dir_url($this->pluginRoot) . 'assets/css/notifications.css', [], SMARL_ASSET_VERSION_CODE . '-readability-1');
         wp_enqueue_style('smartsync-confirmations-css', plugin_dir_url($this->pluginRoot) . 'assets/css/confirmations.css', ['smartsync-enhanced-ui-css'], SMARL_ASSET_VERSION_CODE . '-readability-1');
         wp_enqueue_script('smartsync-confirmations-js', plugin_dir_url($this->pluginRoot) . 'assets/js/confirmations.js', [], SMARL_ASSET_VERSION_CODE . '-dialog-1', true);
@@ -592,7 +574,7 @@ class SMARL_SmartSync
             'aws-admin-js',
             plugin_dir_url($this->pluginRoot) . 'assets/js/wizard.js',
             ['jquery', 'smartsync-notifications-js'],
-            SMARL_ASSET_VERSION_CODE . '-inline-cloudfront-1',
+            SMARL_ASSET_VERSION_CODE . '-lite-1',
             true
         );
         wp_localize_script('aws-admin-js', 'ajax_object', [
@@ -657,32 +639,7 @@ class SMARL_SmartSync
                 'digitalocean_region_fra1' => __('Frankfurt 1', 'smartsync-lite-media-offloader-and-assets-cdn'),
                 'digitalocean_region_tor1' => __('Toronto 1', 'smartsync-lite-media-offloader-and-assets-cdn'),
 
-                // General User-Facing Messages
-                'enter_domain' => __('Please enter a domain.', 'smartsync-lite-media-offloader-and-assets-cdn'),
-                'certificate_generated' => __('Certificate generated successfully!', 'smartsync-lite-media-offloader-and-assets-cdn'),
-                'no_dns_records' => __('No DNS records available. Please wait and try again later.', 'smartsync-lite-media-offloader-and-assets-cdn'),
-                'certificate_generation_failed' => __('Certificate generation failed', 'smartsync-lite-media-offloader-and-assets-cdn'),
-                'certificate_generation_error' => __('An error occurred while generating the certificate. Please try again.', 'smartsync-lite-media-offloader-and-assets-cdn'),
-
-                // DNS Validation
-                'dns_validation_records' => __('DNS Validation Records', 'smartsync-lite-media-offloader-and-assets-cdn'),
-                'checking' => __('Checking...', 'smartsync-lite-media-offloader-and-assets-cdn'),
-                'domain' => __('Domain', 'smartsync-lite-media-offloader-and-assets-cdn'),
-                'type' => __('Type', 'smartsync-lite-media-offloader-and-assets-cdn'),
-                'name' => __('Name', 'smartsync-lite-media-offloader-and-assets-cdn'),
-                'value' => __('Value', 'smartsync-lite-media-offloader-and-assets-cdn'),
-                'verified' => __('Verified', 'smartsync-lite-media-offloader-and-assets-cdn'),
-                'pending_validation' => __('Pending Validation', 'smartsync-lite-media-offloader-and-assets-cdn'),
-                'all_dns_verified' => __('All DNS records have been verified!', 'smartsync-lite-media-offloader-and-assets-cdn'),
-
-                // Error Handling
                 'error' => __('Error', 'smartsync-lite-media-offloader-and-assets-cdn'),
-                'dns_check_error' => __('An error occurred while checking DNS records.', 'smartsync-lite-media-offloader-and-assets-cdn'),
-
-                // Certificate Attachment
-                'certificate_attached' => __('Certificate attached successfully!', 'smartsync-lite-media-offloader-and-assets-cdn'),
-                'attachment_failed' => __('Attachment failed', 'smartsync-lite-media-offloader-and-assets-cdn'),
-                'attachment_error' => __('An error occurred while attaching the certificate. Please try again.', 'smartsync-lite-media-offloader-and-assets-cdn'),
 
                 // IAM and Bucket Configuration
                 'iam_required' => __('IAM Key and Secret are required.', 'smartsync-lite-media-offloader-and-assets-cdn'),
@@ -792,7 +749,7 @@ class SMARL_SmartSync
                 'sync_summary' => __('Uploads: %1$s · Unchanged: %2$s', 'smartsync-lite-media-offloader-and-assets-cdn'),
                 'confirm_full_resync' => __('Full resync will upload every selected local file again, including unchanged files.', 'smartsync-lite-media-offloader-and-assets-cdn'),
                 'dashboard' => __('Dashboard', 'smartsync-lite-media-offloader-and-assets-cdn'),
-                'settings_title' => __('SmartSync Settings', 'smartsync-lite-media-offloader-and-assets-cdn'),
+                'settings_title' => __('SmartSync Lite', 'smartsync-lite-media-offloader-and-assets-cdn'),
                 'cost_unavailable' => __('Unavailable', 'smartsync-lite-media-offloader-and-assets-cdn'),
                 'usage_updated' => __('Storage usage updated.', 'smartsync-lite-media-offloader-and-assets-cdn'),
                 'stopped' => __('Sync stopped.', 'smartsync-lite-media-offloader-and-assets-cdn'),

@@ -1,0 +1,7 @@
+.smartsync-pro-previews{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:18px;margin:24px 0}
+.smartsync-pro-preview{padding:22px;border:1px solid #dce2eb;border-radius:12px;background:#f8fafc;color:#263449;min-width:0}
+.smartsync-pro-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}.smartsync-pro-heading h2{margin:0;font-size:16px;line-height:1.5}
+.smartsync-pro-badge{display:inline-block;flex-shrink:0;padding:3px 9px;border-radius:20px;background:#eee5ff;color:#60349a;font-size:11px;font-weight:700;white-space:nowrap}
+.smartsync-pro-controls{display:grid;gap:12px;padding:14px;margin:14px 0;border:1px dashed #c5cfdd;border-radius:8px;background:#f0f3f7;min-width:0}
+.smartsync-pro-controls label{display:grid;gap:7px;font-size:13px}.smartsync-pro-controls input[type=text]{width:100%;max-width:100%}.smartsync-pro-controls input[type=file]{max-width:100%;font-size:12px}.smartsync-pro-controls button{justify-self:start}
+.smartsync-pro-preview>p{color:#526078;font-size:13px}.smartsync-pro-upgrade{margin-top:4px!important}.tab-button .smartsync-pro-badge{margin-left:5px}

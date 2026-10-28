@@ -211,7 +211,7 @@ jQuery(function ($) {
         const type = button.data('type');
         const direction = button.data('direction');
         const mode = $('#sync-mode-' + type + ' input:checked').val() || 'incremental';
-        if (!['media', 'assets'].includes(type) || !['upload', 'download'].includes(direction)) return;
+        if (type !== 'media' || !['upload', 'download'].includes(direction)) return;
         const destination = $('.settings-destination-provider').length ? $('.settings-destination-provider').text() + ' / ' + $('.settings-destination-storage').text() : '';
         window.smartsyncConfirm({
             kind: direction === 'download' ? 'restore' : (mode === 'full' ? 'full_' : 'upload_') + type,
@@ -334,18 +334,7 @@ jQuery(function ($) {
         toggleSetting(element, 'toggle_media_auto_delete', { state: element.prop('checked') }, text(element.prop('checked') ? 'auto_delete_enabled' : 'auto_delete_disabled'), text('auto_delete_failed'));
     });
 
-    $('#clear-cloudfront-cache-button').on('click', function () {
-        const button = $(this);
-        window.smartsyncConfirm({ kind: 'cache', message: text('confirm_clear_cache') }, function () {
-            if (!pageActive || button.prop('disabled')) return;
-            button.prop('disabled', true);
-            request('clear_cloudfront_cache').done(function (response) {
-                appendLog(response && response.success ? text('cache_cleared') : errorMessage(response, text('failed_to_clear_cache')), !(response && response.success), '', response && response.success ? 'info' : 'error');
-            }).fail(function (xhr) {
-                appendLog(errorMessage(xhr.responseJSON, text('failed_to_clear_cache')), true);
-            }).always(function () { button.prop('disabled', false); });
-        });
-    });
+
 
     $('#fetch-analytics-button').on('click', function () {
         if (this.disabled) return;

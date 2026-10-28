@@ -1,7 +1,7 @@
 <?php
 /**
- * Plugin Name: SmartSync
- * Description: Offload WordPress media and assets to cloud storage and serve them through a CDN.
+ * Plugin Name: SmartSync Lite
+ * Description: Offload WordPress media to Amazon S3, DigitalOcean Spaces, Wasabi or Bunny. Preview additional Pro features.
  * Version: 1.8.0
  * Requires at least: 6.5
  * Requires PHP: 8.1
@@ -93,4 +93,3 @@ $smartSync->initializeActions();
 $smartSync->initializeFilters();
 $smartSync->initializeViews();
 add_action('plugins_loaded', 'smarl_maybe_upgrade_schema', 5);
-

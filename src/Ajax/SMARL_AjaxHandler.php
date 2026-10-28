@@ -25,22 +25,25 @@ class SMARL_AjaxHandler {
     }
     public function initializeActions(): void {
         add_action('wp_ajax_recover_sync_operation', [$this, 'recoverSyncOperation']);
-        foreach (['clear_cloudfront_cache' => 'clearCloudFrontCache', 'toggle_cdn' => 'toggleCdn', 'toggle_media_auto_delete' => 'toggleMediaAutoDelete', 'sync_local_to_aws' => 'syncLocalToAws', 'stop_all_processes' => 'stopAllProcesses', 'sync_aws_to_local' => 'syncAwsToLocal', 'set_sync_state' => 'setSyncState', 'get_sync_state' => 'getSyncState', 'check_sync_status' => 'checkSyncStatus', 'fetch_cloud_analytics' => 'fetchCloudAnalytics', 'fetch_aws_analytics' => 'fetchAwsAnalytics'] as $action => $method) {
+        foreach (['clear_cloudfront_cache' => 'proOnly', 'toggle_cdn' => 'toggleCdn', 'toggle_media_auto_delete' => 'toggleMediaAutoDelete', 'sync_local_to_aws' => 'syncLocalToAws', 'stop_all_processes' => 'stopAllProcesses', 'sync_aws_to_local' => 'syncAwsToLocal', 'set_sync_state' => 'setSyncState', 'get_sync_state' => 'getSyncState', 'check_sync_status' => 'checkSyncStatus', 'fetch_cloud_analytics' => 'fetchCloudAnalytics', 'fetch_aws_analytics' => 'fetchAwsAnalytics'] as $action => $method) {
             add_action('wp_ajax_' . $action, [$this, $method]);
         }
         add_action('process_s3_sync_batch', [$this, 'processS3Batch'], 10, 5);
     }
+    public function proOnly(): void { $this->authorize(); wp_send_json_error(\SmartSyncS3\SMARL_Edition::proMessage(), 403); }
     private function authorize(): void {
         if (!current_user_can('manage_options')) { wp_send_json_error(esc_html__('You do not have permission to manage SmartSync.', 'smartsync-lite-media-offloader-and-assets-cdn'), 403); }
         check_ajax_referer('smarl_nonce', 'nonce');
     }
     private function configured(): SMARL_CloudConfig {
+        if ($this->appConfig && !$this->appConfig->supportsLiteFeatures()) throw new \RuntimeException(\SmartSyncS3\SMARL_Edition::proMessage());
         if (!$this->appConfig || !$this->appConfig->isConfigured()) { throw new \RuntimeException(__('Cloud storage is not configured.', 'smartsync-lite-media-offloader-and-assets-cdn')); }
         return $this->appConfig;
     }
     private function requestType(): string {
         $type = isset($_POST['type']) && is_string($_POST['type']) ? sanitize_text_field(wp_unslash($_POST['type'])) : '';
-        if (!in_array($type, ['media', 'assets'], true)) { throw new \InvalidArgumentException(__('A supported sync type is required.', 'smartsync-lite-media-offloader-and-assets-cdn')); }
+        if ($type === 'assets') throw new \InvalidArgumentException(\SmartSyncS3\SMARL_Edition::proMessage(), 403);
+        if ($type !== 'media') { throw new \InvalidArgumentException(__('A supported sync type is required.', 'smartsync-lite-media-offloader-and-assets-cdn')); }
         return $type;
     }
     private function requestBoolean(string $field): bool {
@@ -125,9 +128,6 @@ class SMARL_AjaxHandler {
             if (array_key_exists('media_test_extensions', $_POST)) {
                 throw new \InvalidArgumentException(__('The temporary file-type option has been removed. Refresh this page before starting a normal media upload.', 'smartsync-lite-media-offloader-and-assets-cdn'));
             }
-            if ($direction === 'download' && $type === 'assets' && is_multisite() && !current_user_can('manage_network_options')) {
-                throw new \InvalidArgumentException(__('Network administrator permission is required to restore shared assets.', 'smartsync-lite-media-offloader-and-assets-cdn'), 403);
-            }
             $config = $this->configured();
         } catch (Throwable $e) { wp_send_json_error($e->getMessage(), $e->getCode() === 403 ? 403 : 400); }
         $lock = SMARL_Helper::acquireSyncLock();
@@ -210,13 +210,14 @@ class SMARL_AjaxHandler {
             $this->s3SyncSettings->load();
             $s = $this->s3SyncSettings;
             if (!$this->isCurrentRun($run_id) || $s->batchNumber !== $batch_number || $s->s3SyncDirection !== $direction) { return; }
+            if ($s->syncType !== 'media') throw new \RuntimeException(\SmartSyncS3\SMARL_Edition::proMessage());
             $config = $this->configured();
             if ($s->cloudFingerprint !== $this->fingerprint($config)) { throw new \RuntimeException(__('Cloud configuration changed. Start a new sync.', 'smartsync-lite-media-offloader-and-assets-cdn')); }
             global $wpdb;
             $table = $wpdb->prefix . 'smarl_file_sync_queue';
             // A previous worker can only have left these rows after losing/expiring its lock.
             if ($wpdb->update($table, ['status' => 'pending'], ['run_id' => $run_id, 'status' => 'in_progress']) === false) { throw new \RuntimeException(__('Unable to recover the sync queue.', 'smartsync-lite-media-offloader-and-assets-cdn')); }
-            $size = $config->serviceProvider === 'google' ? 2 : max(1, SMARL_Constant::$processBatchSize);
+            $size = max(1, SMARL_Constant::$processBatchSize);
             $files = SMARL_Helper::getFileSyncQueueData($size, 0, $run_id);
             $started = microtime(true);
             foreach ($files as $file) {
@@ -225,9 +226,9 @@ class SMARL_AjaxHandler {
                 if ($wpdb->update($table, ['status' => 'in_progress'], ['id' => $file['id'], 'run_id' => $run_id, 'status' => 'pending']) !== 1) { throw new \RuntimeException(__('Unable to claim a queued file.', 'smartsync-lite-media-offloader-and-assets-cdn')); }
                 $stage = 'validation';
                 try {
-                    $key = (string) $file['relative_path'];
+                    $key = SMARL_CloudConfig::validateObjectKey((string) $file['relative_path']);
                     $path = SMARL_Helper::resolveLocalPath($key);
-                    if ($s->syncType === 'media' && !SMARL_Helper::isCurrentSiteMediaKey($key)) { throw new \RuntimeException(__('The media file belongs outside the current site uploads directory.', 'smartsync-lite-media-offloader-and-assets-cdn')); }
+                    if (!SMARL_Helper::isCurrentSiteMediaKey($key)) { throw new \RuntimeException(__('The media file belongs outside the current site uploads directory.', 'smartsync-lite-media-offloader-and-assets-cdn')); }
                     if (!in_array(strtolower(pathinfo($key, PATHINFO_EXTENSION)), $s->extensions, true)) { throw new \RuntimeException(__('File extension is not selected for this sync.', 'smartsync-lite-media-offloader-and-assets-cdn')); }
                     if ($direction === 'upload') {
                         $stage = 'history';
@@ -329,9 +330,9 @@ class SMARL_AjaxHandler {
         // Older queued runs may cover only part of the library. They cannot establish full CDN eligibility.
         if (!$this->hasCompleteMediaCoverage()) { return; }
         $config = SMARL_CloudConfig::load();
+        if (!$config->supportsLiteFeatures()) return;
         if ($this->fingerprint($config) !== $this->s3SyncSettings->cloudFingerprint) { return; }
         if ($this->s3SyncSettings->syncType === 'media') { $config->canEnableMediaCDN = $eligible; if (!$eligible) { $config->useCdnForMedia = false; } }
-        else { $config->canEnableAssetCDN = $eligible; if (!$eligible) { $config->useCdnForAssets = false; } }
         $config->save();
     }
     private function hasCompleteMediaCoverage(): bool {
@@ -371,12 +372,11 @@ class SMARL_AjaxHandler {
             $enabled = $this->requestBoolean('useCdn');
             $this->changeConfiguration(function (SMARL_CloudConfig $config) use ($type, $enabled): void {
                 if (!$enabled && $type === 'media' && SMARL_Helper::hasMissingOffloadedFiles()) { throw new \RuntimeException(__('Restore offloaded media locally before disabling its CDN.', 'smartsync-lite-media-offloader-and-assets-cdn')); }
-                $eligible = $type === 'media' ? $config->canEnableMediaCDN : $config->canEnableAssetCDN;
+                $eligible = $config->canEnableMediaCDN;
                 if ($enabled && (!$eligible || $config->getPublicBaseUrl() === '')) { throw new \RuntimeException(__('Complete a successful sync and configure a public URL before enabling CDN.', 'smartsync-lite-media-offloader-and-assets-cdn')); }
                 if ($type === 'media') {
                     $config->useCdnForMedia = $enabled;
                 }
-                else { $config->useCdnForAssets = $enabled; }
             });
         } catch (Throwable $e) { wp_send_json_error($e->getMessage(), $e->getCode() === 409 ? 409 : 400); }
         wp_send_json_success(['message' => esc_html__('CDN setting updated successfully.', 'smartsync-lite-media-offloader-and-assets-cdn')]);
@@ -401,19 +401,6 @@ class SMARL_AjaxHandler {
             $config->save();
             $this->appConfig = $config;
         } finally { SMARL_Helper::releaseSyncLock($lock); }
-    }
-    public function clearCloudFrontCache(): void {
-        $this->authorize();
-        try { $this->purgeCloudFrontCache(['/*']); }
-        catch (Throwable $e) { wp_send_json_error(__('Unable to invalidate CloudFront. Verify the AWS configuration and permissions.', 'smartsync-lite-media-offloader-and-assets-cdn'), 400); }
-        wp_send_json_success(esc_html__('Cache invalidation requested successfully.', 'smartsync-lite-media-offloader-and-assets-cdn'));
-    }
-    public function purgeCloudFrontCache(array $paths): void {
-        $config = $this->configured();
-        if ($config->serviceProvider !== 'aws' || !$config->useCloudFront || $config->distributionId === '') { throw new \RuntimeException(__('CloudFront is not configured.', 'smartsync-lite-media-offloader-and-assets-cdn')); }
-        $paths = array_values(array_filter($paths, static fn($path) => is_string($path) && str_starts_with($path, '/') && !preg_match('/[\x00-\x1f]/', $path)));
-        if (!$paths) { throw new \InvalidArgumentException(__('At least one invalidation path is required.', 'smartsync-lite-media-offloader-and-assets-cdn')); }
-        $config->getCloudfrontClient()->createInvalidation(['DistributionId' => $config->distributionId, 'InvalidationBatch' => ['CallerReference' => wp_generate_uuid4(), 'Paths' => ['Quantity' => count($paths), 'Items' => $paths]]]);
     }
     public function uploadToBunnyCDN($filePath, $storageZone = '', $fileName = null): array {
         $config = $this->configured();

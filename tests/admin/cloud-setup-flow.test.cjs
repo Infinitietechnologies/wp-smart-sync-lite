@@ -3,7 +3,7 @@ const assert = require('node:assert/strict');
 const { boot, render } = require('./harness.cjs');
 
 test('failed discovery stays on credentials and edits clear the manual fallback', async t => {
-    for (const provider of ['aws', 'digitalocean', 'wasabi', 'cloudflare']) {
+    for (const provider of ['aws', 'digitalocean', 'wasabi']) {
         const app = await boot('wizard', { data: { service_provider: provider, iam_key: 'test-id', iam_secret: 'test-secret', cloudflareEndpoint: 'https://' + 'a'.repeat(32) + '.r2.cloudflarestorage.com', cloudflareUrl: 'cdn.example.test' } });
         t.after(() => app.close());
         app.$('#step-1-next').trigger('click');
@@ -61,7 +61,7 @@ test('step buttons revisit validated steps, invalidate on edits, and cannot skip
     const app = await boot('wizard', { data: { service_provider: 'aws', iam_key: 'fixture-id', iam_secret: 'fixture-secret' } });
     t.after(() => app.close());
     assert.equal(step(app, 2).prop('disabled'), true);
-    assert.equal(step(app, 3).prop('disabled'), true);
+    assert.equal(step(app, 3).length, 0);
     step(app, 2).trigger('click');
     assert.equal(app.$('#wizard-step-1').prop('hidden'), false);
     app.$('#step-1-next').trigger('click');
@@ -71,18 +71,13 @@ test('step buttons revisit validated steps, invalidate on edits, and cannot skip
     step(app, 2).trigger('click');
     assert.equal(app.$('#wizard-step-2').prop('hidden'), false);
     assert.equal(app.requests.length, 1);
-    app.$('#step-2-next').trigger('click');
-    assert.equal(step(app, 3).attr('aria-current'), 'step');
-    step(app, 1).trigger('click');
-    step(app, 3).trigger('click');
-    assert.equal(app.$('#wizard-step-3').prop('hidden'), false);
     assert.equal(step(app, 'final').prop('disabled'), true);
     step(app, 'final').trigger('click');
     assert.equal(app.latest('configure_aws'), undefined);
     step(app, 1).trigger('click');
     app.$('#aws_iam_secret').val('new-secret').trigger('input');
     assert.equal(step(app, 2).prop('disabled'), true);
-    assert.equal(step(app, 3).prop('disabled'), true);
+    assert.equal(step(app, 3).length, 0);
 });
 
 test('current provider stays separate from the setup draft and only updates after a successful save', async t => {

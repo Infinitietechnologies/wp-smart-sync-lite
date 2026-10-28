@@ -54,15 +54,8 @@ smartsync_test('legacy S3 listing preserves zero-size objects across ordinary pa
     smartsync_assert_same('next', $requests[1]['ContinuationToken']);
 });
 
-smartsync_test('public legacy runtime helpers validate configuration and keep cloud invalidation scoped', function () {
-    $config = smartsync_provider_config('aws'); $config->useCloudFront = true; $config->distributionId = 'FIXTURE'; $requests = [];
-    $config->fakeCloudFront = new \Aws\CloudFront\CloudFrontClient(['region' => 'us-east-1', 'version' => 'latest', 'credentials' => ['key' => 'fixture-access', 'secret' => 'fixture-secret'],
-        'handler' => function ($command) use (&$requests) { $requests[] = $command->toArray(); return \GuzzleHttp\Promise\Create::promiseFor(new \Aws\Result()); }]);
-    $handler = new \SmartSyncS3\Ajax\SMARL_AjaxHandler($config);
-    $handler->purgeCloudFrontCache(['/wp-content/*', 'invalid', '/wp-includes/*']);
-    smartsync_assert_same('FIXTURE', $requests[0]['DistributionId']);
-    smartsync_assert_same(['/wp-content/*', '/wp-includes/*'], $requests[0]['InvalidationBatch']['Paths']['Items']);
-    smartsync_assert_throws(fn() => $handler->purgeCloudFrontCache(['invalid']), InvalidArgumentException::class);
+smartsync_test('public legacy Lite helpers validate configuration and keep Bunny uploads scoped', function () {
+    $handler = new \SmartSyncS3\Ajax\SMARL_AjaxHandler(new \SmartSyncS3\Models\SMARL_CloudConfig());
     smartsync_assert_same(400, smartsync_capture_json(fn() => $handler->noConfigurationFound())['status']);
     $bunny = smartsync_provider_config('bunny'); $bunny->region = 'DE'; $bunnyHandler = new \SmartSyncS3\Ajax\SMARL_AjaxHandler($bunny);
     $source = ABSPATH . 'legacy-upload.jpg'; file_put_contents($source, 'legacy');

@@ -86,11 +86,7 @@ smartsync_test('public URL normalization preserves bucket prefixes and refuses m
     }
 });
 
-smartsync_test('Cloudflare endpoint validation restricts API credentials to the R2 account endpoint', function () {
-    $endpoint = 'https://' . str_repeat('a', 32) . '.r2.cloudflarestorage.com';
-    smartsync_assert_same($endpoint, SMARL_CloudConfig::validateCloudflareEndpoint($endpoint . '/'));
-    foreach (['http://example.com', 'https://example.com', $endpoint . '/bucket', $endpoint . '?q=1', $endpoint . ':443'] as $url) smartsync_assert_throws(fn() => SMARL_CloudConfig::validateCloudflareEndpoint($url));
-});
+
 
 smartsync_test('all storage operations reject traversal keys before touching a provider', function () {
     $config = smartsync_provider_config();
@@ -100,19 +96,11 @@ smartsync_test('all storage operations reject traversal keys before touching a p
     smartsync_assert_same('wp-content/uploads/photo.jpg', SMARL_CloudConfig::validateObjectKey('wp-content/uploads/photo.jpg'));
 });
 
-smartsync_test('S3 provider endpoint selection includes regional Wasabi and Cloudflare auto', function () {
-    $config = smartsync_provider_config('wasabi'); $config->region = 'eu-central-1';
-    smartsync_assert_same('https://s3.eu-central-1.wasabisys.com', (string) $config->getS3Client()->getEndpoint());
-    $config->serviceProvider = 'digitalocean'; $config->region = 'sgp1';
-    smartsync_assert_same('https://sgp1.digitaloceanspaces.com', (string) $config->getS3Client()->getEndpoint());
-    $config->serviceProvider = 'cloudflare';
-    smartsync_assert_same('auto', $config->getS3Client()->getRegion());
-    $config->serviceProvider = 'unsupported'; smartsync_assert_throws(fn() => $config->getS3Client());
-});
+
 
 smartsync_test('S3 upload ACLs are only sent to DigitalOcean and Wasabi', function () {
     $path = ABSPATH . 'provider-upload.txt'; file_put_contents($path, 'fixture');
-    foreach (['aws', 'digitalocean', 'wasabi', 'cloudflare'] as $provider) {
+    foreach (['aws', 'digitalocean', 'wasabi'] as $provider) {
         $commands = []; $config = smartsync_provider_config($provider);
         $config->fakeS3 = smartsync_provider_s3(function ($command) use (&$commands) { $commands[] = $command->toArray(); return []; });
         $config->uploadObject('wp-content/uploads/fixture.txt', $path);
@@ -177,22 +165,10 @@ smartsync_test('Bunny lists nested files using storage zone credentials and stre
     smartsync_assert_throws(fn() => $config->listObjects());
 });
 
-smartsync_test('Google object upload and listing work with uniform bucket access and no per-object ACL', function () {
-    $calls = []; $config = smartsync_provider_config('google');
-    $path = ABSPATH . 'google-fixture.txt'; file_put_contents($path, 'fixture-google'); $config->googleServicePath = $path;
-    $config->fakeGoogle = new StorageClient(['projectId' => 'fixture-project', 'credentialsFetcher' => new AnonymousCredentials(), 'httpHandler' => function ($request, $options = []) use (&$calls) {
-        $calls[] = [(string) $request->getUri(), $request->getMethod(), (string) $request->getBody()];
-        if ($request->getMethod() === 'GET') return new Response(200, ['Content-Type' => 'application/json'], '{"items":[{"name":"nested/photo.jpg","size":"12","generation":"1"}]}');
-        return new Response(200, ['Content-Type' => 'application/json'], '{"name":"nested/photo.jpg","size":"12","generation":"1"}');
-    }]);
-    $config->uploadObject('nested/photo.jpg', $path);
-    smartsync_assert_true(!str_contains($calls[0][0], 'predefinedAcl'));
-    smartsync_assert_same([['key' => 'nested/photo.jpg', 'size' => 12]], $config->listObjects());
-    unlink($path);
-});
+
 
 smartsync_test('every provider configuration endpoint rejects insufficient capabilities and invalid nonces', function () {
-    foreach (['configureAws', 'listS3Buckets', 'generateSslCertificate', 'checkDnsRecord', 'updateCloudFrontAlternateDomain'] as $method) {
+    foreach (['configureAws', 'listS3Buckets', 'proOnly'] as $method) {
         $handler = new SMARL_AwsConfigAjax(new SMARL_CloudConfig());
         $GLOBALS['smartsync_test_can_manage'] = false;
         $response = smartsync_capture_json(fn() => $handler->$method()); smartsync_assert_same(403, $response['status']);
@@ -232,171 +208,31 @@ smartsync_test('Bunny bucket choices expose no passwords and bind server-side se
     smartsync_assert_same('fixture.b-cdn.net', $saved['url']);
 });
 
-smartsync_test('configuration validates provider and CloudFront restrictions before touching storage', function () {
-    foreach (['unknown', 'digitalocean', 'google', 'cloudflare', 'bunny'] as $provider) {
-        $_POST = ['service_provider' => $provider, 'bucket_type' => 'existing', 'bucket_name' => 'fixture-bucket', 'bucket_region' => 'us-east-1', 'iam_key' => 'fixture-access', 'iam_secret' => 'fixture-secret', 'use_cloudfront' => 'true'];
-        $response = smartsync_capture_json(fn() => (new SMARL_AwsConfigAjax(null))->configureAws());
-        smartsync_assert_same(false, $response['success']);
-        smartsync_assert_same(false, get_option('smarl_settings'));
-    }
-});
 
-smartsync_test('Cloudflare settings persist API endpoint and public URL on the actual saved model', function () {
-    $config = smartsync_provider_config('cloudflare');
-    $config->fakeS3 = smartsync_provider_s3(fn() => []);
-    $ajax = new SmartSyncProviderAjax(new SMARL_CloudConfig()); $ajax->nextConfig = $config;
-    $_POST = ['service_provider' => 'cloudflare', 'bucket_type' => 'existing', 'bucket_name' => 'fixture-bucket', 'bucket_region' => 'auto', 'iam_key' => 'fixture-access', 'iam_secret' => 'fixture-secret', 'cloudflare_endpoint' => $config->cloudflareEndpoint, 'cloudflare_url' => 'https://cdn.example.test/'];
-    smartsync_assert_same(true, smartsync_capture_json(fn() => $ajax->configureAws())['success']);
-    $saved = SMARL_CloudConfig::load();
-    smartsync_assert_same('cdn.example.test', $saved->cloudflareUrl);
-    smartsync_assert_same($config->cloudflareEndpoint, $saved->cloudflareEndpoint);
-});
 
-smartsync_test('certificate requests preserve prior state for invalid domains and reject non-CloudFront setups', function () {
-    $config = smartsync_provider_config(); $config->useCloudFront = true; $config->distributionId = 'fixture-id'; $config->cloudfrontUrl = 'fixture.cloudfront.net';
-    $config->customUrl = new SMARL_CustomUrl('existing-arn', 'old.example.test'); $config->customUrl->save();
-    $_POST = ['domain' => 'https://new.example.test/path'];
-    smartsync_assert_same(false, smartsync_capture_json(fn() => (new SMARL_AwsConfigAjax($config))->generateSslCertificate())['success']);
-    smartsync_assert_same('existing-arn', SMARL_CustomUrl::load()->certificateArn);
-    $config->serviceProvider = 'digitalocean'; $_POST = ['domain' => 'new.example.test'];
-    smartsync_assert_same(false, smartsync_capture_json(fn() => (new SMARL_AwsConfigAjax($config))->generateSslCertificate())['success']);
-});
 
-smartsync_test('ACM pending records save the certificate immediately without sleeps or duplicate requests', function () {
-    $calls = []; $config = smartsync_provider_config(); $config->useCloudFront = true; $config->distributionId = 'fixture-id'; $config->cloudfrontUrl = 'fixture.cloudfront.net';
-    $config->save();
-    $config->fakeAcm = new AcmClient(['region' => 'us-east-1', 'version' => 'latest', 'credentials' => ['key' => 'fixture', 'secret' => 'fixture'], 'handler' => function ($command) use (&$calls) {
-        $calls[] = $command->getName(); return \GuzzleHttp\Promise\Create::promiseFor(new Result($command->getName() === 'RequestCertificate' ? ['CertificateArn' => 'arn:aws:acm:us-east-1:123456789012:certificate/fixture'] : ['Certificate' => ['Status' => 'PENDING_VALIDATION', 'DomainName' => 'cdn.example.test', 'DomainValidationOptions' => []]]));
-    }]);
-    $_POST = ['domain' => 'CDN.example.test']; $ajax = new SMARL_AwsConfigAjax($config);
-    $response = smartsync_capture_json(fn() => $ajax->generateSslCertificate());
-    smartsync_assert_same(true, $response['success']); smartsync_assert_same('cdn.example.test', SMARL_CustomUrl::load()->domain);
-    smartsync_capture_json(fn() => $ajax->generateSslCertificate());
-    smartsync_assert_same(['RequestCertificate', 'DescribeCertificate', 'DescribeCertificate'], $calls);
-    smartsync_assert_same(false, get_option('smarl_sync_lock'));
-});
 
-smartsync_test('DNS verification rejects certificates not bound to the configured domain', function () {
-    $config = smartsync_provider_config(); $config->useCloudFront = true; $config->distributionId = 'fixture-id'; $config->cloudfrontUrl = 'fixture.cloudfront.net';
-    $config->customUrl = new SMARL_CustomUrl('fixture-arn', 'cdn.example.test'); $_POST = ['certificateArn' => 'different-arn'];
-    $config->save(); $config->customUrl->save();
-    smartsync_assert_same(false, smartsync_capture_json(fn() => (new SMARL_AwsConfigAjax($config))->checkDnsRecord())['success']);
-});
 
-smartsync_test('CloudFront payloads use unique caller references and preserve asset version query strings', function () {
-    $first = SMARL_AwsHelper::createCloudfrontArray('fixture-bucket', 'us-east-1', 'fixture-oac')['DistributionConfig'];
-    $second = SMARL_AwsHelper::createCloudfrontArray('fixture-bucket', 'us-east-1', 'fixture-oac')['DistributionConfig'];
-    smartsync_assert_true(is_string($first['CallerReference']) && $first['CallerReference'] !== $second['CallerReference']);
-    smartsync_assert_same(true, $first['DefaultCacheBehavior']['ForwardedValues']['QueryString']);
-    smartsync_assert_true(class_exists(\SmartSyncS3\Services\SMARLI_WasabiBucketManager::class));
-});
 
-smartsync_test('Google credential validation rejects arbitrary JSON and external token endpoints', function () {
-    $path = ABSPATH . 'google-key-fixture.json';
-    file_put_contents($path, '{"type":"authorized_user"}'); smartsync_assert_same(false, SMARLI_GoogleService::getServiceJSON($path));
-    $credentials = ['type' => 'service_account', 'project_id' => 'fixture-project', 'client_email' => 'fixture@fixture-project.iam.gserviceaccount.com', 'private_key' => "-----BEGIN PRIVATE KEY-----\nfixture\n-----END PRIVATE KEY-----", 'token_uri' => 'https://attacker.example.test/token'];
-    file_put_contents($path, json_encode($credentials)); smartsync_assert_same(false, SMARLI_GoogleService::getServiceJSON($path));
-    $credentials['token_uri'] = 'https://oauth2.googleapis.com/token'; file_put_contents($path, json_encode($credentials));
-    smartsync_assert_same('fixture-project', SMARLI_GoogleService::getProjectId($path)); unlink($path);
-});
 
-smartsync_test('Google credential migration removes the web upload and cleans only owned private files', function () {
-    $path = wp_upload_dir()['basedir'] . '/fixture-service-key.json';
-    $credentials = ['type' => 'service_account', 'project_id' => 'fixture-project', 'client_email' => 'fixture@fixture-project.iam.gserviceaccount.com', 'private_key' => "-----BEGIN PRIVATE KEY-----\nfixture\n-----END PRIVATE KEY-----", 'token_uri' => 'https://oauth2.googleapis.com/token'];
-    file_put_contents($path, json_encode($credentials));
-    $private = SMARLI_GoogleService::migrateCredentials($path);
-    smartsync_assert_true(is_file($private)); smartsync_assert_true(!is_file($path));
-    smartsync_assert_true(str_contains(str_replace('\\', '/', $private), '/smartsync-private/'));
-    smartsync_assert_true(!str_contains(file_get_contents($private), 'BEGIN PRIVATE KEY'));
-    smartsync_assert_same('fixture-project', SMARLI_GoogleService::getServiceJSON($private)['project_id']);
-    $envelope = json_decode(file_get_contents($private), true);
-    $ciphertext = base64_decode($envelope['ciphertext']); $ciphertext[0] = chr(ord($ciphertext[0]) ^ 1);
-    $envelope['ciphertext'] = base64_encode($ciphertext); file_put_contents($private, json_encode($envelope));
-    smartsync_assert_same(false, SMARLI_GoogleService::getServiceJSON($private));
-    $unrelated = SMARLI_GoogleService::getCredentialsDirectory() . '/unrelated.json'; file_put_contents($unrelated, '{}');
-    SMARLI_GoogleService::deleteCredentialFile($unrelated); smartsync_assert_true(is_file($unrelated));
-    SMARLI_GoogleService::deleteCredentialFile($private); smartsync_assert_true(!is_file($private));
-    unlink($unrelated); SMARLI_GoogleService::cleanupCredentials();
-});
 
-smartsync_test('DNS status requires an issued matching certificate and normalized distribution CNAME', function () {
-    $config = smartsync_provider_config(); $config->useCloudFront = true; $config->distributionId = 'fixture-id'; $config->cloudfrontUrl = 'fixture.cloudfront.net';
-    $config->customUrl = new SMARL_CustomUrl('arn:aws:acm:us-east-1:123456789012:certificate/fixture', 'cdn.example.test');
-    $config->save(); $config->customUrl->save();
-    $GLOBALS['smartsync_test_dns'] = ['cdn.example.test' => [['target' => 'FIXTURE.cloudfront.net.']]];
-    $status = 'PENDING_VALIDATION';
-    $config->fakeAcm = new AcmClient(['region' => 'us-east-1', 'version' => 'latest', 'credentials' => ['key' => 'fixture', 'secret' => 'fixture'], 'handler' => function () use (&$status) {
-        return \GuzzleHttp\Promise\Create::promiseFor(new Result(['Certificate' => ['Status' => $status, 'DomainName' => 'cdn.example.test', 'SubjectAlternativeNames' => ['cdn.example.test'], 'DomainValidationOptions' => []]]));
-    }]);
-    $_POST = ['certificateArn' => $config->customUrl->certificateArn]; $ajax = new SMARL_AwsConfigAjax($config);
-    smartsync_assert_same(false, smartsync_capture_json(fn() => $ajax->checkDnsRecord())['data']['verified']);
-    $status = 'ISSUED'; smartsync_assert_same(true, smartsync_capture_json(fn() => $ajax->checkDnsRecord())['data']['verified']);
-    $GLOBALS['smartsync_test_dns'] = []; smartsync_assert_same(false, smartsync_capture_json(fn() => $ajax->checkDnsRecord())['data']['verified']);
-});
 
-smartsync_test('CloudFront alternate domain attachment is idempotent and checks certificate coverage', function () {
-    $config = smartsync_provider_config(); $config->useCloudFront = true; $config->distributionId = 'fixture-id'; $config->cloudfrontUrl = 'fixture.cloudfront.net';
-    $config->customUrl = new SMARL_CustomUrl('arn:aws:acm:us-east-1:123456789012:certificate/fixture', 'cdn.example.test');
-    $config->save(); $config->customUrl->save();
-    $GLOBALS['smartsync_test_dns'] = ['cdn.example.test' => [['target' => 'fixture.cloudfront.net.']]];
-    $config->fakeAcm = new AcmClient(['region' => 'us-east-1', 'version' => 'latest', 'credentials' => ['key' => 'fixture', 'secret' => 'fixture'], 'handler' => function () {
-        return \GuzzleHttp\Promise\Create::promiseFor(new Result(['Certificate' => ['Status' => 'ISSUED', 'DomainName' => 'cdn.example.test', 'SubjectAlternativeNames' => ['cdn.example.test']]]));
-    }]);
-    $updates = [];
-    $distribution = SMARL_AwsHelper::createCloudfrontArray('fixture-bucket', 'us-east-1', 'fixture-oac')['DistributionConfig'];
-    $distribution['Aliases'] = ['Quantity' => 1, 'Items' => ['cdn.example.test']];
-    $config->fakeCloudFront = new CloudFrontClient(['region' => 'us-east-1', 'version' => 'latest', 'credentials' => ['key' => 'fixture', 'secret' => 'fixture'], 'handler' => function ($command) use (&$updates, &$distribution) {
-        if ($command->getName() === 'GetDistributionConfig') return \GuzzleHttp\Promise\Create::promiseFor(new Result(['DistributionConfig' => $distribution, 'ETag' => 'fixture-etag']));
-        $updates[] = $command->toArray(); return \GuzzleHttp\Promise\Create::promiseFor(new Result());
-    }]);
-    $ajax = new SMARL_AwsConfigAjax($config);
-    smartsync_assert_same(true, smartsync_capture_json(fn() => $ajax->updateCloudFrontAlternateDomain())['success']);
-    smartsync_assert_same(1, $updates[0]['DistributionConfig']['Aliases']['Quantity']);
-    smartsync_assert_same('fixture-etag', $updates[0]['IfMatch']);
-    smartsync_assert_same('cdn.example.test', get_option('smarl_settings')['url']);
-    $distribution['Aliases'] = ['Quantity' => 1, 'Items' => ['other.example.test']];
-    smartsync_assert_same(false, smartsync_capture_json(fn() => $ajax->updateCloudFrontAlternateDomain())['success']);
-    smartsync_assert_same(1, count($updates));
-    smartsync_assert_same(false, get_option('smarl_sync_lock'));
-});
 
-smartsync_test('all custom domain endpoints respect the shared configuration lock', function () {
-    $config = smartsync_provider_config(); $config->useCloudFront = true; $config->distributionId = 'fixture-id'; $config->cloudfrontUrl = 'fixture.cloudfront.net'; $config->save();
-    $ajax = new SMARL_AwsConfigAjax($config);
-    $lock = \SmartSyncS3\Helpers\SMARL_Helper::acquireSyncLock();
-    foreach (['generateSslCertificate', 'checkDnsRecord', 'updateCloudFrontAlternateDomain'] as $method) {
-        smartsync_assert_same(409, smartsync_capture_json(fn() => $ajax->$method())['status']);
-        smartsync_assert_same($lock, get_option('smarl_sync_lock')['token']);
-    }
-    \SmartSyncS3\Helpers\SMARL_Helper::releaseSyncLock($lock);
-    smartsync_assert_same([], $GLOBALS['smartsync_test_http_requests']);
-});
 
-smartsync_test('stale custom domain requests cannot restore a previous provider configuration', function () {
-    $config = smartsync_provider_config(); $config->useCloudFront = true; $config->distributionId = 'fixture-id'; $config->cloudfrontUrl = 'fixture.cloudfront.net'; $config->save();
-    $ajax = new SMARL_AwsConfigAjax($config);
-    $replacement = SMARL_CloudConfig::fromArray($config->toArray()); $replacement->bucket = 'replacement-bucket'; $replacement->save();
-    foreach (['generateSslCertificate', 'checkDnsRecord', 'updateCloudFrontAlternateDomain'] as $method) {
-        smartsync_assert_same(409, smartsync_capture_json(fn() => $ajax->$method())['status']);
-        smartsync_assert_same('replacement-bucket', get_option('smarl_settings')['bucket']);
-        smartsync_assert_same(false, get_option('smarl_sync_lock'));
-    }
-    delete_option('smarl_settings');
-    foreach (['generateSslCertificate', 'checkDnsRecord', 'updateCloudFrontAlternateDomain'] as $method) smartsync_assert_same(404, smartsync_capture_json(fn() => $ajax->$method())['status']);
-    smartsync_assert_same([], $GLOBALS['smartsync_test_http_requests']);
-});
 
-smartsync_test('stale certificate requests cannot overwrite a newer custom domain', function () {
-    $config = smartsync_provider_config(); $config->useCloudFront = true; $config->distributionId = 'fixture-id'; $config->cloudfrontUrl = 'fixture.cloudfront.net'; $config->save();
-    $config->customUrl = new SMARL_CustomUrl('old-certificate-arn', 'old.example.test'); $config->customUrl->save();
-    $ajax = new SMARL_AwsConfigAjax($config);
-    (new SMARL_CustomUrl('new-certificate-arn', 'new.example.test'))->save();
-    foreach (['generateSslCertificate', 'checkDnsRecord', 'updateCloudFrontAlternateDomain'] as $method) {
-        smartsync_assert_same(409, smartsync_capture_json(fn() => $ajax->$method())['status']);
-        smartsync_assert_same('new.example.test', SMARL_CustomUrl::load()->domain);
-        smartsync_assert_same(false, get_option('smarl_sync_lock'));
-    }
-});
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 smartsync_test('AWS direct hosting keeps unrelated policy statements and blocks public ACLs', function () {
     $calls = []; $config = smartsync_provider_config();
@@ -439,84 +275,22 @@ smartsync_test('provider reconfiguration requires restoring tracked offloaded me
     smartsync_assert_same([], $GLOBALS['smartsync_test_http_requests']); smartsync_assert_same(false, get_option('smarl_settings')); smartsync_assert_same(false, get_option('smarl_sync_lock'));
 });
 
-smartsync_test('credentials-only CloudFront repair preserves remote-only media delivery and existing resources', function () {
-    $config = smartsync_provider_config(); $config->useCloudFront = true; $config->cloudfrontUrl = 'fixture.cloudfront.net'; $config->url = 'media.example.test'; $config->distributionId = 'fixture-existing-distribution';
-    $config->canEnableMediaCDN = $config->useCdnForMedia = $config->mediaAutoDelete = true; $config->canEnableAssetCDN = $config->useCdnForAssets = true; $config->urlType = 'cloudfront';
-    $config->customUrl = new SMARL_CustomUrl('fixture-existing-certificate', 'media.example.test'); $config->save(); $config->customUrl->save();
-    $GLOBALS['smartsync_test_posts'][993] = (object) ['ID' => 993, 'post_type' => 'attachment']; update_post_meta(993, '_smarl_offloaded_files', ['wp-content/uploads/remote-only-repair.jpg']);
-    $calls = [];
-    $config->fakeS3 = smartsync_provider_s3(function ($command) use (&$calls) {
-        $calls[] = $command->getName();
-        if ($command->getName() !== 'HeadBucket') throw new RuntimeException('Credential repair attempted to provision cloud resources.');
-        return [];
-    });
-    $before = $config->toArray(); $before['iam_key'] = 'replacement-access'; $before['iam_secret'] = 'replacement-secret';
-    $_POST = ['service_provider' => 'aws', 'bucket_type' => 'existing', 'bucket_name' => $config->bucket, 'bucket_region' => $config->region, 'iam_key' => 'replacement-access', 'iam_secret' => 'replacement-secret', 'use_cloudfront' => 'true'];
-    $response = smartsync_capture_json(fn() => (new SMARL_AwsConfigAjax($config))->configureAws());
-    smartsync_assert_same(true, $response['success']); smartsync_assert_same(['HeadBucket'], $calls);
-    smartsync_assert_same($before, get_option('smarl_settings')); smartsync_assert_same('fixture-existing-certificate', SMARL_CustomUrl::load()->certificateArn);
-    smartsync_assert_same(false, get_option('smarl_sync_lock'));
-});
 
-smartsync_test('credentials-only R2 repair keeps CDN flags but a changed public target still requires restore', function () {
-    $config = smartsync_provider_config('cloudflare'); $config->region = 'auto'; $config->cloudflareUrl = $config->url = 'cdn.example.test';
-    $config->canEnableMediaCDN = $config->useCdnForMedia = true; $config->save();
-    $GLOBALS['smartsync_test_posts'][994] = (object) ['ID' => 994, 'post_type' => 'attachment']; update_post_meta(994, '_smarl_offloaded_files', ['wp-content/uploads/remote-only-r2.jpg']);
-    $calls = []; $config->fakeS3 = smartsync_provider_s3(function ($command) use (&$calls) { $calls[] = $command->getName(); return []; });
-    $_POST = ['service_provider' => 'cloudflare', 'bucket_type' => 'existing', 'bucket_name' => $config->bucket, 'bucket_region' => 'auto', 'iam_key' => 'new-access', 'iam_secret' => 'new-secret', 'cloudflare_endpoint' => $config->cloudflareEndpoint, 'cloudflare_url' => $config->url];
-    $ajax = new SMARL_AwsConfigAjax($config);
-    smartsync_assert_same(true, smartsync_capture_json(fn() => $ajax->configureAws())['success']);
-    smartsync_assert_same(true, SMARL_CloudConfig::load()->useCdnForMedia); smartsync_assert_same(['HeadBucket'], $calls);
-    $_POST['cloudflare_url'] = 'different.example.test';
-    smartsync_assert_same(false, smartsync_capture_json(fn() => $ajax->configureAws())['success']);
-    smartsync_assert_same(['HeadBucket'], $calls); smartsync_assert_same('cdn.example.test', get_option('smarl_settings')['url']);
-});
 
-smartsync_test('replacing a pending Google upload never deletes the active credential file', function () {
-    $credentials = ['type' => 'service_account', 'project_id' => 'fixture-project', 'client_email' => 'fixture@fixture-project.iam.gserviceaccount.com', 'private_key' => "-----BEGIN PRIVATE KEY-----\nfixture\n-----END PRIVATE KEY-----", 'token_uri' => 'https://oauth2.googleapis.com/token'];
-    $upload = wp_upload_dir()['basedir'] . '/active-google-upload.json'; file_put_contents($upload, json_encode($credentials));
-    $active = SMARLI_GoogleService::migrateCredentials($upload);
-    update_option('smarl_settings', ['service_provider' => 'google', 'googleServicePath' => $active]);
-    set_transient('smarl_google_credentials_' . get_current_user_id(), $active, 3600);
-    $temporary = ABSPATH . 'replacement-google-upload.json'; file_put_contents($temporary, json_encode($credentials));
-    $GLOBALS['smartsync_test_uploaded_files'] = [$temporary => true];
-    $_FILES['service_json'] = ['name' => 'service-account.json', 'tmp_name' => $temporary, 'error' => UPLOAD_ERR_OK, 'size' => filesize($temporary)];
-    SMARLI_GoogleService::moveFileTemp(); $firstPending = SMARLI_GoogleService::getTempPath();
-    smartsync_assert_true($firstPending !== $active && is_file($firstPending) && is_file($active));
-    smartsync_assert_same($active, get_option('smarl_settings')['googleServicePath']); smartsync_assert_same('fixture-project', SMARLI_GoogleService::getProjectId($active));
-    SMARLI_GoogleService::moveFileTemp(); $secondPending = SMARLI_GoogleService::getTempPath();
-    smartsync_assert_true(is_file($active) && is_file($secondPending) && !is_file($firstPending));
-    smartsync_assert_same(false, get_option('smarl_sync_lock'));
-    SMARLI_GoogleService::deleteCredentialFile($active); SMARLI_GoogleService::deleteCredentialFile($secondPending); unlink($temporary);
-    unset($GLOBALS['smartsync_test_uploaded_files']);
-});
+
+
+
 
 smartsync_test('configuration rechecks sync state before committing provider changes', function () {
-    $config = smartsync_provider_config('cloudflare');
+    $config = smartsync_provider_config('digitalocean');
     $config->fakeS3 = smartsync_provider_s3(function () {
         update_option('smarl_sync_settings', ['s3SyncStatus' => 'processing']); return [];
     });
     $ajax = new SmartSyncProviderAjax(null); $ajax->nextConfig = $config;
-    $_POST = ['service_provider' => 'cloudflare', 'bucket_type' => 'existing', 'bucket_name' => 'fixture-bucket', 'bucket_region' => 'auto', 'iam_key' => 'fixture-access', 'iam_secret' => 'fixture-secret', 'cloudflare_endpoint' => $config->cloudflareEndpoint, 'cloudflare_url' => 'cdn.example.test'];
+    $_POST = ['service_provider' => 'digitalocean', 'bucket_type' => 'existing', 'bucket_name' => 'fixture-bucket', 'bucket_region' => 'nyc3', 'iam_key' => 'fixture-access', 'iam_secret' => 'fixture-secret', 'cloudflare_endpoint' => $config->cloudflareEndpoint, 'cloudflare_url' => 'cdn.example.test'];
     smartsync_assert_same(409, smartsync_capture_json(fn() => $ajax->configureAws())['status']);
     smartsync_assert_same(false, get_option('smarl_settings')); smartsync_assert_same(false, get_option('smarl_sync_lock'));
 });
 
-smartsync_test('Google restore writes its destination and deletion tolerates missing objects', function () {
-    $config = smartsync_provider_config('google');
-    $credential = ABSPATH . 'google-fake-config.txt'; file_put_contents($credential, 'fixture'); $config->googleServicePath = $credential;
-    $calls = [];
-    $config->fakeGoogle = new StorageClient(['projectId' => 'fixture-project', 'credentialsFetcher' => new AnonymousCredentials(), 'httpHandler' => function ($request) use (&$calls) {
-        $uri = (string) $request->getUri(); $method = $request->getMethod(); $calls[] = [$method, $uri];
-        if ($method === 'DELETE') return new Response(204);
-        if (str_contains($uri, 'alt=media')) return new Response(200, [], 'restored-google');
-        if (str_contains($uri, 'missing')) throw new \GuzzleHttp\Exception\ClientException('Not found', $request, new Response(404, ['Content-Type' => 'application/json'], '{"error":{"code":404,"message":"Not found"}}'));
-        return new Response(200, ['Content-Type' => 'application/json'], '{"name":"nested/photo.jpg","generation":"1"}');
-    }]);
-    $destination = ABSPATH . 'google-restored.txt'; $config->downloadObject('nested/photo.jpg', $destination);
-    smartsync_assert_same('restored-google', file_get_contents($destination));
-    $config->deleteObject('nested/photo.jpg'); $config->deleteObject('missing.jpg');
-    smartsync_assert_same(1, count(array_filter($calls, fn($call) => $call[0] === 'DELETE')));
-    unlink($destination); unlink($credential);
-});
+
 }

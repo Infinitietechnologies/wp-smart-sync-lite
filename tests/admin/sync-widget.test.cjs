@@ -14,22 +14,6 @@ function snapshot(app) {
     return storage;
 }
 
-test('the shared widget renders on settings, wizard and unsupported custom-domain screens without duplicate polls', async t => {
-    for (const view of ['settings', 'wizard', 'domain']) {
-        const app = await boot(view, { data: { service_provider: 'bunny' }, widget: { seed: running } });
-        t.after(() => app.close());
-        assert.equal(app.$('.smartsync-background-indicator').length, 1);
-        assert.equal(app.$('.smartsync-background-indicator').prop('hidden'), false);
-        assert.equal(app.$('.smartsync-widget-toggle').attr('aria-expanded'), 'false');
-        app.$('.smartsync-widget-toggle').trigger('click');
-        assert.equal(app.$('#sync-widget-provider').text(), 'Bunny CDN');
-        assert.equal(app.$('#sync-widget-storage').text(), 'website-media');
-        assert.equal(app.$('#sync-widget-operation').text(), 'Uploading media');
-        assert.equal(app.$('#sync-widget-current_file').text(), 'photo.jpg');
-        assert.equal(app.$('#sync-widget-failed').text(), '1');
-        assert.equal(app.requests.filter(request => request.action === 'check_sync_status').length, view === 'wizard' ? 0 : 1);
-    }
-});
 
 test('expanded preference, elapsed time and an observed ETA survive navigation with site isolation', async t => {
     const first = await boot('settings'); t.after(() => first.close());

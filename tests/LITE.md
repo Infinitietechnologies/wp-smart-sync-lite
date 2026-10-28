@@ -1,0 +1,28 @@
+# SmartSync Lite 1.8.0 verification
+
+The `lite` branch retains Amazon S3, DigitalOcean Spaces, Wasabi and Bunny **media** operations. Google Cloud Storage, Cloudflare R2, Amazon CloudFront (including custom domains, certificates, DNS and cache invalidation), and JS/CSS synchronization have disabled **Pro only** previews and upgrade links. The maintained Pro integration implementations and Google dependencies are removed.
+
+Legacy settings remain readable for ownership tracking and uninstall cleanup. They do not authorize a Pro client, delivery URL or worker. Existing offloaded media on a Pro-only configuration must be restored using the full edition before switching. Both editions share class names and state; activate only one edition at a time. The install directory remains `smartsync` for upgrade continuity; the artifact is `smartsync-lite-1.8.0.zip`.
+
+Verified on 2026-10-28:
+
+| Check | Result |
+| --- | --- |
+| PHP regressions, PHP 8.1 / 8.2 / 8.3 / 8.4 / 8.5 | 223 passed, 0 failed on each runtime |
+| Admin DOM regressions | 97 passed, 0 failed; PHP view warnings fail rendering |
+| Native WordPress 6.5 / PHP 8.1 | Core, SQL sync, core audit, sync audit and Bunny provider integrations passed |
+| Native WordPress 7.1.3 / PHP 8.1 and PHP 8.5 | Same five integrations passed on both runtimes |
+| WordPress diagnostics | No unexpected PHP diagnostics; all three debug logs empty |
+| PHPStan level 5 | Runtime and entrypoint passes; no baseline or ignored errors |
+| Maintained PHP / JavaScript syntax | Passed |
+| Composer | Strict validation, platform requirements and locked dependency audit passed |
+| Browser previews | Settings, provider setup and CloudFront preview checked at 1280px and 390px; controls disabled, no horizontal overflow |
+| Extracted Lite ZIP, WordPress 7.1.3 / PHP 8.5 | Activated successfully; SDKs loaded from the extracted package; core/AJAX/scheduler/schema checks passed; Pro clients absent; no PHP debug output |
+
+Lite-specific regressions cover crafted provider discovery/configuration, all retired Pro AJAX actions, CloudFront requests, asset upload/restore/delivery requests, inherited asset jobs, injected JS queue rows, preserved legacy Pro settings, absence of asset URL hooks, disabled provider choices, private settings excluded from previews, badges and exact upgrade URLs.
+
+The native WordPress fixtures use real MySQL, WordPress hooks/options/roles/nonces and Action Scheduler. Provider HTTP is mocked or blocked; these checks do not establish live account permissions, billing, provisioning or CDN delivery. Core files were checked against WordPress.org checksums. These are three Lite integration combinations; the older 32-combination report describes the full edition. CI remains intentionally disabled.
+
+Commands: `php tests/run.php`, `npm test --prefix tests/admin`, `composer test --working-dir=tests/static`, `composer validate --strict --no-check-publish`, `composer check-platform-reqs`, `composer audit --locked`, and `./tests/build-plugin.ps1`. Run native integration files through WP-CLI only in their guarded disposable fixture paths, as described in [README.md](README.md).
+
+The verified Lite ZIP contains 6,353 entries. Its maintained files match the Lite source. SHA-256: `6e969a3a589beddca31bd8030039516a590587bd4e3e1738ef3a3d4699e1b5a2`.

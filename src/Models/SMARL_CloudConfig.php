@@ -2,25 +2,20 @@
 namespace SmartSyncS3\Models;
 if (!defined('ABSPATH')) exit;
 
-use Aws\Acm\AcmClient;
-use Aws\CloudFront\CloudFrontClient;
 use Aws\S3\S3Client;
-use Aws\Sts\StsClient;
 use InvalidArgumentException;
 use RuntimeException;
-use Google\Cloud\Storage\StorageClient;
 use GuzzleHttp\Client;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Handler\CurlHandler;
 use GuzzleHttp\HandlerStack;
-use SmartSyncS3\Services\SMARLI_GoogleService;
 use SmartSyncS3\Helpers\SMARL_Helper;
 use SmartSyncS3\Exceptions\SMARL_ProviderException;
 
 /** Persisted configuration and common storage operations for media and sync jobs. */
 class SMARL_CloudConfig
 {
-    public const PROVIDERS = ['aws', 'digitalocean', 'cloudflare', 'wasabi', 'google', 'bunny'];
+    public const PROVIDERS = \SmartSyncS3\SMARL_Edition::PROVIDERS;
     public string $bucket = '';
     public string $serviceProvider = 'aws';
     public string $region = 'us-east-1';
@@ -101,58 +96,40 @@ class SMARL_CloudConfig
     }
     public static function load(): ?SMARL_CloudConfig
     {
-        // A long-running request can outlive a configuration change in another worker.
         wp_cache_delete('smarl_settings', 'options');
         wp_cache_delete('notoptions', 'options');
         $data = get_option('smarl_settings', []);
         $config = self::fromArray(is_array($data) ? $data : []);
         $config->customUrl = SMARL_CustomUrl::load();
-        try { $needsMigration = $config->serviceProvider === 'google' && $config->googleServicePath !== '' && SMARLI_GoogleService::credentialsNeedMigration($config->googleServicePath); }
-        catch (\Throwable $error) { $needsMigration = false; }
-        $retiredSettings = is_array($data) && (array_key_exists('mediaCdnTestExtensions', $data) || array_key_exists('mediaCdnTestTarget', $data));
-        if ($needsMigration || $retiredSettings) {
+        if (is_array($data) && (array_key_exists('mediaCdnTestExtensions', $data) || array_key_exists('mediaCdnTestTarget', $data))) {
             $lock = SMARL_Helper::acquireSyncLock();
-            if ($lock === null) return $config;
-            try {
-                global $wpdb;
-                $current = maybe_unserialize($wpdb->get_var($wpdb->prepare("SELECT option_value FROM {$wpdb->options} WHERE option_name = %s", 'smarl_settings')));
-                $fresh = self::fromArray(is_array($current) ? $current : []);
-                $fresh->customUrl = $config->customUrl;
-                $config = $fresh;
-                if (is_array($current) && (array_key_exists('mediaCdnTestExtensions', $current) || array_key_exists('mediaCdnTestTarget', $current))) $config->save();
-                if ($config->serviceProvider !== 'google' || !SMARLI_GoogleService::credentialsNeedMigration($config->googleServicePath)) return $config;
-                $oldPath = $config->googleServicePath;
-                $path = SMARLI_GoogleService::migrateCredentials($oldPath, false);
-                if ($path !== $config->googleServicePath) {
-                    $config->googleServicePath = $path;
-                    try { $config->save(); }
-                    catch (\Throwable $error) { /* Verify durable state even when an option hook fails after writing. */ }
-                    $saved = maybe_unserialize($wpdb->get_var($wpdb->prepare("SELECT option_value FROM {$wpdb->options} WHERE option_name = %s", 'smarl_settings')));
-                    if (is_array($saved) && ($saved['service_provider'] ?? '') === 'google' && ($saved['googleServicePath'] ?? '') === $path) {
-                        SMARLI_GoogleService::deleteLegacyCredentialFile($oldPath);
-                        if (get_option('service_json_path_temp') === $oldPath) delete_option('service_json_path_temp');
-                    } else {
-                        $config->googleServicePath = $oldPath;
-                        SMARLI_GoogleService::deleteCredentialFile($path);
-                    }
-                }
-            } catch (\Throwable $e) {
-                // Configuration remains inspectable so an administrator can replace invalid credentials.
-                if (isset($oldPath)) $config->googleServicePath = $oldPath;
-            } finally { SMARL_Helper::releaseSyncLock($lock); }
+            if ($lock !== null) {
+                try {
+                    global $wpdb;
+                    $fresh = maybe_unserialize($wpdb->get_var($wpdb->prepare("SELECT option_value FROM {$wpdb->options} WHERE option_name = %s", 'smarl_settings')));
+                    $config = self::fromArray(is_array($fresh) ? $fresh : []);
+                    $config->save();
+                } catch (\Throwable $error) { /* Keep the safe in-memory configuration; retry persistence later. */ }
+                finally { SMARL_Helper::releaseSyncLock($lock); }
+            }
         }
+        // Pro settings remain inert and intact so switching editions cannot change storage ownership.
         return $config;
     }
     public static function delete(): void { delete_option('smarl_settings'); }
     public static function init(): void { add_option('smarl_settings', [], '', false); }
 
+    public function supportsLiteFeatures(): bool
+    {
+        return in_array($this->serviceProvider, self::PROVIDERS, true) && !$this->useCloudFront
+            && $this->urlType !== 'cloudfront' && !preg_match('~(?:^|[./])cloudfront\.net(?:/|$)~i', $this->url);
+    }
+
     public function isConfigured(): bool
     {
-        if ($this->bucket === '' || !in_array($this->serviceProvider, self::PROVIDERS, true)) return false;
-        if ($this->serviceProvider === 'google') return $this->googleServicePath !== '' && is_readable($this->googleServicePath);
+        if (!$this->supportsLiteFeatures() || $this->bucket === '') return false;
         if ($this->serviceProvider === 'bunny') return $this->bunnyStoragePassword !== '' && $this->region !== '';
-        return $this->iamKey !== '' && $this->iamSecret !== '' && $this->region !== ''
-            && ($this->serviceProvider !== 'cloudflare' || $this->cloudflareEndpoint !== '');
+        return $this->iamKey !== '' && $this->iamSecret !== '' && $this->region !== '';
     }
 
     public static function normalizePublicBaseUrl(string $value): string
@@ -171,31 +148,18 @@ class SMARL_CloudConfig
         return 'https://' . strtolower($parts['host']) . rtrim($parts['path'] ?? '', '/');
     }
 
-    public function getPublicBaseUrl(): string { return self::normalizePublicBaseUrl($this->url); }
+    public function getPublicBaseUrl(): string { return $this->supportsLiteFeatures() ? self::normalizePublicBaseUrl($this->url) : ''; }
 
-    public static function validateCloudflareEndpoint(string $endpoint): string
-    {
-        $parts = parse_url($endpoint);
-        if (!$parts || ($parts['scheme'] ?? '') !== 'https' || isset($parts['user']) || isset($parts['port'])
-            || isset($parts['query']) || isset($parts['fragment']) || !empty(trim($parts['path'] ?? '', '/'))
-            || !preg_match('/^[a-f0-9]{32}(?:\.(?:eu|fedramp))?\.r2\.cloudflarestorage\.com$/i', $parts['host'] ?? '')) {
-            throw new InvalidArgumentException('Enter the HTTPS Cloudflare R2 account endpoint.');
-        }
-        return 'https://' . strtolower($parts['host']);
-    }
 
     public function getS3Client(string $region = ''): ?S3Client
     {
-        if (in_array($this->serviceProvider, ['google', 'bunny'], true)) return null;
+        if (!$this->supportsLiteFeatures()) throw new InvalidArgumentException(\SmartSyncS3\SMARL_Edition::proMessage());
+        if ($this->serviceProvider === 'bunny') return null;
         if (!in_array($this->serviceProvider, self::PROVIDERS, true)) throw new InvalidArgumentException('Unsupported storage provider.');
         $region = $region !== '' ? $region : $this->region;
         if (!preg_match('/^[a-z0-9-]+$/', $region)) throw new InvalidArgumentException('A valid storage region is required.');
         $options = ['region' => $region, 'version' => 'latest', 'credentials' => $this->credentials(), 'http' => $this->sdkHttpOptions()];
-        if ($this->serviceProvider === 'cloudflare') {
-            $options['region'] = 'auto';
-            $options['endpoint'] = self::validateCloudflareEndpoint($this->cloudflareEndpoint);
-            $options['use_path_style_endpoint'] = true;
-        } elseif ($this->serviceProvider === 'digitalocean') {
+        if ($this->serviceProvider === 'digitalocean') {
             // The endpoint chooses the Spaces datacenter. AWS regions avoid an invalid CreateBucket payload.
             $options['region'] = 'us-east-1';
             $options['endpoint'] = "https://$region.digitaloceanspaces.com";
@@ -208,9 +172,6 @@ class SMARL_CloudConfig
     private function sdkHttpOptions(): array {
         return SMARL_Helper::cloudHttpOptions();
     }
-    public function getCloudfrontClient(): CloudFrontClient { return new CloudFrontClient(['region' => 'us-east-1', 'version' => 'latest', 'credentials' => $this->credentials(), 'http' => $this->sdkHttpOptions()]); }
-    public function getStsClient(string $region = ''): StsClient { return new StsClient(['region' => $region ?: $this->region, 'version' => 'latest', 'credentials' => $this->credentials(), 'http' => $this->sdkHttpOptions()]); }
-    public function getAcmClient(): AcmClient { return new AcmClient(['region' => 'us-east-1', 'version' => 'latest', 'credentials' => $this->credentials(), 'http' => $this->sdkHttpOptions()]); }
 
     public function createDigitalOceanSpace($spaceName): array
     {
@@ -224,6 +185,7 @@ class SMARL_CloudConfig
 
     public static function validateObjectKey(string $key): string
     {
+        if (in_array(strtolower(pathinfo($key, PATHINFO_EXTENSION)), ['js', 'css', 'mjs', 'cjs'], true)) throw new InvalidArgumentException(\SmartSyncS3\SMARL_Edition::proMessage());
         if ($key === '' || $key[0] === '/' || str_contains($key, '\\') || preg_match('/[\x00-\x1f\x7f]/', $key)
             || preg_match('~(?:^|/)\.{1,2}(?:/|$)~', $key) || preg_match('~^[a-z]:~i', $key)) throw new InvalidArgumentException('Invalid storage object path.');
         return $key;
@@ -234,11 +196,7 @@ class SMARL_CloudConfig
         self::validateObjectKey($key);
         if (!$this->isConfigured()) throw new SMARL_ProviderException(__('Cloud storage is not configured.', 'smartsync-lite-media-offloader-and-assets-cdn'));
         if (!is_file($path) || !is_readable($path)) throw new SMARL_ProviderException(__('The local upload file cannot be read.', 'smartsync-lite-media-offloader-and-assets-cdn'));
-        if ($this->serviceProvider === 'google') {
-            $stream = fopen($path, 'rb');
-            try { $this->googleBucket()->upload($stream, ['name' => $key]); }
-            finally { if (is_resource($stream)) fclose($stream); }
-        } elseif ($this->serviceProvider === 'bunny') {
+        if ($this->serviceProvider === 'bunny') {
             $size = filesize($path);
             if ($size === false) throw new SMARL_ProviderException(__('The local upload file cannot be read.', 'smartsync-lite-media-offloader-and-assets-cdn'));
             $options = ['headers' => ['Content-Type' => 'application/octet-stream']];
@@ -252,7 +210,7 @@ class SMARL_CloudConfig
             $this->bunnyRequest('PUT', $key, $options);
         } else {
             $args = ['Bucket' => $this->bucket, 'Key' => $key, 'SourceFile' => $path];
-            // R2 has no object ACLs; AWS uses its bucket policy or OAC.
+            // AWS uses bucket policies; Spaces and Wasabi use public object ACLs.
             if (in_array($this->serviceProvider, ['digitalocean', 'wasabi'], true)) $args['ACL'] = 'public-read';
             $this->getS3Client()->putObject($args);
         }
@@ -264,8 +222,7 @@ class SMARL_CloudConfig
     {
         self::validateObjectKey($key);
         if (!$this->isConfigured()) throw new RuntimeException('Storage is not configured.');
-        if ($this->serviceProvider === 'google') $this->googleBucket()->object($key)->downloadToFile($destination);
-        elseif ($this->serviceProvider === 'bunny') $this->bunnyRequest('GET', $key, ['stream' => true, 'filename' => $destination]);
+        if ($this->serviceProvider === 'bunny') $this->bunnyRequest('GET', $key, ['stream' => true, 'filename' => $destination]);
         else $this->getS3Client()->getObject(['Bucket' => $this->bucket, 'Key' => $key, 'SaveAs' => $destination]);
     }
 
@@ -273,10 +230,7 @@ class SMARL_CloudConfig
     {
         self::validateObjectKey($key);
         if (!$this->isConfigured()) throw new RuntimeException('Storage is not configured.');
-        if ($this->serviceProvider === 'google') {
-            $object = $this->googleBucket()->object($key);
-            if ($object->exists()) $object->delete();
-        } elseif ($this->serviceProvider === 'bunny') $this->bunnyRequest('DELETE', $key, [], true);
+        if ($this->serviceProvider === 'bunny') $this->bunnyRequest('DELETE', $key, [], true);
         else $this->getS3Client()->deleteObject(['Bucket' => $this->bucket, 'Key' => $key]);
     }
 
@@ -414,14 +368,7 @@ class SMARL_CloudConfig
     {
         if (!$this->isConfigured()) throw new RuntimeException('Storage is not configured.');
         $files = [];
-        if ($this->serviceProvider === 'google') {
-            $options = $this->verificationKeys === null ? [] : ['prefix' => $this->verificationPrefix, 'requestTimeout' => $this->verificationTimeout(), 'retries' => 0];
-            foreach ($this->googleBucket()->objects($options) as $object) {
-                if ($this->verificationKeys !== null) $this->verificationTimeout();
-                $info = $object->info();
-                if ($this->collectListedObject($files, $object->name(), (int) ($info['size'] ?? 0))) return $files;
-            }
-        } elseif ($this->serviceProvider === 'bunny') {
+        if ($this->serviceProvider === 'bunny') {
             $directories = [$this->verificationKeys === null ? '' : $this->verificationPrefix];
             $seen = [];
             while ($directories) {
@@ -461,69 +408,10 @@ class SMARL_CloudConfig
         return $files;
     }
 
-    protected function getGoogleStorageClient(): StorageClient { return (new SMARLI_GoogleService($this->googleServicePath))->storage; }
-    private function googleBucket() { return $this->getGoogleStorageClient()->bucket($this->bucket); }
 
-    public function createGoogleBucket(): void
-    {
-        $this->getGoogleStorageClient()->createBucket($this->bucket, ['location' => $this->region,
-            'iamConfiguration' => ['uniformBucketLevelAccess' => ['enabled' => true]]]);
-    }
 
-    public function configureGooglePublicAccess(): void
-    {
-        $bucket = $this->googleBucket();
-        $permission = 'storage.buckets.get';
-        try {
-            $info = $bucket->info();
-            if (($info['iamConfiguration']['publicAccessPrevention'] ?? '') === 'enforced') {
-                throw new SMARL_ProviderException(__('Google Public access prevention is enforced on this bucket. SmartSync cannot set up public CDN delivery. Use a dedicated public website bucket; if the restriction is inherited, ask your Google Cloud administrator.', 'smartsync-lite-media-offloader-and-assets-cdn'));
-            }
-            $iam = $bucket->iam();
-            $permission = 'storage.buckets.getIamPolicy';
-            $policy = $iam->policy(['requestedPolicyVersion' => 3]);
-            foreach ($policy['bindings'] ?? [] as $index => $binding) {
-                if (($binding['role'] ?? '') !== 'roles/storage.objectViewer' || isset($binding['condition'])) continue;
-                if (in_array('allUsers', $binding['members'] ?? [], true)) return;
-                $policy['bindings'][$index]['members'][] = 'allUsers';
-                $permission = 'storage.buckets.setIamPolicy';
-                $iam->setPolicy($policy);
-                return;
-            }
-            $policy['bindings'][] = ['role' => 'roles/storage.objectViewer', 'members' => ['allUsers']];
-            $permission = 'storage.buckets.setIamPolicy';
-            $iam->setPolicy($policy);
-        } catch (\Google\Cloud\Core\Exception\ServiceException $error) {
-            // Classify only known diagnostics. Never display Google's raw response, signed requests or credentials.
-            $detail = strtolower($error->getMessage());
-            if (preg_match('/\bcurl error \d+\b/', $detail)) throw $error;
-            if (str_contains($detail, 'publicaccessprevention') || str_contains($detail, 'public access prevention')) {
-                $message = __('Google Public access prevention blocks public viewing on this bucket or its parent project. Use a bucket permitted for public website files, or ask your Google Cloud administrator to review the restriction.', 'smartsync-lite-media-offloader-and-assets-cdn');
-            } elseif (str_contains($detail, 'allowedpolicymemberdomains') || str_contains($detail, 'organization policy') || str_contains($detail, 'domain restricted')) {
-                $message = __('A Google Cloud organization policy blocks granting public access to allUsers. Ask your administrator to review Domain Restricted Sharing and public-sharing policies for this website bucket.', 'smartsync-lite-media-offloader-and-assets-cdn');
-            } elseif (str_contains($detail, 'invalid_grant') || str_contains($detail, 'invalid_client') || $error->getCode() === 401) {
-                $message = __('Google rejected the service-account credentials. Check that the key is active and belongs to the selected account. For P12, also check the account email and project ID.', 'smartsync-lite-media-offloader-and-assets-cdn');
-            } elseif ($error->getCode() === 403) {
-                /* translators: %s is a Google Cloud IAM permission name. */
-                $message = sprintf(__('Google denied bucket setup. The service account needs %s on this bucket. Bucket listing can succeed without this permission. Grant the required bucket permission and retry.', 'smartsync-lite-media-offloader-and-assets-cdn'), $permission);
-            } elseif ($error->getCode() === 404) {
-                $message = __('Google could not find or access the selected bucket. Refresh the bucket list and check the service account and project.', 'smartsync-lite-media-offloader-and-assets-cdn');
-            } elseif (in_array($error->getCode(), [409, 412], true)) {
-                $message = __('Google rejected the public-access policy update. Check Public access prevention and organization policies, refresh the bucket list, then retry.', 'smartsync-lite-media-offloader-and-assets-cdn');
-            } else {
-                /* translators: %d is an HTTP status code returned by Google Cloud Storage. */
-                $message = sprintf(__('Google could not configure public bucket delivery (HTTP %d). Check the bucket IAM permissions, public-sharing policies and Cloud Storage API settings.', 'smartsync-lite-media-offloader-and-assets-cdn'), $error->getCode());
-            }
-            throw new SMARL_ProviderException($message, 0, $error);
-        }
-    }
 
     /** A credentials-only repair must prove read access without changing existing IAM policy. */
-    public function verifyGoogleConnection(): void
-    {
-        if ($this->serviceProvider !== 'google' || !$this->isConfigured()) throw new InvalidArgumentException(__('Google storage is not configured.', 'smartsync-lite-media-offloader-and-assets-cdn'));
-        if (!$this->googleBucket()->exists()) throw new InvalidArgumentException('The selected Google bucket does not exist.');
-    }
 
     public function getBunnyStorageEndpoint(): string
     {

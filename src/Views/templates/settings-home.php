@@ -4,6 +4,7 @@ if (!defined('ABSPATH')) exit;
 
 return static function (SMARL_CloudConfig $config, string $providerName, bool $configured, array $compatibility): void {
 $hasTarget = $config->bucket !== '';
+$proPreview = require __DIR__ . '/pro-features.php';
 $icon = static function (string $name, string $class = 'settings-section-icon'): void {
     $paths = [
         'brand' => 'M5 9a7 7 0 0 1 12-3l2 2M19 4v4h-4M19 15a7 7 0 0 1-12 3l-2-2M5 20v-4h4',
@@ -25,7 +26,7 @@ $icon = static function (string $name, string $class = 'settings-section-icon'):
 ?>
 <div class="smartsync-wrap smartsync-settings">
     <header class="settings-page-header">
-        <div class="settings-brand"><span class="settings-brand-mark" aria-hidden="true"><?php $icon('brand', 'settings-brand-icon'); ?></span><h1><?php esc_html_e('SmartSync', 'smartsync-lite-media-offloader-and-assets-cdn'); ?></h1></div>
+        <div class="settings-brand"><span class="settings-brand-mark" aria-hidden="true"><?php $icon('brand', 'settings-brand-icon'); ?></span><h1><?php esc_html_e('SmartSync Lite', 'smartsync-lite-media-offloader-and-assets-cdn'); ?></h1></div>
         <span class="settings-connection-badge" data-connected="<?php echo $configured ? 'true' : 'false'; ?>"><?php echo esc_html($configured ? __('Connected', 'smartsync-lite-media-offloader-and-assets-cdn') : ($hasTarget ? __('Needs setup', 'smartsync-lite-media-offloader-and-assets-cdn') : __('No connection', 'smartsync-lite-media-offloader-and-assets-cdn'))); ?></span>
     </header>
     <?php if (!$compatibility['compatible']): ?>
@@ -35,7 +36,7 @@ $icon = static function (string $name, string $class = 'settings-section-icon'):
     <div class="tabs-container settings-tabs" role="tablist" aria-label="<?php esc_attr_e('SmartSync settings', 'smartsync-lite-media-offloader-and-assets-cdn'); ?>">
         <button type="button" id="tab-button-general" class="tab-button active" data-tab="general" role="tab" aria-controls="tab-general" aria-selected="true"><?php $icon('overview', 'settings-tab-icon'); ?><?php esc_html_e('Overview', 'smartsync-lite-media-offloader-and-assets-cdn'); ?></button>
         <button type="button" id="tab-button-media" class="tab-button" data-tab="media" role="tab" aria-controls="tab-media" aria-selected="false" tabindex="-1"><?php $icon('media', 'settings-tab-icon'); ?><?php esc_html_e('Media', 'smartsync-lite-media-offloader-and-assets-cdn'); ?></button>
-        <button type="button" id="tab-button-assets" class="tab-button" data-tab="assets" role="tab" aria-controls="tab-assets" aria-selected="false" tabindex="-1"><?php $icon('assets', 'settings-tab-icon'); ?><?php esc_html_e('Assets', 'smartsync-lite-media-offloader-and-assets-cdn'); ?></button>
+        <button type="button" id="tab-button-assets" class="tab-button" data-tab="assets" role="tab" aria-controls="tab-assets" aria-selected="false" tabindex="-1"><?php $icon('assets', 'settings-tab-icon'); ?><?php esc_html_e('Assets', 'smartsync-lite-media-offloader-and-assets-cdn'); ?> <span class="smartsync-pro-badge"><?php esc_html_e('Pro only', 'smartsync-lite-media-offloader-and-assets-cdn'); ?></span></button>
     </div>
     <div class="settings-destination" role="group" aria-label="<?php esc_attr_e('Sync destination', 'smartsync-lite-media-offloader-and-assets-cdn'); ?>" hidden>
         <?php $icon('cloud', 'settings-destination-icon'); ?>
@@ -65,7 +66,7 @@ $icon = static function (string $name, string $class = 'settings-section-icon'):
                         </dl>
                     <?php else: ?>
                         <p class="settings-empty-title"><?php esc_html_e('Connect your storage', 'smartsync-lite-media-offloader-and-assets-cdn'); ?></p>
-                        <p class="settings-help"><?php esc_html_e('Choose a provider to start uploading media and assets.', 'smartsync-lite-media-offloader-and-assets-cdn'); ?></p>
+                        <p class="settings-help"><?php esc_html_e('Choose a provider to start uploading media.', 'smartsync-lite-media-offloader-and-assets-cdn'); ?></p>
                         <a id="reconfigure-aws" class="primary-btn settings-button" href="<?php echo esc_url(admin_url('admin.php?page=smarl-configuration-wizard')); ?>"><?php esc_html_e('Connect storage', 'smartsync-lite-media-offloader-and-assets-cdn'); ?></a>
                     <?php endif; ?>
                 </section>
@@ -78,24 +79,23 @@ $icon = static function (string $name, string $class = 'settings-section-icon'):
                     <details class="settings-disclosure"<?php if (!$configured) echo ' hidden'; ?>><summary><?php esc_html_e('Usage details', 'smartsync-lite-media-offloader-and-assets-cdn'); ?></summary><p class="settings-help"><?php esc_html_e('Estimated monthly cost:', 'smartsync-lite-media-offloader-and-assets-cdn'); ?> <span id="total-price"><?php esc_html_e('Unavailable', 'smartsync-lite-media-offloader-and-assets-cdn'); ?></span></p></details>
                 </section>
             </div>
-            <?php if ($config->serviceProvider === 'aws' && $config->useCloudFront && $config->distributionId !== ''): ?>
-                <details class="settings-card settings-maintenance"><summary><?php esc_html_e('CloudFront cache', 'smartsync-lite-media-offloader-and-assets-cdn'); ?></summary><p class="settings-help"><?php esc_html_e('Refresh cached files after updating your content.', 'smartsync-lite-media-offloader-and-assets-cdn'); ?></p><button type="button" id="clear-cloudfront-cache-button" class="settings-button settings-button-secondary"><?php esc_html_e('Clear CloudFront cache', 'smartsync-lite-media-offloader-and-assets-cdn'); ?></button></details>
-            <?php endif; ?>
+
+            <?php $proPreview(); ?>
         </div>
-        <?php foreach (['media', 'assets'] as $type): $media = $type === 'media'; $toggleId = $media ? 'use-cloudfront-media' : 'use-cloudfront-asset'; ?>
+        <?php foreach (['media', 'assets'] as $type): $media = $type === 'media';
+            if (!$media): ?><div id="tab-assets" class="tab-panel" role="tabpanel" aria-labelledby="tab-button-assets" hidden><?php $proPreview(['assets']); ?></div><?php continue; endif; $toggleId = 'use-cloudfront-media'; ?>
             <div id="tab-<?php echo esc_attr($type); ?>" class="tab-panel" role="tabpanel" aria-labelledby="tab-button-<?php echo esc_attr($type); ?>" hidden>
                 <div class="settings-panel-grid">
                     <section class="settings-card settings-delivery-card" aria-labelledby="settings-delivery-<?php echo esc_attr($type); ?>">
                         <div class="settings-card-heading"><h2 id="settings-delivery-<?php echo esc_attr($type); ?>"><?php $icon('cloud'); ?><?php esc_html_e('Cloud delivery', 'smartsync-lite-media-offloader-and-assets-cdn'); ?></h2></div>
-                        <div class="settings-toggle-row"><div><label id="<?php echo esc_attr($toggleId); ?>-label" for="<?php echo esc_attr($toggleId); ?>"><?php echo esc_html($media ? __('Serve media from cloud', 'smartsync-lite-media-offloader-and-assets-cdn') : __('Serve assets from cloud', 'smartsync-lite-media-offloader-and-assets-cdn')); ?></label><p id="<?php echo esc_attr($toggleId); ?>-help" class="settings-help"><?php echo esc_html($media ? __('Deliver media through your connected storage URL.', 'smartsync-lite-media-offloader-and-assets-cdn') : __('Deliver scripts, styles and fonts through your connected storage URL.', 'smartsync-lite-media-offloader-and-assets-cdn')); ?></p></div>
-                            <input type="checkbox" role="switch" id="<?php echo esc_attr($toggleId); ?>" class="settings-toggle use-cloudfront-button" data-type="<?php echo esc_attr($type); ?>" aria-labelledby="<?php echo esc_attr($toggleId); ?>-label" aria-describedby="<?php echo esc_attr($toggleId); ?>-help"<?php if ($media ? $config->useCdnForMedia : $config->useCdnForAssets) echo ' checked'; ?>>
+                        <div class="settings-toggle-row"><div><label id="<?php echo esc_attr($toggleId); ?>-label" for="<?php echo esc_attr($toggleId); ?>"><?php echo esc_html(__('Serve media from cloud', 'smartsync-lite-media-offloader-and-assets-cdn')); ?></label><p id="<?php echo esc_attr($toggleId); ?>-help" class="settings-help"><?php echo esc_html(__('Deliver media through your connected storage URL.', 'smartsync-lite-media-offloader-and-assets-cdn')); ?></p></div>
+                            <input type="checkbox" role="switch" id="<?php echo esc_attr($toggleId); ?>" class="settings-toggle use-cloudfront-button" data-type="<?php echo esc_attr($type); ?>" aria-labelledby="<?php echo esc_attr($toggleId); ?>-label" aria-describedby="<?php echo esc_attr($toggleId); ?>-help"<?php if ($config->useCdnForMedia) echo ' checked'; ?>>
                         </div>
-                        <?php if ($media): ?>
+
                             <div class="settings-toggle-row"><div><label id="auto-delete-media-label" for="auto-delete-media"><?php esc_html_e('Remove local copies', 'smartsync-lite-media-offloader-and-assets-cdn'); ?></label><p id="auto-delete-media-help" class="settings-help"><?php esc_html_e('Only after all attachment files upload successfully and cloud delivery is enabled.', 'smartsync-lite-media-offloader-and-assets-cdn'); ?></p></div><input type="checkbox" role="switch" id="auto-delete-media" class="settings-toggle" aria-labelledby="auto-delete-media-label" aria-describedby="auto-delete-media-help"<?php if ($config->mediaAutoDelete) echo ' checked'; ?>></div>
-                        <?php endif; ?>
-                    </section>
+</section>
                     <section class="settings-card settings-sync-card" aria-labelledby="settings-sync-<?php echo esc_attr($type); ?>">
-                        <div class="settings-card-heading"><h2 id="settings-sync-<?php echo esc_attr($type); ?>"><?php $icon('upload'); ?><?php echo esc_html($media ? __('Sync media', 'smartsync-lite-media-offloader-and-assets-cdn') : __('Sync assets', 'smartsync-lite-media-offloader-and-assets-cdn')); ?></h2></div>
+                        <div class="settings-card-heading"><h2 id="settings-sync-<?php echo esc_attr($type); ?>"><?php $icon('upload'); ?><?php echo esc_html(__('Sync media', 'smartsync-lite-media-offloader-and-assets-cdn')); ?></h2></div>
                         <div class="smartsync-upload-mode">
                             <fieldset id="sync-mode-<?php echo esc_attr($type); ?>" class="sync-mode settings-mode-picker" aria-describedby="sync-mode-help-<?php echo esc_attr($type); ?>" disabled>
                                 <legend><?php esc_html_e('Upload mode', 'smartsync-lite-media-offloader-and-assets-cdn'); ?></legend>
@@ -106,12 +106,11 @@ $icon = static function (string $name, string $class = 'settings-section-icon'):
                             </fieldset>
                             <p id="sync-mode-help-<?php echo esc_attr($type); ?>" class="settings-help"><?php esc_html_e('Skips unchanged files and retries unsuccessful uploads.', 'smartsync-lite-media-offloader-and-assets-cdn'); ?></p>
                         </div>
-                        <button type="button" id="<?php echo $media ? 'sync-local-to-aws' : 'sync-local-to-aws-plugin'; ?>" data-type="<?php echo esc_attr($type); ?>" data-direction="upload" class="primary-btn settings-button sync-button"><?php echo esc_html($media ? __('Upload media', 'smartsync-lite-media-offloader-and-assets-cdn') : __('Upload assets', 'smartsync-lite-media-offloader-and-assets-cdn')); ?></button>
+                        <button type="button" id="<?php echo 'sync-local-to-aws'; ?>" data-type="<?php echo esc_attr($type); ?>" data-direction="upload" class="primary-btn settings-button sync-button"><?php echo esc_html(__('Upload media', 'smartsync-lite-media-offloader-and-assets-cdn')); ?></button>
                         <details class="settings-disclosure settings-sync-help"><summary><?php esc_html_e('How syncing works', 'smartsync-lite-media-offloader-and-assets-cdn'); ?></summary><p class="settings-help"><?php esc_html_e('Untracked files upload once to establish history. Before skipping unchanged files, SmartSync checks their cloud copies. Missing or size-mismatched copies upload again. Full resync uploads every selected local file without checking existing copies.', 'smartsync-lite-media-offloader-and-assets-cdn'); ?></p></details>
-                        <?php if ($media): ?>
+
                             <details class="settings-disclosure settings-restore"><summary><?php esc_html_e('Restore from cloud', 'smartsync-lite-media-offloader-and-assets-cdn'); ?></summary><p class="settings-help"><?php esc_html_e('Download media back to this site. Existing local files are replaced only after a successful download.', 'smartsync-lite-media-offloader-and-assets-cdn'); ?></p><button type="button" id="sync-aws-to-local" data-type="media" data-direction="download" class="settings-button settings-button-secondary sync-button"><?php esc_html_e('Restore local files', 'smartsync-lite-media-offloader-and-assets-cdn'); ?></button></details>
-                        <?php endif; ?>
-                    </section>
+</section>
                 </div>
             </div>
         <?php endforeach; ?>
@@ -126,7 +125,7 @@ $icon = static function (string $name, string $class = 'settings-section-icon'):
             </div>
         </div>
         <div id="settings-progress-slot"></div>
-        <details id="settings-activity-details" class="settings-disclosure"><summary><?php esc_html_e('View transfer log', 'smartsync-lite-media-offloader-and-assets-cdn'); ?></summary><div id="sync-log-container" class="sync-log" role="log" aria-live="polite" aria-relevant="additions"><p id="sync-log-placeholder"><?php esc_html_e('No transfers yet. Start an upload from Media or Assets.', 'smartsync-lite-media-offloader-and-assets-cdn'); ?></p></div></details>
+        <details id="settings-activity-details" class="settings-disclosure"><summary><?php esc_html_e('View transfer log', 'smartsync-lite-media-offloader-and-assets-cdn'); ?></summary><div id="sync-log-container" class="sync-log" role="log" aria-live="polite" aria-relevant="additions"><p id="sync-log-placeholder"><?php esc_html_e('No transfers yet. Start an upload from Media.', 'smartsync-lite-media-offloader-and-assets-cdn'); ?></p></div></details>
     </section>
 </div>
 <?php

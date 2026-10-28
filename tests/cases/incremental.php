@@ -23,7 +23,7 @@ smartsync_test('1784 successful uploads plus 10 new files produce exactly 10 upl
     smartsync_run_jobs($handler); smartsync_assert_same(1794, count($storage->uploads));
 });
 
-foreach (['aws', 'digitalocean', 'wasabi', 'cloudflare', 'google', 'bunny'] as $provider) {
+foreach (['aws', 'digitalocean', 'wasabi', 'bunny'] as $provider) {
     smartsync_test('incremental skips unchanged bytes and queues only new/modified files: ' . $provider, function () use ($provider) {
         [$storage, $handler] = smartsync_sync_fixture($provider);
         $root = wp_upload_dir()['basedir'];
@@ -136,20 +136,7 @@ smartsync_test('automatic media uploads share receipts with manual sync and inte
     smartsync_assert_same(0, SMARL_UploadHistory::plan($files, $storage, false)['skipped']);
 });
 
-smartsync_test('assets use the same content history and invalid sync modes fail before state mutation', function () {
-    [$storage, $handler] = smartsync_sync_fixture();
-    file_put_contents(ABSPATH . 'theme.css', 'body{}');
-    smartsync_incremental_start($handler, 'assets'); smartsync_run_jobs($handler);
-    smartsync_assert_same(1, smartsync_incremental_start($handler, 'assets')['data']['skipped_files']);
-    $before = get_option('smarl_sync_settings');
-    foreach (['verify', '', ['full']] as $mode) {
-        $_POST = ['type' => 'assets', 'mode' => $mode];
-        smartsync_assert_same(false, smartsync_capture_json(fn() => $handler->syncLocalToAws())['success']);
-        smartsync_assert_same($before, get_option('smarl_sync_settings'));
-    }
-    $GLOBALS['wpdb']->query('DROP TABLE wp_smarl_upload_history');
-    smartsync_assert_throws(fn() => SMARL_UploadHistory::plan([['path' => ABSPATH . 'theme.css', 'relative_path' => 'theme.css']], $storage, false));
-});
+
 
 smartsync_test('verified skipped receipts bind attachment ownership and unverified keys retain their old target', function () {
     [$storage, $handler] = smartsync_sync_fixture();

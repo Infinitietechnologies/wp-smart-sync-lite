@@ -101,7 +101,7 @@ if (is_multisite()) {
 $smarlAutoload = __DIR__ . '/vendor/autoload.php';
 if (is_readable($smarlAutoload)) {
     require_once $smarlAutoload;
-    if (class_exists(\SmartSyncS3\Services\SMARLI_GoogleService::class)) {
-        \SmartSyncS3\Services\SMARLI_GoogleService::cleanupCredentials();
+    if (class_exists(\SmartSyncS3\Services\SMARL_LegacyCredentials::class)) {
+        \SmartSyncS3\Services\SMARL_LegacyCredentials::cleanupCredentials();
     }
 }

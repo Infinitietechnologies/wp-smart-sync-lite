@@ -46,7 +46,7 @@ class SMARL_Helper
             $endpoint = $config->getBunnyStorageEndpoint();
             $region = ''; // US/NY aliases can describe the same canonical API host.
         } elseif ($provider === 'cloudflare') {
-            $endpoint = $config->cloudflareEndpoint === '' ? '' : \SmartSyncS3\Models\SMARL_CloudConfig::validateCloudflareEndpoint($config->cloudflareEndpoint);
+            $endpoint = $config->cloudflareEndpoint === '' ? '' : $config->cloudflareEndpoint;
             $region = 'auto';
         }
         return hash('sha256', wp_json_encode(['provider' => $provider, 'bucket' => $config->bucket, 'region' => $region, 'endpoint' => $endpoint]));
@@ -209,38 +209,8 @@ class SMARL_Helper
                 'mp4', 'm4v', 'mov', 'wmv', 'avi', 'mpg', 'ogv', '3gp', '3g2', 'flv', 'mkv', 'webm', 'mpeg'
             ];
 
-        } elseif ($type == "assets") {
-            return [
-                'css',
-                'js',
-                "woff",
-                "woff2",
-                "ttf",
-                "otf",
-                "eot",
-                "map"
-            ];
         }
         return [];
-    }
-
-    /**
-     * Function to check CNAME record for a domain
-     *
-     * @param string $domain The domain to check
-     * @return string|null Returns the CNAME record or null if not found
-     */
-    public static function checkCNAME($domain)
-    {
-        // Use dns_get_record to fetch DNS records of type CNAME
-        $records = dns_get_record($domain, DNS_CNAME);
-
-        // Check if a CNAME record exists
-        if (!empty($records) && isset($records[0]['target'])) {
-            return $records[0]['target'];
-        }
-
-        return null; // No CNAME record found
     }
 
     /**
@@ -341,7 +311,9 @@ class SMARL_Helper
     }
 
     public static function scanSyncFiles(string $type, array $extensions): array {
-        if ($type !== 'media' || !is_multisite()) { return self::scanLocalFiles(ABSPATH, $extensions); }
+        if ($type !== 'media') throw new \InvalidArgumentException(\SmartSyncS3\SMARL_Edition::proMessage());
+        $extensions = array_values(array_diff(array_map('strtolower', $extensions), ['js', 'css', 'mjs', 'cjs']));
+        if (!is_multisite()) { return self::scanLocalFiles(ABSPATH, $extensions); }
         $directory = self::currentSiteMediaDirectory();
         if (!is_dir($directory)) { return []; }
         $mainSite = is_main_site();

@@ -121,17 +121,7 @@ smartsync_test('malicious attachment size metadata cannot upload or delete outsi
     smartsync_assert_true(is_file($paths[0]));
 });
 
-smartsync_test('CDN rewriting preserves first-party root-relative keys and external URLs', function (): void {
-    $storage = new SmartSyncCoreStorage();
-    $core = smartsync_core_instance($storage);
-    smartsync_assert_same('https://cdn.example.test/bucket/wp-includes/js/core.js?v=1#ready', $core->replaceBaseUrl('https://example.test/blog/wp-includes/js/core.js?v=1#ready'));
-    smartsync_assert_same('https://cdn.example.test/bucket/wp-content/uploads/photo.JPG', $core->getAttachmentUrl('https://example.test/blog/wp-content/uploads/photo.JPG'));
-    foreach (['https://other.test/blog/script.js', 'https://example.test.evil.test/blog/script.js', 'https://example.test/other/script.js', 'https://example.test:8443/blog/script.js', 'data:text/javascript,alert(1)', '/blog/wp-content/theme.js'] as $url) {
-        smartsync_assert_same($url, $core->replaceBaseUrl($url));
-    }
-    smartsync_assert_same('https://cdn.example.test/bucket', $core->generateUrlFromBase('https://cdn.example.test/bucket'));
-    smartsync_assert_same('https://cdn.example.test/bucket', $core->generateUrlFromBase('cdn.example.test/bucket'));
-});
+
 
 smartsync_test('admin assets and request objects are scoped and localized coherently', function (): void {
     $core = smartsync_core_instance(new SmartSyncCoreStorage());
@@ -259,7 +249,7 @@ smartsync_test('blog switches refresh registered callbacks and isolate pending a
     do_action('switch_blog', 2, 1, 'switch');
     smartsync_assert_same([], (new ReflectionProperty($core, 'pendingAttachments'))->getValue($core));
     $core->queueAttachmentUpload(['file' => 'second.jpg'], 501);
-    smartsync_assert_same('https://cdn-two.example.test/wp-includes/js/test.js', apply_filters('script_loader_src', site_url('/wp-includes/js/test.js'), 'fixture'));
+    smartsync_assert_same(site_url('/wp-includes/js/test.js'), apply_filters('script_loader_src', site_url('/wp-includes/js/test.js'), 'fixture'));
     $handler = (new ReflectionProperty($core, 'ajaxHandlers'))->getValue($core);
     smartsync_assert_same('fixture-two', (new ReflectionProperty($handler, 'appConfig'))->getValue($handler)->bucket);
     $first->save();

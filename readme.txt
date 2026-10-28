@@ -1,6 +1,6 @@
-=== SmartSync ===
+=== SmartSync Lite ===
 Contributors: infinitietech, jaysparmar
-Tags: aws, s3, cloudfront, cdn, sync
+Tags: media offload, s3, cdn, cloud storage, sync
 Requires at least: 6.5
 Tested up to: 7.1.3
 Requires PHP: 8.1
@@ -8,159 +8,56 @@ Stable tag: 1.8.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-SmartSync synchronizes WordPress media and assets with cloud storage and supports optional CDN delivery.
+Offload WordPress media to Amazon S3, DigitalOcean Spaces, Wasabi or Bunny Storage/CDN.
 
 == Description ==
-SmartSync supports **Amazon S3**, **DigitalOcean Spaces**, **Cloudflare R2**, **Wasabi**, **Google Cloud Storage**, and **Bunny Storage/CDN**. Configure a provider through the WordPress admin wizard, synchronize media or assets, and enable their CDN URLs independently. Optional CloudFront and ACM custom-domain setup is available for AWS.
+SmartSync Lite synchronizes media with **Amazon S3**, **DigitalOcean Spaces**, **Wasabi**, and **Bunny Storage/CDN**. Connect storage, upload media through the background queue, then enable cloud media delivery.
 
-### Features:
-- **Provider Configuration** – Select an existing bucket or create one through the wizard where supported. Bunny requires an existing storage zone with a connected pull zone.
-- **Optional CloudFront Setup** – Create an AWS CloudFront distribution and configure a custom domain with an ACM certificate when selected.
-- **Synchronization Management** – Upload or restore files through a background queue with progress, error reporting, and stop controls.
-- **Media and Asset Delivery** – Enable CDN delivery separately after successful synchronization.
-- **Attachment Offloading** – Upload originals and generated sizes; optional local cleanup requires successful uploads and enabled media CDN delivery.
+### Lite features
+* Provider setup with credential verification and storage discovery. Select existing storage or create a bucket where supported. Bunny requires an existing storage zone and connected public pull zone.
+* Incremental media uploads, full resync, local restore, progress reporting and stop controls.
+* Media URL delivery through direct storage URLs or a connected Bunny pull zone.
+* Attachment originals and generated sizes, with optional local cleanup after successful offloading.
+* Per-site media configuration and uploads boundaries on WordPress multisite.
+
+### Pro features — preview only
+These features display disabled previews with a **Pro only** badge. Their integration and synchronization implementations are not included in Lite.
+
+* Google Cloud Storage integration — [Pro](https://codecanyon.net/item/wp-smartsync-wordpress-plugin-for-media-assets-cdn-cloud-storage/56335604)
+* Cloudflare R2 integration — [Pro](https://codecanyon.net/item/wp-smartsync-wordpress-plugin-for-media-assets-cdn-cloud-storage/56335604)
+* Amazon CloudFront CDN integration — [Pro](https://codecanyon.net/item/wp-smartsync-wordpress-plugin-for-media-assets-cdn-cloud-storage/56335604)
+* JS and CSS file synchronization — [Pro](https://codecanyon.net/item/wp-smartsync-wordpress-plugin-for-media-assets-cdn-cloud-storage/56335604)
 
 == Installation ==
-1. Download the plugin or clone it from GitHub.
-   For a source checkout, run `composer install --no-dev --prefer-dist` in the plugin directory to install the required dependencies before uploading or activating it.
-2. Upload the plugin to the `/wp-content/plugins/` directory, or install it via **Plugins > Add New** in WordPress.
-3. Activate the plugin through the **Plugins** menu in WordPress.
-4. Open **SmartSync Settings > Cloud Config**, select your provider, and supply its access credentials or Google service-account JSON.
-5. Synchronize the required media/assets, review the results, then enable their cloud delivery switches.
+1. Install the dependency-complete SmartSync Lite ZIP through **Plugins > Add New > Upload Plugin**. For a source checkout, run composer install --no-dev --prefer-dist before uploading the plugin.
+2. Activate **SmartSync Lite**.
+3. Open **SmartSync Lite > Cloud Config** and connect a supported Lite provider.
+4. Upload media, review the results, then enable cloud media delivery.
 
-== How It Works ==
-1. **Provider Setup** – Validate credentials and select or create the storage resources requested in the wizard.
-2. **Background Sync** – Queue uploads or downloads and monitor their actual outcomes.
-3. **CDN Delivery** – Enable the configured public cloud URL for media and/or assets after synchronization. CloudFront is optional for AWS.
-4. **Attachment Lifecycle** – Offload new or regenerated attachment files, retain local copies on upload failure, and distinguish local cleanup from intentional cloud deletion.
-
-Single-site bulk scans use eligible file types beneath the WordPress installation root, with private/generated directories excluded. Multisite media scans and restores stay inside the current site's uploads; the main site excludes child-site upload directories. Restoring shared assets requires a network administrator, and ordinary site-admin restores respect WordPress file-type restrictions. Analytics reports object counts and sizes, not provider billing costs.
-
-== How to Generate AWS IAM Keys ==
-1. Log in to the [AWS Management Console](https://aws.amazon.com/console/).
-2. Navigate to **IAM (Identity and Access Management)**.
-3. Click **Users** → Select or create a user.
-4. Go to the **Security credentials** tab.
-5. Click **Create access key** → Copy and store the keys securely.
-
-> **Permissions depend on selected operations:** Credentials must allow the bucket/object operations you choose. Creating public bucket delivery or CloudFront resources also involves bucket policies, CloudFront, STS, and ACM. SmartSync does not provide a universal IAM policy; provider account restrictions and public-access controls can affect setup.
-
-== Optional CloudFront Delivery ==
-- AWS configurations can use CloudFront instead of direct bucket delivery.
-- Custom domains use ACM certificates and require certificate-validation and distribution CNAME records.
-- Media and asset delivery switches remain separate from provider setup and synchronization.
+Credentials must permit the operations selected for the website's storage. Provider account restrictions and public-access controls can affect setup. Do not activate the full and Lite editions together; they share plugin state and class names.
 
 == Frequently Asked Questions ==
-= Does this plugin support multi-region S3 buckets? =
-Yes, the plugin allows you to configure S3 buckets in different AWS regions.
+= Can I use CloudFront, Google Cloud Storage, R2 or synchronize JS/CSS? =
+Those are Pro features. Lite displays previews and upgrade links; it cannot execute those operations.
 
-= Is CloudFront mandatory? =
-No, you can use the plugin with S3 alone, but CloudFront improves performance.
+= Can I switch an existing Pro configuration to Lite? =
+Restore offloaded media with the full edition before switching from a Pro provider or CloudFront configuration. Lite preserves legacy settings but does not operate those integrations or rewrite their media URLs. Back up the database and media first.
 
-== Screenshots ==
-1. **SmartSync Dashboard** – View sync status and settings.
-2. **AWS Integration Panel** – Enter IAM credentials for authentication.
+= What does media sync scan? =
+Single-site bulk scans use eligible media file types beneath the WordPress root, excluding private/generated directories. Multisite scans and restores stay inside the current site's uploads and exclude other sites. JS/CSS files are excluded even if old settings contain those extensions.
+
+= Does the plugin measure provider costs? =
+Usage reports object counts and bytes; they do not calculate provider bills.
 
 == Changelog ==
 = 1.8.0 =
-* Add incremental synchronization with persistent upload history to skip unchanged files and retry unsuccessful uploads.
-* Improve synchronization progress, recovery controls, notifications, provider guides, and cloud-setup screens.
-* Improve provider credential verification, Google credential migration, Bunny transfers, and CloudFront provisioning recovery.
-* Protect shared cloud objects and changed local files during attachment cleanup and storage changes.
-* Harden interrupted-sync recovery, cancellation, request locks, configuration persistence, and stale admin polling.
-* Upgrade the database schema to version 3 automatically and remove retired test settings safely.
-* Include WordPress 7.1.3 compatibility fixes, including deferred translation during legacy progress recovery.
-* Verify 32 supported WordPress/PHP combinations across WordPress 6.5 through 7.1.3 and PHP 8.1 through 8.5; repair outdated test fixtures.
-
-= 1.7.3 =
-* Preserve cloud-object ownership across storage changes and shared attachments; protect changed local files during cleanup.
-* Repair interrupted sync recovery, cancellation, coordination caches, cyclic listings and bounded progress logs.
-* Stream large Bunny uploads, verify credential changes and settings persistence, and retain CloudFront provisioning receipts for retries.
-* Recover admin polling and browser navigation, invalidate stale provider discovery, and show active synchronization indicators.
-
-= 1.7.2 =
-- Verify Bunny storage access before saving and distinguish account API keys from storage credentials.
-- Handle paginated Bunny zones, regional storage hostnames, and active HTTPS-ready public pull zones.
-- Allow existing S3-compatible buckets to be entered without account-wide listing permission.
-- Correct DigitalOcean SDK region handling for new Spaces buckets.
-- Correct dotted S3 HTTPS URLs, China endpoints, partition-specific bucket policies, and unsupported automatic CloudFront setup.
-- Preserve newer provider settings when changing CDN or local-cleanup switches.
-- Read Google conditional IAM policies safely and merge public-read membership without duplicate role bindings.
-
-= 1.7.1 =
-- Repair restore queues, progress, cancellation, and provider dispatch.
-- Keep cloud copies during local media cleanup and retain local files after upload failures.
-- Support attachment size regeneration and media outside the current upload month.
-- Restrict CDN rewriting and admin assets to the appropriate site URLs and plugin pages.
-- Harden configuration requests, credential storage, lifecycle cleanup, and dependencies.
-
-= 1.0 =
-- Initial release with S3 and CloudFront support.
+* Introduce SmartSync Lite on the separate lite branch.
+* Keep Amazon S3, DigitalOcean Spaces, Wasabi and Bunny media offloading, restore and delivery.
+* Show Google Cloud Storage, Cloudflare R2, CloudFront and JS/CSS synchronization as disabled Pro only previews with upgrade links.
+* Remove Pro integration code, Google SDK dependencies, CloudFront provisioning/cache code and script/style URL rewriting.
+* Reject crafted Pro requests and inherited asset jobs before storage operations; preserve legacy settings without activating Pro integrations.
+* Retain the 1.8.0 media reliability, incremental history, recovery and compatibility fixes. See tests/LITE.md in the source checkout for Lite verification.
 
 == Upgrade Notice ==
 = 1.8.0 =
-Adds incremental synchronization and improved setup/recovery controls. Database schema upgrades automatically to version 3. WordPress 6.5+ and PHP 8.1+ remain required.
-
-= 1.0 =
-- First stable version.
-
-== License ==
-This plugin is licensed under **GPLv2 or later**.  
-For details: [GNU GPL v2](https://www.gnu.org/licenses/gpl-2.0.html).
-
-== Localization ==
-To generate a `.pot` file for translations, run:
-```sh
-curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
-php wp-cli.phar i18n make-pot . languages/wp-smartsync.pot --exclude=vendor,tests,.agents,Documentation --domain=smartsync-lite-media-offloader-and-assets-cdn
-```
-
-== Requirements and data handling ==
-
-WordPress 6.5 or later is required. This release has been tested with WordPress 7.1.3, the latest stable release verified on 28 October 2026. Compatibility checks cover 32 supported combinations across WordPress 6.5 through 7.1.3 and PHP 8.1 through 8.5.
-
-PHP 8.1 or later and the bundled Composer dependencies are required. For a source checkout, run `composer install` using the included lockfile before installing the plugin.
-
-Automatic local media cleanup runs after metadata generation finishes, only after all attachment files upload successfully and a media CDN URL is enabled. User attachment deletion removes the corresponding cloud objects. Keep an independent backup before enabling offloading or removing the plugin.
-
-Deactivation stops queued synchronization and retains configuration. Uninstall removes SmartSync settings, local credentials, queue data, and offload metadata. It does not download files or delete cloud objects; restore any locally removed media before uninstalling.
-
-== External Services ==
-
-This plugin connects to third-party cloud storage and CDN services to manage file uploads, synchronization, and asset delivery. The services used are:
-
-AWS (Amazon Web Services)
-
-This plugin integrates with AWS S3 and related APIs for storing and retrieving media assets and configuration data.
-
-- Data Sent: Bucket name, region, access credentials (user-supplied), and file metadata.
-- When: During initial configuration, file uploads, or API-based operations.
-- Terms: https://aws.amazon.com/service-terms/
-- Privacy Policy: https://aws.amazon.com/privacy/
-
-Cloudflare R2
-
-Cloudflare R2 is used to store media files and access them via Cloudflare’s object storage API.
-
-- Data Sent: Bucket name, region, access credentials (user-supplied), and file metadata.
-- When: When configured and used for uploads, downloads, or deletions.
-- Terms: https://www.cloudflare.com/terms/
-- Privacy Policy: https://www.cloudflare.com/privacypolicy/
-
-DigitalOcean Spaces
-
-DigitalOcean Spaces provides cloud object storage for files uploaded via the plugin.
-
-- Data Sent: Space name, region, access credentials (user-supplied), and file metadata.
-- When: When performing file uploads or configuring DigitalOcean Spaces storage.
-- Terms: https://www.digitalocean.com/legal/terms
-- Privacy Policy: https://www.digitalocean.com/legal/privacy-policy
-
-Google Cloud Storage
-
-The plugin optionally integrates with Google Cloud Storage or Google APIs for storing, syncing, or managing user media files.
-
-- Data Sent: Bucket name, access credentials (user-supplied), file metadata, and API requests based on plugin functionality.
-- When: When the Google storage option is configured and used for upload/download operations.
-- Terms: https://cloud.google.com/terms/
-- Privacy Policy: https://policies.google.com/privacy
+SmartSync Lite is a media edition. Restore media from Pro-only configurations using the full edition before switching. Do not activate both editions together.

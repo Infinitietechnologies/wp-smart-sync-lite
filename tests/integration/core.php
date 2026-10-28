@@ -5,7 +5,7 @@ if (!defined('WP_CLI') || !WP_CLI || strpos(str_replace('\\', '/', ABSPATH), 'sm
 }
 
 use SmartSyncS3\Models\SMARL_CloudConfig;
-use SmartSyncS3\Services\SMARLI_GoogleService;
+use SmartSyncS3\Services\SMARL_LegacyCredentials;
 
 add_filter('pre_http_request', static function () {
     return new WP_Error('smarl_fixture_http_blocked', 'External HTTP is blocked in this integration test.');
@@ -19,7 +19,7 @@ final class SmartSyncIntegrationStorage extends SMARL_CloudConfig
     public bool $failThumbnails = false;
     public function __construct()
     {
-        $this->serviceProvider = 'google';
+        $this->serviceProvider = 'aws';
         $this->url = 'https://cdn.example.test/bucket';
         $this->useCdnForMedia = $this->useCdnForAssets = $this->mediaAutoDelete = true;
     }
@@ -174,8 +174,8 @@ try {
     $passed++;
 
     $source = site_url('/wp-includes/js/fixture.js?v=1#ready');
-    smarl_integration_assert($core->replaceBaseUrl($source) === 'https://cdn.example.test/bucket/wp-includes/js/fixture.js?v=1#ready', 'CDN rewrite does not align with root-relative object keys.');
-    smarl_integration_assert($core->replaceBaseUrl('https://other.example.test/script.js') === 'https://other.example.test/script.js', 'External asset URL was rewritten.');
+    smarl_integration_assert(apply_filters('script_loader_src', $source, 'fixture') === $source, 'Lite rewrote a script URL.');
+    smarl_integration_assert(!method_exists($core, 'replaceBaseUrl'), 'The Pro asset rewriter remains in Lite.');
     WP_CLI::log('PASS actual WordPress site URLs preserve object paths and external asset origins');
     $passed++;
 
@@ -195,7 +195,7 @@ try {
     $unrelatedFile = $uploads['basedir'] . '/smarl-audit-unrelated.json';
     file_put_contents($legacyCredential, wp_json_encode(['type' => 'service_account', 'client_email' => 'fixture@example.test', 'private_key' => 'fixture-only-no-real-key']));
     file_put_contents($unrelatedFile, wp_json_encode(['keep' => true]));
-    $credentialDirectory = SMARLI_GoogleService::getCredentialsDirectory();
+    $credentialDirectory = SMARL_LegacyCredentials::getCredentialsDirectory();
     wp_mkdir_p($credentialDirectory);
     $privateCredential = $credentialDirectory . '/smarl-1-' . bin2hex(random_bytes(16)) . '.json';
     file_put_contents($privateCredential, '{}');

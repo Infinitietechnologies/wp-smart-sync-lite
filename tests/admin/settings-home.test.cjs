@@ -8,7 +8,7 @@ test('settings overview presents one connection action and accessible native del
     assert.match(html, /Bunny CDN/);
     assert.doesNotMatch(html, /<table|class="tabs-content"|smartsync-contextual-description/);
     assert.equal((html.match(/id="reconfigure-aws"/g) || []).length, 1);
-    assert.equal((html.match(/role="switch"/g) || []).length, 3);
+    assert.equal((html.match(/role="switch"/g) || []).length, 2);
     assert.doesNotMatch(html, /synthetic-storage-password/);
 });
 

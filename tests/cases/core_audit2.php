@@ -39,11 +39,7 @@ function smartsync_audit2_attachment(int $id): array {
     return [$metadata, $path, SMARL_Helper::relativeKeyForPath($path)];
 }
 
-smartsync_test('CORE-001 dynamic asset endpoints remain local while static asset URLs use CDN', function (): void {
-    $core = smartsync_audit2_core(new SmartSyncAudit2Storage());
-    foreach (['https://example.test/blog/wp-admin/load-scripts.php?c=1&load=jquery', 'https://example.test/blog/wp-admin/load-styles.php?load=common', 'https://example.test/blog/?generated=theme.css'] as $url) smartsync_assert_same($url, $core->replaceBaseUrl($url));
-    smartsync_assert_same('https://cdn.example.test/bucket/wp-includes/js/jquery.js?ver=3', $core->replaceBaseUrl('https://example.test/blog/wp-includes/js/jquery.js?ver=3'));
-});
+
 
 smartsync_test('CORE-002 configured uploads origin and path map to physical keys before cleanup', function (): void {
     $GLOBALS['smartsync_test_upload_dir'] = ['baseurl' => 'https://media.example.test/photos'];
