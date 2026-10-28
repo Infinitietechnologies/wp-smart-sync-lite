@@ -21,7 +21,7 @@ composer install --no-dev --prefer-dist --no-interaction
 ./tests/build-plugin.ps1
 ```
 
-For version 1.8.0 this produces `dist/smartsync-lite-media-offloader-and-assets-cdn.1.8.0.zip`. Its top-level directory matches the WordPress.org slug. The earlier GitHub archive rooted at `smartsync/` is not the directory-update artifact. The build includes Composer dependencies and excludes tests, Git, project skills and local logs. Run the checks in [tests/LITE.md](tests/LITE.md), including the upgrade test against the previously published version.
+For version 1.8.0 this produces `dist/smartsync-lite-media-offloader-and-assets-cdn.1.8.0.zip`. Its top-level directory matches the WordPress.org slug. The earlier GitHub archive rooted at `smartsync/` is not the directory-update artifact. The build includes Composer dependencies and excludes the standalone documentation website, tests, Git, project skills and local logs. Provider guides in the plugin link directly to official provider documentation. Run the checks in [tests/LITE.md](tests/LITE.md), including the upgrade test against the previously published version.
 
 ## Publish through SVN
 
@@ -33,7 +33,9 @@ For version 1.8.0 this produces `dist/smartsync-lite-media-offloader-and-assets-
 6. If release confirmation is enabled, use the confirmation email or the plugin's [Advanced / Release Management page](https://wordpress.org/plugins/smartsync-lite-media-offloader-and-assets-cdn/advanced/) to approve 1.8.0.
 7. Verify the listing and [plugin information API](https://api.wordpress.org/plugins/info/1.2/?action=plugin_information&request%5Bslug%5D=smartsync-lite-media-offloader-and-assets-cdn) show 1.8.0, then download the WordPress.org ZIP and verify its version, basename and dependencies. Processing and caches may delay the public update.
 
-The locally prepared publisher for this release verifies package hashes and staged SVN paths before asking for the password. It passes that password through stdin with authentication caching disabled. It does not store the password in the release files.
+The corrected local publisher uploads changed runtime files to trunk with `Stable tag: 1.4`, keeping the existing stable release selected. It then uses a server-side SVN copy to create `tags/1.8.0` and updates both readmes to `Stable tag: 1.8.0` in one final transaction. This avoids uploading a second full release tree. A checkpoint permits resuming the final tagging step if necessary. Earlier tags and listing images remain untouched.
+
+The publisher verifies the frozen package and action plan, keeps the computer awake during the transfer, and passes the password through stdin with authentication caching disabled. It does not store the password in the release files. The initial larger working-copy tag attempt was rejected and did not publish a release; use the corrected publisher for the retry.
 
 GitHub Actions remain disabled; this procedure does not enable an automatic publishing workflow.
 

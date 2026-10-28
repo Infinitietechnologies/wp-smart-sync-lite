@@ -19,7 +19,7 @@ $archive = New-Object IO.Compression.ZipArchive($archiveStream, [IO.Compression.
 $fileCount = 0
 try {
     $sourceFiles = @()
-    foreach ($directory in @('src', 'assets', 'languages', 'vendor', 'Documentation')) {
+    foreach ($directory in @('src', 'assets', 'languages', 'vendor')) {
         $sourceFiles += Get-ChildItem -LiteralPath (Join-Path $pluginRoot $directory) -File -Recurse
     }
     $sourceFiles += Get-Item -LiteralPath (Join-Path $pluginRoot 'aws-s3-smartsync-wp.php'), (Join-Path $pluginRoot 'uninstall.php'), (Join-Path $pluginRoot 'composer.json'), (Join-Path $pluginRoot 'composer.lock'), (Join-Path $pluginRoot 'readme.txt')
