@@ -61,12 +61,14 @@ Usage reports object counts and bytes; they do not calculate provider bills.
 
 == Changelog ==
 = 1.8.0 =
-* Update SmartSync Lite from the WordPress.org 1.4 release to the independent 1.8.0 edition.
-* Keep Amazon S3, DigitalOcean Spaces, Wasabi and Bunny media offloading, restore and delivery.
-* Show Google Cloud Storage, Cloudflare R2, CloudFront and JS/CSS synchronization as disabled Pro only previews with upgrade links.
-* Remove Pro integration code, Google SDK dependencies, CloudFront provisioning/cache code and script/style URL rewriting.
-* Reject crafted Pro requests and inherited asset jobs before storage operations; preserve legacy settings without activating Pro integrations.
-* Retain the 1.8.0 media reliability, incremental history, recovery and compatibility fixes. See tests/LITE.md in the source checkout for Lite verification.
+* Added: Incremental media synchronization that skips unchanged files and retries unsuccessful uploads.
+* Added: Sync status widgets, progress notifications and recovery controls.
+* Improved: Cloud setup, connection checks and saved settings for Amazon S3, DigitalOcean Spaces, Wasabi and Bunny.
+* Improved: Bunny storage connections and streaming media uploads.
+* Improved: Media restoration and local cleanup, with better protection for changed files and shared attachments.
+* Fixed: Interrupted or stuck syncs, stop controls and outdated progress displays.
+* Fixed: Media ownership tracking when switching storage providers or buckets.
+* Compatibility: Updated for WordPress 7.1 and PHP 8.1 through 8.5. Requires WordPress 6.5 or later.
 
 == Upgrade Notice ==
 = 1.8.0 =
