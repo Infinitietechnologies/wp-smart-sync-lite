@@ -1,0 +1,58 @@
+name: Publish SmartSync Lite to WordPress.org (manual)
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Plugin version; source is checked out from the matching v-prefixed Git tag
+        required: true
+        default: '1.8.0'
+        type: string
+      publish:
+        description: Publish to WordPress.org; leave unchecked for a read-only deployment preview
+        required: true
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+concurrency:
+  group: wordpress-org-lite-publication
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - name: Check out the release tag
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: v${{ inputs.version }}
+          persist-credentials: false
+
+      - name: Install the locked production dependencies
+        run: |
+          composer validate --strict --no-check-publish --no-interaction
+          composer install --no-dev --prefer-dist --no-interaction --no-progress --no-scripts
+          composer check-platform-reqs --no-dev
+          command -v svn
+          command -v svnmucc
+          command -v rsync
+
+      - name: Preview the release without publishing
+        if: ${{ !inputs.publish }}
+        env:
+          WPORG_VERSION: ${{ inputs.version }}
+          WPORG_PUBLISH: 'false'
+        run: bash tests/publish-wordpress.sh
+
+      - name: Publish the reviewed release
+        if: ${{ inputs.publish }}
+        env:
+          WPORG_VERSION: ${{ inputs.version }}
+          WPORG_PUBLISH: 'true'
+          SVN_USERNAME: infinitietech
+          SVN_PASSWORD: ${{ secrets.WPORG_SVN_PASSWORD }}
+        run: bash tests/publish-wordpress.sh
